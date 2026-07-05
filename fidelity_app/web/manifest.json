@@ -1,11 +1,11 @@
 {
-    "name": "fidelity_app",
-    "short_name": "fidelity_app",
+    "name": "Donde Siempre",
+    "short_name": "Donde Siempre",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#FFFFFF",
-    "description": "A new Flutter project.",
+    "background_color": "#F5F5F5",
+    "theme_color": "#000000",
+    "description": "Donde Siempre - App de fidelización con QR y puntos.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

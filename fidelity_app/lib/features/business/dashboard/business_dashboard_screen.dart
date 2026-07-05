@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../qr_management/qr_management_screen.dart';
 import '../rewards/rewards_management_screen.dart';
 import '../profile/business_profile_screen.dart';
 import '../create_business_screen.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/providers/supabase_provider.dart';
+import '../../../shared/widgets/shared_widgets.dart';
 
 import 'providers/dashboard_provider.dart';
 import 'widgets/dashboard_animated_toast.dart';
@@ -114,19 +118,15 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
         title: Column(
           children: [
-            const Icon(Icons.storefront_rounded, color: AppTheme.accentPurple, size: 48),
+            const Icon(LucideIcons.store, color: AppColors.accentPurple, size: 48),
             const SizedBox(height: 16),
             Text(
-              '¡Bienvenido a Fidelity!',
-              style: GoogleFonts.anton(
-                fontSize: 24,
-                color: AppTheme.accentPurple,
-                letterSpacing: 1,
-              ),
+              '¡Bienvenido a Donde Siempre!',
+              style: AppTypography.titleBold.copyWith(color: AppColors.accentPurple, fontSize: 22),
               textAlign: TextAlign.center,
             ),
           ],
@@ -134,20 +134,14 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
         content: Text(
           '¡Hola $ownerDisplayName, tu negocio ha sido registrado y activado exitosamente!\n\nDesde aquí podrás administrar tus clientes, aprobar escaneos y gestionar los premios.',
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          style: AppTypography.bodyRegular,
         ),
         actions: [
           Center(
-            child: ElevatedButton(
+            child: PrimaryButton(
+              label: '¡Comenzar!',
+              isFullWidth: false,
               onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              ),
-              child: const Text('¡Comenzar!'),
             ),
           ),
         ],
@@ -162,35 +156,35 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.card)),
         ),
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(height: 5, width: 40, decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(10))),
+            Container(height: 5, width: 40, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10))),
             const SizedBox(height: 32),
-            const Text('FOTO DE PERFIL', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1)),
+            Text('Foto de perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
             const SizedBox(height: 32),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: AppTheme.accentPurple.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: const Icon(Icons.photo_library_rounded, color: AppTheme.accentPurple),
+                decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPurple), shape: BoxShape.circle),
+                child: const Icon(LucideIcons.images, color: AppColors.accentPurple),
               ),
-              title: const Text('ELEGIR DE GALERÍA', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
+              title: Text('Elegir de galería', style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             const SizedBox(height: 8),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: AppTheme.accentYellow.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: const Icon(Icons.camera_alt_rounded, color: AppTheme.accentYellow),
+                decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentAmber), shape: BoxShape.circle),
+                child: const Icon(LucideIcons.camera, color: AppColors.accentAmber),
               ),
-              title: const Text('TOMAR FOTO', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
+              title: Text('Tomar foto', style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             if (business['logo_url'] != null) ...[
@@ -198,10 +192,10 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: AppTheme.accentPink.withValues(alpha: 0.1), shape: BoxShape.circle),
-                  child: const Icon(Icons.delete_rounded, color: AppTheme.accentPink),
+                  decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPink), shape: BoxShape.circle),
+                  child: const Icon(LucideIcons.trash2, color: AppColors.accentPink),
                 ),
-                title: const Text('ELIMINAR FOTO', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppTheme.accentPink)),
+                title: Text('Eliminar foto', style: AppTypography.subtitleBold.copyWith(fontSize: 14, color: AppColors.accentPink)),
                 onTap: () => Navigator.pop(context, 'delete'),
               ),
             ],
@@ -232,11 +226,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
 
         if (mounted) {
           ref.read(dashboardProvider.notifier).loadData(silent: true);
-          DashboardAnimatedToast.show(context, 'Foto eliminada exitosamente', AppTheme.accentGreen, Icons.check_circle_rounded);
+          DashboardAnimatedToast.show(context, 'Foto eliminada exitosamente', AppColors.accentGreen, LucideIcons.circleCheck);
         }
       } catch (e) {
         if (mounted) {
-          DashboardAnimatedToast.show(context, 'Error al eliminar foto', AppTheme.accentPink, Icons.error_outline_rounded);
+          DashboardAnimatedToast.show(context, 'Error al eliminar foto', AppColors.accentPink, LucideIcons.circleAlert);
         }
       }
       return;
@@ -256,7 +250,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
         context: context,
         barrierDismissible: false,
         builder: (context) => const Center(
-          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple)),
+          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
         ),
       );
 
@@ -283,12 +277,12 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
       if (mounted) {
         Navigator.pop(context); // close dialog
         ref.read(dashboardProvider.notifier).loadData(silent: true);
-        DashboardAnimatedToast.show(context, 'Logo actualizado exitosamente', AppTheme.accentGreen, Icons.check_circle_rounded);
+        DashboardAnimatedToast.show(context, 'Logo actualizado exitosamente', AppColors.accentGreen, LucideIcons.circleCheck);
       }
     } catch (e) {
       if (mounted) {
         Navigator.pop(context); // close dialog
-        DashboardAnimatedToast.show(context, 'Error al cambiar logo', AppTheme.accentPink, Icons.error_outline_rounded);
+        DashboardAnimatedToast.show(context, 'Error al cambiar logo', AppColors.accentPink, LucideIcons.circleAlert);
       }
     }
   }
@@ -302,28 +296,25 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
         insetPadding: const EdgeInsets.symmetric(horizontal: 28),
         child: Container(
           padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(36)),
+          decoration: BoxDecoration(color: AppColors.surfaceCard, borderRadius: BorderRadius.circular(AppRadii.card)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: AppTheme.accentYellow.withValues(alpha: 0.12), shape: BoxShape.circle),
-                child: const Icon(Icons.emoji_events_rounded, size: 48, color: AppTheme.accentYellow),
+                decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentAmber), shape: BoxShape.circle),
+                child: const Icon(LucideIcons.trophy, size: 48, color: AppColors.accentAmber),
               ),
               const SizedBox(height: 20),
-              const Text('¡PREMIO PENDIENTE!', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1), textAlign: TextAlign.center),
+              Text('¡Premio pendiente!', style: AppTypography.titleBold, textAlign: TextAlign.center),
               const SizedBox(height: 12),
-              const Text('Este cliente ya ganó un premio. No podés agregar más puntos hasta que lo retires y lo marques como entregado.', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600, height: 1.5), textAlign: TextAlign.center),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-                  child: const Text('ENTENDIDO', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
-                ),
+              Text(
+                'Este cliente ya ganó un premio. No podés agregar más puntos hasta que lo retires y lo marques como entregado.',
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 24),
+              PrimaryButton(label: 'Entendido', onPressed: () => Navigator.pop(ctx)),
             ],
           ),
         ),
@@ -343,8 +334,8 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
           DashboardAnimatedToast.show(
             context,
             next.toastMessage!,
-            next.toastIsError ? AppTheme.accentPink : AppTheme.accentGreen,
-            next.toastIsError ? Icons.error_outline_rounded : Icons.check_circle_rounded,
+            next.toastIsError ? AppColors.accentPink : AppColors.accentGreen,
+            next.toastIsError ? LucideIcons.circleAlert : LucideIcons.circleCheck,
           );
         }
       }
@@ -353,7 +344,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     if (state.isLoading && state.business == null) {
       return const Scaffold(
         body: Center(
-          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple)),
+          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
         ),
       );
     }
@@ -362,12 +353,8 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
 
     if (business == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Mi Negocio'),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black),
-        ),
+        backgroundColor: AppColors.background,
+        appBar: AppBar(title: const Text('Mi Negocio')),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -376,23 +363,24 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               children: [
                 Container(
                   padding: const EdgeInsets.all(48),
-                  decoration: BoxDecoration(color: AppTheme.accentPurple.withValues(alpha: 0.05), shape: BoxShape.circle),
-                  child: const Icon(Icons.storefront_rounded, size: 80, color: AppTheme.accentPurple),
+                  decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPurple), shape: BoxShape.circle),
+                  child: const Icon(LucideIcons.store, size: 72, color: AppColors.accentPurple),
                 ),
-                const SizedBox(height: 40),
-                Text('SIN NEGOCIO', style: GoogleFonts.anton(fontSize: 24, fontWeight: FontWeight.w400, letterSpacing: 2), textAlign: TextAlign.center),
-                const SizedBox(height: 12),
-                const Text('Registra tu local para empezar a fidelizar a tus clientes con puntos y premios.', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black38)),
-                const SizedBox(height: 48),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateBusinessScreen()));
-                      ref.read(dashboardProvider.notifier).loadData();
-                    },
-                    child: const Text('REGISTRAR MI LOCAL'),
-                  ),
+                const SizedBox(height: AppSpacing.xl),
+                Text('Sin negocio', style: AppTypography.displayBold.copyWith(fontSize: 22), textAlign: TextAlign.center),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Registra tu local para empezar a fidelizar a tus clientes con puntos y premios.',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMedium,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                PrimaryButton(
+                  label: 'Registrar mi local',
+                  onPressed: () async {
+                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateBusinessScreen()));
+                    ref.read(dashboardProvider.notifier).loadData();
+                  },
                 ),
               ],
             ),
@@ -408,7 +396,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     }
 
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           toolbarHeight: 90,
           leadingWidth: 90,
@@ -432,9 +420,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                     tag: 'business_logo',
                     child: CircleAvatar(
                       radius: 28,
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.pastelOf(AppColors.textSecondary),
                       backgroundImage: business['logo_url'] != null ? NetworkImage(business['logo_url']) : null,
-                      child: business['logo_url'] == null ? const Icon(Icons.store, color: Colors.black, size: 28) : null,
+                      child: business['logo_url'] == null
+                          ? const Icon(LucideIcons.store, color: AppColors.textSecondary, size: 26)
+                          : null,
                     ),
                   ),
                   Positioned(
@@ -445,11 +435,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [AppTheme.accentPurple, AppTheme.accentPink], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          gradient: const LinearGradient(colors: [AppColors.accentPurple, AppColors.accentPink], begin: Alignment.topLeft, end: Alignment.bottomRight),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                         ),
-                        child: const Icon(Icons.edit_rounded, size: 14, color: Colors.white),
+                        child: const Icon(LucideIcons.pencil, size: 14, color: Colors.white),
                       ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(duration: const Duration(seconds: 1), begin: const Offset(1, 1), end: const Offset(1.15, 1.15), curve: Curves.easeInOut).shimmer(duration: const Duration(seconds: 3), color: Colors.white.withValues(alpha: 0.5)),
                     ),
                   ),
@@ -461,20 +451,20 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (ownerDisplayName.isNotEmpty)
-                Text('Hola, $ownerDisplayName', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
-              Text(business['name'].toString().toUpperCase(), style: GoogleFonts.anton(fontSize: 18, fontWeight: FontWeight.w400, letterSpacing: 0.5)),
+                Text('Hola, $ownerDisplayName', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
+              Text(business['name'].toString(), style: AppTypography.titleBold.copyWith(fontSize: 18)),
               Row(
                 children: [
-                  Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppTheme.accentGreen, shape: BoxShape.circle)),
+                  Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle)),
                   const SizedBox(width: 6),
-                  Text('${state.customers.length} CLIENTES ACTIVOS', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.black45)),
+                  Text('${state.customers.length} clientes activos', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
                 ],
               ),
             ],
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.logout_rounded),
+            IconActionButton(
+              icon: LucideIcons.logOut,
               onPressed: () async {
                 await ref.read(authStateProvider.notifier).logout();
               },
@@ -484,26 +474,22 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
           bottom: TabBar(
             controller: _tabController,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.8),
-            indicatorWeight: 4,
+            labelStyle: AppTypography.labelBold.copyWith(fontSize: 11),
+            indicatorWeight: 3,
             indicatorSize: TabBarIndicatorSize.label,
-            indicatorColor: Colors.black,
-            unselectedLabelColor: Colors.black38,
+            indicatorColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textSecondary,
             isScrollable: true,
             tabs: [
-              const Tab(text: 'CLIENTES'),
+              const Tab(text: 'Clientes'),
               Tab(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('PENDIENTES'),
+                    const Text('Pendientes'),
                     if (state.pendingScans.isNotEmpty) ...[
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(color: AppTheme.accentPink, shape: BoxShape.circle),
-                        child: Text('${state.pendingScans.length}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
-                      ),
+                      const SizedBox(width: 6),
+                      CounterBadge(count: state.pendingScans.length, color: AppColors.accentPink),
                     ],
                   ],
                 ),
@@ -512,20 +498,16 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('PREMIOS'),
+                    const Text('Premios'),
                     if (state.pendingRewards.isNotEmpty) ...[
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(color: AppTheme.accentPurple, shape: BoxShape.circle),
-                        child: Text('${state.pendingRewards.length}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
-                      ),
+                      const SizedBox(width: 6),
+                      CounterBadge(count: state.pendingRewards.length, color: AppColors.accentPurple),
                     ],
                   ],
                 ),
               ),
-              const Tab(text: 'MÉTRICAS'),
-              const Tab(text: 'QR CODES'),
+              const Tab(text: 'Métricas'),
+              const Tab(text: 'QR Codes'),
             ],
           ),
         ),

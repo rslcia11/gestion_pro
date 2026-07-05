@@ -2,12 +2,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/push_notification_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/models/business_category.dart';
-import '../../auth/login_screen.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../help/business_faqs_screen.dart';
 import '../widgets/location_picker_map.dart';
@@ -217,7 +221,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Perfil actualizado exitosamente'),
-            backgroundColor: AppTheme.accentGreen,
+            backgroundColor: AppColors.accentGreen,
           ),
         );
         Navigator.pop(context, true); // Indicate success to refresh parent
@@ -227,7 +231,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       }
@@ -242,63 +246,37 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       builder: (context) {
         final confirmController = TextEditingController();
         return AlertDialog(
+          backgroundColor: AppColors.surfaceCard,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(AppRadii.card),
           ),
-          title: const Text(
-            '¿ELIMINAR CUENTA?',
-            style: TextStyle(fontWeight: FontWeight.w900),
-          ),
+          title: Text('¿Eliminar cuenta?', style: AppTypography.titleBold),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Esta acción es irreversible. Se borrarán todos tus datos, negocios, premios y puntos acumulados.',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black54,
-                ),
+                style: AppTypography.bodyMedium,
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Escribe "ELIMINAR" para confirmar:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text('Escribe "ELIMINAR" para confirmar:', style: AppTypography.labelBold),
               const SizedBox(height: 8),
-              TextField(
-                controller: confirmController,
-                decoration: InputDecoration(
-                  hintText: 'ELIMINAR',
-                  filled: true,
-                  fillColor: Colors.black.withValues(alpha: 0.05),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
-              ),
+              AppTextField(controller: confirmController, hint: 'ELIMINAR'),
             ],
           ),
           actions: [
-            TextButton(
+            SecondaryButton(
+              label: 'Cancelar',
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('CANCELAR'),
             ),
-            ElevatedButton(
+            PrimaryButton(
+              label: 'Eliminar definitivamente',
+              isDestructive: true,
               onPressed: () {
                 if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') {
                   Navigator.pop(context, true);
                 }
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentPink,
-              ),
-              child: const Text('ELIMINAR DEFINITIVAMENTE'),
             ),
           ],
         );
@@ -346,33 +324,23 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: Colors.white,
-        title: const Text(
-          'EDITAR PERFIL',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            fontSize: 16,
-            letterSpacing: 1.5,
-          ),
-        ),
+        title: Text('Editar Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
         actions: [
-          IconButton(
+          IconActionButton(
+            icon: LucideIcons.circleCheck,
+            backgroundColor: AppColors.pastelOf(AppColors.accentGreen),
+            iconColor: AppColors.accentGreen,
             onPressed: _isLoading ? null : _saveChanges,
-            icon: const Icon(
-              Icons.check_rounded,
-              color: AppTheme.accentGreen,
-              size: 28,
-            ),
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
               child: Form(
@@ -409,11 +377,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 ),
                                 child:
                                     (_logoUrl == null && _newLogoFile == null)
-                                    ? const Icon(
-                                        Icons.storefront_rounded,
-                                        size: 50,
-                                        color: Colors.black26,
-                                      )
+                                    ? const Icon(LucideIcons.store, size: 44, color: AppColors.border)
                                     : null,
                               ),
                             ),
@@ -423,14 +387,10 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: const BoxDecoration(
-                                  color: Colors.black,
+                                  color: AppColors.primary,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
-                                  Icons.camera_alt_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                                child: const Icon(LucideIcons.camera, color: Colors.white, size: 20),
                               ),
                             ),
                           ],
@@ -440,19 +400,16 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     const SizedBox(height: 48),
 
                     // SECTION: DATOS PERSONALES
-                    _buildSectionHeader(
-                      'DATOS PERSONALES',
-                      Icons.person_outline_rounded,
-                    ),
+                    _buildSectionHeader('Datos Personales', LucideIcons.user),
                     _buildTextField(
                       _fullNameController,
-                      'NOMBRE COMPLETO',
-                      Icons.badge_outlined,
+                      'Nombre completo',
+                      LucideIcons.idCard,
                     ),
                     _buildTextField(
                       _phoneController,
-                      'WHATSAPP / CELULAR',
-                      Icons.phone_android_rounded,
+                      'WhatsApp / Celular',
+                      LucideIcons.phone,
                       keyboardType: TextInputType.phone,
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(10),
@@ -460,37 +417,26 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // SECTION: DATOS DEL NEGOCIO
-                    _buildSectionHeader(
-                      'DATOS DEL NEGOCIO',
-                      Icons.storefront_rounded,
-                    ),
+                    _buildSectionHeader('Datos del Negocio', LucideIcons.store),
                     _buildTextField(
                       _businessNameController,
-                      'NOMBRE DEL NEGOCIO',
-                      Icons.business_rounded,
+                      'Nombre del negocio',
+                      LucideIcons.building2,
                     ),
                     _buildTextField(
                       _businessDescriptionController,
-                      'DESCRIPCIÓN BREVE',
-                      Icons.description_outlined,
+                      'Descripción breve',
+                      LucideIcons.fileText,
                       maxLines: 2,
                       isRequired: false,
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     // Category Dropdown
-                    const Text(
-                      'CATEGORÍA',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 12,
-                        color: Colors.black38,
-                        letterSpacing: 1,
-                      ),
-                    ),
+                    Text('Categoría', style: AppTypography.labelBold.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 8),
                     Autocomplete<BusinessCategory>(
                       initialValue: TextEditingValue(text: _selectedCategory?.name.toUpperCase() ?? ''),
@@ -510,14 +456,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         return TextFormField(
                           controller: textEditingController,
                           focusNode: focusNode,
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                          style: AppTypography.bodyRegular,
                           decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.category_rounded, size: 20, color: Colors.black26),
-                            suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                            prefixIcon: const Icon(LucideIcons.layers, size: 20, color: AppColors.textSecondary),
+                            suffixIcon: const Icon(LucideIcons.chevronDown, color: AppColors.textSecondary),
                             filled: true,
-                            fillColor: Colors.black.withValues(alpha: 0.04),
+                            fillColor: AppColors.background,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(AppRadii.pill),
                               borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
@@ -538,7 +484,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           alignment: Alignment.topLeft,
                           child: Material(
                             elevation: 8.0,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(AppRadii.card),
                             clipBehavior: Clip.antiAlias,
                             child: Container(
                               constraints: const BoxConstraints(maxHeight: 250),
@@ -550,7 +496,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 itemBuilder: (BuildContext context, int index) {
                                   final BusinessCategory option = options.elementAt(index);
                                   return ListTile(
-                                    title: Text(option.name.toUpperCase(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                                    title: Text(option.name.toUpperCase(), style: AppTypography.labelBold),
                                     onTap: () => onSelected(option),
                                   );
                                 },
@@ -561,17 +507,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       },
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     // Location Picker
-                    const Text(
-                      'UBICACIÓN',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 12,
-                        color: Colors.black38,
-                        letterSpacing: 1,
-                      ),
-                    ),
+                    Text('Ubicación', style: AppTypography.labelBold.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 8),
                     GestureDetector(
                       onTap: () async {
@@ -584,22 +522,13 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           MaterialPageRoute(
                             builder: (context) => Scaffold(
                               appBar: AppBar(
-                                title: const Text(
-                                  'SELECCIONAR UBICACIÓN',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14,
-                                  ),
-                                ),
+                                title: const Text('Seleccionar Ubicación'),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(context),
-                                    child: const Text(
-                                      'CONFIRMAR',
-                                      style: TextStyle(
-                                        color: AppTheme.accentPurple,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    child: Text(
+                                      'Confirmar',
+                                      style: AppTypography.labelBold.copyWith(color: AppColors.accentPurple),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -628,65 +557,51 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.black.withValues(alpha: 0.05),
-                          ),
+                          color: AppColors.surfaceCard,
+                          borderRadius: BorderRadius.circular(AppRadii.card),
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
-                              Icons.location_on_rounded,
-                              color: AppTheme.accentPink,
-                            ),
+                            const Icon(LucideIcons.mapPin, color: AppColors.accentPink),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Text(
-                                _address ?? 'SELECCIONAR EN EL MAPA',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12,
-                                  color: _address == null
-                                      ? Colors.black26
-                                      : Colors.black,
+                                _address ?? 'Seleccionar en el mapa',
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: _address == null ? AppColors.border : AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              color: Colors.black26,
-                            ),
+                            const Icon(LucideIcons.chevronRight, color: AppColors.border),
                           ],
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 48),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // SECTION: CAMPAÑA DE PUNTOS
-                    _buildSectionHeader(
-                      'CAMPAÑA DE PUNTOS',
-                      Icons.auto_awesome_rounded,
-                    ),
+                    _buildSectionHeader('Campaña de Puntos', LucideIcons.sparkles),
                     _buildTextField(
                       _rewardDescriptionController,
-                      '¿QUÉ PREMIO ENTREGAS?',
-                      Icons.card_giftcard_rounded,
+                      '¿Qué premio entregas?',
+                      LucideIcons.gift,
                     ),
                     _buildTextField(
                       _rewardLongDescriptionController,
-                      'DESCRIPCIÓN DEL PREMIO',
-                      Icons.description_rounded,
+                      'Descripción del premio',
+                      LucideIcons.fileText,
                       maxLines: 2,
                       isRequired: false,
                     ),
                     _buildTextField(
                       _pointsRequiredController,
-                      'PUNTOS NECESARIOS',
-                      Icons.numbers_rounded,
+                      'Puntos necesarios',
+                      LucideIcons.hash,
                       keyboardType: TextInputType.number,
                     ),
 
@@ -703,83 +618,44 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppTheme.accentPurple.withValues(alpha: 0.08),
-                              AppTheme.accentPink.withValues(alpha: 0.05),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
+                          color: AppColors.pastelOf(AppColors.accentPurple),
+                          borderRadius: BorderRadius.circular(AppRadii.card),
                         ),
                         child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentPurple.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(14),
+                                color: AppColors.accentPurple.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(AppRadii.badge),
                               ),
-                              child: const Icon(
-                                Icons.help_outline_rounded,
-                                color: AppTheme.accentPurple,
-                                size: 22,
-                              ),
+                              child: const Icon(LucideIcons.circleHelp, color: AppColors.accentPurple, size: 22),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
-                                    'PREGUNTAS FRECUENTES',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 13,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    'Guía completa para gestionar tu negocio',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black45,
-                                    ),
-                                  ),
+                                children: [
+                                  Text('Preguntas Frecuentes', style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
+                                  const SizedBox(height: 2),
+                                  Text('Guía completa para gestionar tu negocio', style: AppTypography.caption),
                                 ],
                               ),
                             ),
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              color: AppTheme.accentPurple,
-                            ),
+                            const Icon(LucideIcons.chevronRight, color: AppColors.accentPurple),
                           ],
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // DELETE ACCOUNT
                     Center(
                       child: TextButton.icon(
                         onPressed: _deleteAccount,
-                        icon: const Icon(
-                          Icons.delete_forever_rounded,
-                          color: Colors.black26,
-                        ),
-                        label: const Text(
-                          'ELIMINAR MI CUENTA',
-                          style: TextStyle(
-                            color: Colors.black26,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 12,
-                            letterSpacing: 1,
-                          ),
-                        ),
+                        icon: const Icon(LucideIcons.trash2, color: AppColors.border),
+                        label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.border)),
                       ),
                     ),
                     const SizedBox(height: 100),
@@ -795,16 +671,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppTheme.accentPurple),
+          Icon(icon, size: 20, color: AppColors.accentPurple),
           const SizedBox(width: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              letterSpacing: 2,
-            ),
-          ),
+          Text(title, style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
         ],
       ),
     );
@@ -821,46 +690,19 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 12,
-              color: Colors.black38,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            maxLines: maxLines,
-            inputFormatters: inputFormatters,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-            decoration: InputDecoration(
-              prefixIcon: Icon(icon, size: 20, color: Colors.black26),
-              filled: true,
-              fillColor: Colors.black.withValues(alpha: 0.04),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-            ),
-            validator: (value) {
-              if (isRequired && (value == null || value.isEmpty)) {
-                return 'Campo requerido';
-              }
-              return null;
-            },
-          ),
-        ],
+      child: AppTextField(
+        controller: controller,
+        label: label,
+        prefixIcon: icon,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        inputFormatters: inputFormatters,
+        validator: (value) {
+          if (isRequired && (value == null || value.isEmpty)) {
+            return 'Campo requerido';
+          }
+          return null;
+        },
       ),
     );
   }

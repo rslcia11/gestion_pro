@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/utils/date_utils.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/shared_widgets.dart';
 
 class BusinessHistoryScreen extends StatefulWidget {
   final String businessId;
@@ -123,34 +125,35 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           title: const Text('Historial de Actividad'),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black),
-          bottom: const TabBar(
-            tabs: [
+          bottom: TabBar(
+            tabs: const [
               Tab(text: 'Escaneos'),
               Tab(text: 'Premios'),
               Tab(text: 'Traspasos'),
             ],
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.black38,
-            indicatorColor: Colors.black,
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textSecondary,
+            indicatorColor: AppColors.primary,
             isScrollable: true,
           ),
           actions: [
-            IconButton(
-              icon: Icon(_dateRange == null ? Icons.filter_alt_outlined : Icons.filter_alt),
+            IconActionButton(
+              icon: _dateRange == null ? LucideIcons.listFilter : LucideIcons.filter,
+              iconColor: _dateRange == null ? AppColors.textSecondary : AppColors.primary,
               onPressed: _selectDateRange,
-              color: _dateRange == null ? null : Colors.black,
             ),
             if (_dateRange != null)
-              IconButton(icon: const Icon(Icons.clear, size: 20), onPressed: () { setState(() => _dateRange = null); _loadHistory(); }),
+              IconActionButton(
+                icon: LucideIcons.x,
+                onPressed: () { setState(() => _dateRange = null); _loadHistory(); },
+              ),
           ],
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple)))
+            ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
             : TabBarView(children: [_buildScansList(), _buildRewardsList(), _buildTransfersList()]),
       ),
     );
@@ -159,15 +162,20 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
   Widget _buildScansList() {
     if (_scans.isEmpty) return const Center(child: Text('No hay escaneos en este periodo'));
     return ListView.builder(
+      padding: const EdgeInsets.all(20),
       itemCount: _scans.length,
       itemBuilder: (context, index) {
         final scan = _scans[index];
-        final profileName = scan['profiles']['full_name'] ?? 'Usuario';
-        return ListTile(
-          leading: const Icon(Icons.check_circle, color: Colors.green),
-          title: Text(profileName, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text(EcuadorDateUtils.formatEcuadorTime(scan['scanned_at'])),
-          trailing: const Text('+1 Punto', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+        final profileName = (scan['profiles']['full_name'] ?? 'Usuario').toString();
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: ActivityListCard(
+            avatarInitials: profileName.isNotEmpty ? profileName[0] : '?',
+            title: profileName,
+            description: '+1 Punto',
+            timestamp: EcuadorDateUtils.formatEcuadorTime(scan['scanned_at']),
+            trailing: const Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 20),
+          ),
         );
       },
     );
@@ -176,21 +184,21 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
   Widget _buildRewardsList() {
     if (_rewards.isEmpty) return const Center(child: Text('No hay premios en este periodo'));
     return ListView.builder(
+      padding: const EdgeInsets.all(20),
       itemCount: _rewards.length,
       itemBuilder: (context, index) {
         final reward = _rewards[index];
-        final profileName = reward['profiles']['full_name'] ?? 'Usuario';
-        return ListTile(
-          leading: const Icon(Icons.card_giftcard, color: AppTheme.accentPurple),
-          title: Text(profileName, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(reward['description'] ?? 'Premio', style: const TextStyle(color: AppTheme.accentPurple, fontWeight: FontWeight.w600)),
-              Text(EcuadorDateUtils.formatEcuadorTime(reward['earned_at'])),
-            ],
+        final profileName = (reward['profiles']['full_name'] ?? 'Usuario').toString();
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: ActivityListCard(
+            avatarInitials: profileName.isNotEmpty ? profileName[0] : '?',
+            avatarUrl: null,
+            title: profileName,
+            description: (reward['description'] ?? 'Premio').toString(),
+            timestamp: EcuadorDateUtils.formatEcuadorTime(reward['earned_at']),
+            trailing: const Icon(LucideIcons.gift, color: AppColors.accentPurple, size: 20),
           ),
-          trailing: Text('-\ Pts', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
         );
       },
     );
@@ -199,23 +207,23 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
   Widget _buildTransfersList() {
     if (_transfers.isEmpty) return const Center(child: Text('No hay transferencias en este periodo'));
     return ListView.builder(
+      padding: const EdgeInsets.all(20),
       itemCount: _transfers.length,
       itemBuilder: (context, index) {
         final transfer = _transfers[index];
         final fromName = transfer['from_user']?['full_name'] ?? 'Alguien';
         final toName = transfer['to_user']?['full_name'] ?? 'Alguien';
         final pts = transfer['rewards']?['points_used'] ?? '?';
-        return ListTile(
-          leading: const Icon(Icons.swap_horiz_rounded, color: Colors.blue),
-          title: Text('$fromName -> $toName', style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Premio transferido', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600)),
-              Text(EcuadorDateUtils.formatEcuadorTime(transfer['created_at'])),
-            ],
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: ActivityListCard(
+            avatarInitials: fromName.isNotEmpty ? fromName[0] : '?',
+            avatarUrl: null,
+            title: '$fromName → $toName',
+            description: 'Premio transferido ($pts pts)',
+            timestamp: EcuadorDateUtils.formatEcuadorTime(transfer['created_at']),
+            trailing: const Icon(LucideIcons.arrowLeftRight, color: AppColors.accentBlue, size: 20),
           ),
-          trailing: Text('$pts Pts', style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold)),
         );
       },
     );

@@ -1,10 +1,13 @@
 // lib/features/business/rewards/rewards_management_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/utils/date_utils.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/services/realtime_sync_service.dart';
 import 'dart:async';
 import 'providers/rewards_management_provider.dart';
@@ -48,7 +51,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Entrega de premio aprobada'),
-            backgroundColor: AppTheme.accentGreen,
+            backgroundColor: AppColors.accentGreen,
           ),
         );
       } else {
@@ -56,7 +59,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $error'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       }
@@ -70,7 +73,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Premio rechazado'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       } else {
@@ -78,7 +81,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $error'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       }
@@ -92,42 +95,25 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: state.isLoading && state.rewards.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : state.error != null
-          ? Center(child: Text(state.error!, style: const TextStyle(color: Colors.red)))
+          ? Center(child: Text(state.error!, style: AppTypography.bodyMedium.copyWith(color: AppColors.error)))
           : state.rewards.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
-                      color: AppTheme.accentPurple.withValues(alpha: 0.05),
+                      color: AppColors.pastelOf(AppColors.accentPurple),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.card_giftcard_rounded,
-                      size: 64,
-                      color: AppTheme.accentPurple,
-                    ),
+                    child: const Icon(LucideIcons.gift, size: 56, color: AppColors.accentPurple),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'SIN PREMIOS AÚN',
-                    style: GoogleFonts.anton(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const Text(
-                    'Aquí verás los premios por aprobar y entregados.',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black26,
-                    ),
-                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text('Sin premios aún', style: AppTypography.subtitleBold),
+                  Text('Aquí verás los premios por aprobar y entregados.', style: AppTypography.bodyMedium),
                 ],
               ),
             )
@@ -136,163 +122,48 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
               itemCount: state.rewards.length,
               itemBuilder: (context, index) {
                 final reward = state.rewards[index];
-                final String fullName = reward['display_name'].toUpperCase();
+                final String fullName = reward['display_name'].toString();
                 final String date = EcuadorDateUtils.formatEcuadorTime(
                   reward['earned_at'],
                 );
                 final String status = reward['status'] ?? 'pending';
 
-                Color statusColor = AppTheme.accentYellow;
-                String statusLabel = 'PENDIENTE';
+                StatusChipVariant variant = StatusChipVariant.pending;
+                String statusLabel = 'Pendiente';
                 if (status == 'approved') {
-                  statusColor = AppTheme.accentGreen;
-                  statusLabel = 'ENTREGADO';
+                  variant = StatusChipVariant.success;
+                  statusLabel = 'Entregado';
                 } else if (status == 'rejected') {
-                  statusColor = AppTheme.accentPink;
-                  statusLabel = 'RECHAZADO';
+                  variant = StatusChipVariant.error;
+                  statusLabel = 'Rechazado';
                 }
 
-                return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(32),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: status == 'pending'
-                              ? statusColor.withValues(alpha: 0.2)
-                              : Colors.black.withValues(alpha: 0.03),
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: ActivityListCard(
+                    avatarUrl: reward['avatar_url'],
+                    avatarInitials: fullName.isNotEmpty ? fullName[0] : '?',
+                    title: fullName,
+                    description: reward['is_transferred'] == true
+                        ? '${reward['from_name']} transfirió el premio a $fullName'
+                        : '$fullName ganó premio',
+                    timestamp: 'El $date',
+                    trailing: StatusChip(label: statusLabel, variant: variant),
+                    actions: status == 'pending'
+                        ? Row(
                             children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: statusColor.withValues(alpha: 0.1),
-                                backgroundImage: reward['avatar_url'] != null
-                                    ? NetworkImage(reward['avatar_url'])
-                                    : null,
-                                child: reward['avatar_url'] == null
-                                    ? Text(
-                                        fullName.isNotEmpty ? fullName[0] : '?',
-                                        style: TextStyle(
-                                          color: statusColor,
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 18,
-                                        ),
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(width: 16),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      fullName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 13,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      reward['is_transferred'] == true
-                                        ? '${reward['from_name'].toUpperCase()} TRANSFIRIÓ EL PREMIO A $fullName'
-                                        : '$fullName GANÓ PREMIO',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        color: statusColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'EL $date',
-                                      style: const TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.black38,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                child: SecondaryButton(label: 'Rechazar', onPressed: () => _rejectReward(reward['id'])),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Text(
-                                  statusLabel,
-                                  style: TextStyle(
-                                    color: statusColor,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1,
-                                  ),
-                                ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: PrimaryButton(label: 'Entregar', onPressed: () => _approveReward(reward['id'])),
                               ),
                             ],
-                          ),
-                          if (status == 'pending') ...[
-                            const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextButton(
-                                    onPressed: () =>
-                                        _rejectReward(reward['id']),
-                                    child: const Text(
-                                      'RECHAZAR',
-                                      style: TextStyle(
-                                        color: Colors.black26,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () =>
-                                        _approveReward(reward['id']),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppTheme.accentGreen,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'ENTREGAR',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    )
+                          )
+                        : null,
+                  ),
+                )
                     .animate(delay: (index * 50).ms)
                     .fadeIn(duration: 400.ms)
                     .slideY(begin: 0.1, curve: Curves.easeOut);

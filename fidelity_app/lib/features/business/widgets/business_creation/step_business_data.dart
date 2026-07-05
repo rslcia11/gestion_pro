@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../location_picker_map.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radii.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/shared_widgets.dart';
 import '../../../../core/models/business_category.dart';
 
 class StepBusinessData extends StatelessWidget {
@@ -38,30 +42,15 @@ class StepBusinessData extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Datos del Negocio',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
+          Text('Datos del Negocio', style: AppTypography.subtitleBold),
           const SizedBox(height: 8),
-          const Text(
-            '¿Cómo reconocerán los clientes a tu local?',
-            style: TextStyle(color: Colors.black54),
-          ),
+          Text('¿Cómo reconocerán los clientes a tu local?', style: AppTypography.bodyMedium),
           const SizedBox(height: 24),
 
-          TextFormField(
+          AppTextField(
             controller: nameController,
-            decoration: InputDecoration(
-              labelText: 'Nombre del negocio',
-              prefixIcon: const Icon(Icons.store, color: Colors.black),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+            label: 'Nombre del negocio',
+            prefixIcon: LucideIcons.store,
             validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
           ),
           const SizedBox(height: 16),
@@ -84,20 +73,20 @@ class StepBusinessData extends StatelessWidget {
               return TextFormField(
                 controller: textEditingController,
                 focusNode: focusNode,
+                style: AppTypography.bodyRegular,
                 decoration: InputDecoration(
                   labelText: 'Categoría (Busca o selecciona)',
-                  prefixIcon: const Icon(Icons.category, color: Colors.black),
-                  suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
+                  labelStyle: AppTypography.bodyMedium,
+                  filled: true,
+                  fillColor: AppColors.background,
+                  prefixIcon: const Icon(LucideIcons.layers, size: 20, color: AppColors.textSecondary),
+                  suffixIcon: const Icon(LucideIcons.chevronDown, color: AppColors.textSecondary),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                    borderSide: BorderSide.none,
                   ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
-                onChanged: (value) {
-                  if (selectedCategory != null && value.toLowerCase() != selectedCategory!.name.toLowerCase()) {
-                    // Reset if user types something else
-                    // (Requires logic update in parent if we want to clear it, but checking in validator is enough)
-                  }
-                },
                 validator: (String? value) {
                   if (selectedCategory == null || value == null || value.isEmpty) {
                     return 'Selecciona una categoría válida de la lista';
@@ -111,12 +100,12 @@ class StepBusinessData extends StatelessWidget {
                 alignment: Alignment.topLeft,
                 child: Material(
                   elevation: 8.0,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadii.card),
                   clipBehavior: Clip.antiAlias,
                   child: Container(
                     constraints: const BoxConstraints(maxHeight: 250),
                     // We let it size based on the parent's constraints mostly, but give it a max width
-                    width: MediaQuery.of(context).size.width - 48, 
+                    width: MediaQuery.of(context).size.width - 48,
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
@@ -124,7 +113,7 @@ class StepBusinessData extends StatelessWidget {
                       itemBuilder: (BuildContext context, int index) {
                         final BusinessCategory option = options.elementAt(index);
                         return ListTile(
-                          title: Text(option.name.toUpperCase(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                          title: Text(option.name.toUpperCase(), style: AppTypography.labelBold),
                           onTap: () => onSelected(option),
                         );
                       },
@@ -136,35 +125,16 @@ class StepBusinessData extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          TextFormField(
+          AppTextField(
             controller: descriptionController,
-            maxLines: 2,
-            decoration: InputDecoration(
-              labelText: 'Descripción (Opcional)',
-              prefixIcon: const Icon(
-                Icons.description,
-                color: Colors.black,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+            label: 'Descripción (Opcional)',
+            prefixIcon: LucideIcons.pencil,
           ),
           const SizedBox(height: 24),
 
-          const Text(
-            'Ubicación Exacta *',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
+          Text('Ubicación Exacta *', style: AppTypography.subtitleBold.copyWith(fontSize: 16)),
           const SizedBox(height: 8),
-          const Text(
-            'Mueve el marcador o toca el mapa para ubicarte.',
-            style: TextStyle(fontSize: 12, color: Colors.black54),
-          ),
+          Text('Mueve el marcador o toca el mapa para ubicarte.', style: AppTypography.caption),
           const SizedBox(height: 12),
 
           LocationPickerMap(
@@ -180,28 +150,16 @@ class StepBusinessData extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentGreen.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppTheme.accentGreen.withValues(alpha: 0.3),
-                  ),
+                  color: AppColors.pastelOf(AppColors.accentGreen),
+                  borderRadius: BorderRadius.circular(AppRadii.badge),
+                  border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.check_circle,
-                      color: AppTheme.accentGreen,
-                      size: 20,
-                    ),
+                    const Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        address,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      child: Text(address, style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary)),
                     ),
                   ],
                 ),

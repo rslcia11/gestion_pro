@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/theme/app_theme.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_radii.dart';
+import '../../../../../core/theme/app_shadows.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/shared_widgets.dart';
 import '../../providers/dashboard_provider.dart';
 class TabCustomers extends ConsumerStatefulWidget {
   const TabCustomers({super.key});
@@ -19,31 +26,29 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(48)),
-        title: const Text('SUMAR PUNTOS', textAlign: TextAlign.center),
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('Sumar puntos', textAlign: TextAlign.center, style: AppTypography.titleBold),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              card['profiles']['full_name'].toString().toUpperCase(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: Colors.black45,
-              ),
+              card['profiles']['full_name'].toString(),
+              style: AppTypography.subtitleBold.copyWith(fontSize: 14, color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 24),
-            TextField(
+            const SizedBox(height: AppSpacing.lg),
+            AppTextField(
               controller: pointsController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'PUNTOS A SUMAR'),
+              hint: 'Puntos a sumar',
             ),
           ],
         ),
         actions: [
           Center(
-            child: ElevatedButton(
+            child: PrimaryButton(
+              label: 'Agregar',
+              isFullWidth: false,
               onPressed: () {
                 final points = int.tryParse(pointsController.text);
                 if (points != null && points > 0) {
@@ -51,7 +56,6 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                   ref.read(dashboardProvider.notifier).addManualPoints(card['user_id'], points);
                 }
               },
-              child: const Text('AGREGAR'),
             ),
           ),
           const SizedBox(height: 16),
@@ -67,19 +71,23 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Canjear premio'),
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('Canjear premio', style: AppTypography.titleBold),
         content: Text(
           '¿Canjear premio por ${business['points_required']} puntos?',
+          style: AppTypography.bodyRegular,
         ),
         actions: [
-          TextButton(
+          SecondaryButton(
+            label: 'Cancelar',
+            isFullWidth: false,
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
           ),
-          ElevatedButton(
+          PrimaryButton(
+            label: 'Canjear',
+            isFullWidth: false,
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-            child: const Text('Canjear'),
           ),
         ],
       ),
@@ -111,26 +119,9 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'BUSCAR CLIENTE...',
-              prefixIcon: const Icon(
-                Icons.search_rounded,
-                color: Colors.black,
-                size: 24,
-              ),
-              filled: true,
-              fillColor: Colors.black.withValues(alpha: 0.04),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(24),
-                borderSide: BorderSide.none,
-              ),
-              hintStyle: const TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 12,
-                letterSpacing: 1,
-              ),
-            ),
+          child: AppTextField(
+            hint: 'Buscar cliente...',
+            prefixIcon: LucideIcons.search,
             onChanged: (value) => setState(() => _searchQuery = value),
           ),
         ),
@@ -140,19 +131,11 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.people_outline_rounded,
-                        size: 64,
-                        color: Colors.black.withValues(alpha: 0.1),
-                      ),
+                      const Icon(LucideIcons.users, size: 56, color: AppColors.border),
                       const SizedBox(height: 16),
                       Text(
-                        _searchQuery.isEmpty ? 'NO HAY CLIENTES AÚN' : 'SIN RESULTADOS',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black26,
-                          letterSpacing: 1,
-                        ),
+                        _searchQuery.isEmpty ? 'No hay clientes aún' : 'Sin resultados',
+                        style: AppTypography.subtitleBold.copyWith(color: AppColors.textSecondary, fontSize: 14),
                       ),
                     ],
                   ),
@@ -164,58 +147,36 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                     final card = filteredCustomers[index];
                     final profile = card['profiles'];
                     final accentColor = [
-                      AppTheme.accentPurple,
-                      AppTheme.accentPink,
-                      AppTheme.accentYellow,
-                      AppTheme.accentGreen,
+                      AppColors.accentPurple,
+                      AppColors.accentPink,
+                      AppColors.accentAmber,
+                      AppColors.accentGreen,
                     ][index % 4];
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(32),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                        border: Border.all(color: Colors.black.withValues(alpha: 0.04)),
+                        color: AppColors.surfaceCard,
+                        borderRadius: BorderRadius.circular(AppRadii.card),
+                        boxShadow: AppShadows.card,
                       ),
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: accentColor.withValues(alpha: 0.1),
-                            backgroundImage: profile?['avatar_url'] != null
-                                ? NetworkImage(profile!['avatar_url'])
-                                : null,
-                            child: profile?['avatar_url'] == null
-                                ? Text(
-                                    (profile?['full_name']?[0] ?? '?').toUpperCase(),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      color: accentColor,
-                                      fontSize: 20,
-                                    ),
-                                  )
-                                : null,
+                          UserAvatar(
+                            imageUrl: profile?['avatar_url'],
+                            initials: profile?['full_name']?[0],
+                            size: 52,
+                            backgroundColor: accentColor,
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  (profile?['full_name'] ?? 'USUARIO').toUpperCase(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14,
-                                    letterSpacing: 0.5,
-                                  ),
+                                  (profile?['full_name'] ?? 'Usuario').toString(),
+                                  style: AppTypography.subtitleBold.copyWith(fontSize: 14),
                                 ),
                                 const SizedBox(height: 4),
                                 Wrap(
@@ -224,47 +185,21 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                                   crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
                                     Text(
-                                      '${card['current_points'] ?? 0}/${business['points_required'] ?? '?'} ACTUALES',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppTheme.accentPurple,
-                                      ),
+                                      '${card['current_points'] ?? 0}/${business['points_required'] ?? '?'} actuales',
+                                      style: AppTypography.caption.copyWith(color: AppColors.accentPurple, fontWeight: FontWeight.w700),
                                     ),
-                                    Container(
-                                      width: 4,
-                                      height: 4,
-                                      decoration: const BoxDecoration(color: Colors.black12, shape: BoxShape.circle),
-                                    ),
-                                    Text(
-                                      '${card['total_points_lifetime'] ?? 0} TOTALES',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.black45,
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 4,
-                                      height: 4,
-                                      decoration: const BoxDecoration(color: Colors.black12, shape: BoxShape.circle),
-                                    ),
-                                    Text(
-                                      '${card['rewards_claimed'] ?? 0} PREMIOS',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.black45,
-                                      ),
-                                    ),
+                                    Container(width: 3, height: 3, decoration: const BoxDecoration(color: AppColors.border, shape: BoxShape.circle)),
+                                    Text('${card['total_points_lifetime'] ?? 0} totales', style: AppTypography.caption),
+                                    Container(width: 3, height: 3, decoration: const BoxDecoration(color: AppColors.border, shape: BoxShape.circle)),
+                                    Text('${card['rewards_claimed'] ?? 0} premios', style: AppTypography.caption),
                                   ],
                                 ),
                               ],
                             ),
                           ),
                           PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_horiz_rounded, color: Colors.black45),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                            icon: const Icon(LucideIcons.moreHorizontal, color: AppColors.textSecondary),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
                             onSelected: (value) {
                               if (value == 'add_points') {
                                 _showAddPointsDialog(card);
@@ -286,32 +221,28 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                                   child: Row(
                                     children: [
                                       Icon(
-                                        hasPendingReward
-                                            ? Icons.lock_outline_rounded
-                                            : Icons.add_circle_outline_rounded,
+                                        hasPendingReward ? LucideIcons.lock : LucideIcons.circlePlus,
                                         size: 20,
-                                        color: hasPendingReward ? Colors.black26 : accentColor,
+                                        color: hasPendingReward ? AppColors.border : accentColor,
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
-                                        hasPendingReward ? 'PREMIO PENDIENTE' : 'PUNTOS',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 12,
-                                          color: hasPendingReward ? Colors.black26 : Colors.black,
+                                        hasPendingReward ? 'Premio pendiente' : 'Puntos',
+                                        style: AppTypography.labelBold.copyWith(
+                                          color: hasPendingReward ? AppColors.border : AppColors.textPrimary,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 if ((card['current_points'] ?? 0) >= business['points_required'])
-                                  const PopupMenuItem(
+                                  PopupMenuItem(
                                     value: 'redeem',
                                     child: Row(
                                       children: [
-                                        Icon(Icons.card_giftcard_rounded, size: 20, color: AppTheme.accentGreen),
-                                        SizedBox(width: 12),
-                                        Text('CANJEAR', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12)),
+                                        const Icon(LucideIcons.gift, size: 20, color: AppColors.accentGreen),
+                                        const SizedBox(width: 12),
+                                        Text('Canjear', style: AppTypography.labelBold),
                                       ],
                                     ),
                                   ),

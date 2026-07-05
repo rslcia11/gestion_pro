@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -10,10 +9,16 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gal/gal.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_shadows.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/services/realtime_sync_service.dart';
 import 'dart:async';
@@ -86,7 +91,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Código QR generado exitosamente'),
-            backgroundColor: AppTheme.accentGreen,
+            backgroundColor: AppColors.accentGreen,
           ),
         );
       }
@@ -95,7 +100,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al generar QR: $e'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       }
@@ -162,63 +167,31 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
+              backgroundColor: AppColors.surfaceCard,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(AppRadii.card),
               ),
               title: Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppTheme.accentGreen.withValues(alpha: 0.1),
+                      color: AppColors.pastelOf(AppColors.accentGreen),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.check_circle_rounded,
-                      color: AppTheme.accentGreen,
-                      size: 48,
-                    ),
+                    child: const Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 44),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    '¡CÓDIGO GUARDADO!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 20,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  Text('¡Código guardado!', style: AppTypography.titleBold, textAlign: TextAlign.center),
                 ],
               ),
-              content: const Text(
+              content: Text(
                 'La imagen del código QR se ha guardado correctamente en tu galería de fotos.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black54,
-                ),
+                style: AppTypography.bodyMedium,
               ),
               actions: [
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.accentGreen,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text(
-                      'LISTO',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
+                PrimaryButton(label: 'Listo', onPressed: () => Navigator.pop(context)),
               ],
             ),
           );
@@ -312,7 +285,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ PDF generado. Selecciona "Guardar en Archivos" para enviarlo a Documentos.'),
-            backgroundColor: AppTheme.accentGreen,
+            backgroundColor: AppColors.accentGreen,
             duration: Duration(seconds: 4),
           ),
         );
@@ -336,27 +309,28 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(48)),
-        child: Padding(
+        backgroundColor: Colors.transparent,
+        child: Container(
           padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(AppRadii.card),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 label.toUpperCase(),
                 textAlign: TextAlign.center,
-                style: GoogleFonts.anton(fontSize: 18, fontWeight: FontWeight.w400, letterSpacing: 1),
+                style: AppTypography.labelBold.copyWith(fontSize: 14),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10)),
-                  ],
+                  color: AppColors.surfaceCard,
+                  borderRadius: BorderRadius.circular(AppRadii.card),
+                  boxShadow: AppShadows.card,
                 ),
                 child: QrImageView(
                   data: code,
@@ -366,52 +340,40 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                   dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Colors.black),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               SelectableText(
-                code,
+                'ID: $code',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 10, color: Colors.black26, fontWeight: FontWeight.w700),
+                style: AppTypography.caption,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: SecondaryButton(
+                      label: 'Imagen',
+                      icon: LucideIcons.image,
                       onPressed: () {
                         Navigator.pop(context);
                         _shareQRImage(code, label);
                       },
-                      icon: const Icon(Icons.photo_rounded, size: 16),
-                      label: const Text('IMAGEN', style: TextStyle(fontSize: 12, letterSpacing: 0)),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: SecondaryButton(
+                      label: 'PDF',
+                      icon: LucideIcons.fileText,
                       onPressed: () {
                         Navigator.pop(context);
                         _shareQRPdf(code, label);
                       },
-                      icon: const Icon(Icons.picture_as_pdf_rounded, size: 16),
-                      label: const Text('PDF', style: TextStyle(fontSize: 12, letterSpacing: 0)),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('LISTO'),
-                ),
-              ),
+              const SizedBox(height: AppSpacing.md),
+              PrimaryButton(label: 'Listo', onPressed: () => Navigator.pop(context)),
             ],
           ),
         ),
@@ -423,33 +385,26 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(48)),
-        title: const Text('REGENERAR QR', textAlign: TextAlign.center),
-        content: const Text(
-          'EL CÓDIGO ACTUAL DEJARÁ DE FUNCIONAR. ¿ESTÁS SEGURO?',
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('Regenerar QR', textAlign: TextAlign.center, style: AppTypography.titleBold),
+        content: Text(
+          'El código actual dejará de funcionar. ¿Estás seguro?',
           textAlign: TextAlign.center,
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Colors.black54),
+          style: AppTypography.bodyMedium,
         ),
         actions: [
           Row(
             children: [
               Expanded(
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('CANCELAR', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.black26)),
-                ),
+                child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context, false)),
               ),
+              const SizedBox(width: 8),
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentPink),
-                  child: const Text('REGENERAR'),
-                ),
+                child: PrimaryButton(label: 'Regenerar', isDestructive: true, onPressed: () => Navigator.pop(context, true)),
               ),
             ],
           ),
-          const SizedBox(height: 8),
         ],
       ),
     );
@@ -496,26 +451,20 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : _qrCodes.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(color: AppTheme.accentYellow.withValues(alpha: 0.05), shape: BoxShape.circle),
-                        child: const Icon(Icons.qr_code_2_rounded, size: 64, color: AppTheme.accentYellow),
+                        padding: const EdgeInsets.all(28),
+                        decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentAmber), shape: BoxShape.circle),
+                        child: const Icon(LucideIcons.qrCode, size: 56, color: AppColors.accentAmber),
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'SIN CÓDIGOS QR',
-                        style: GoogleFonts.anton(fontSize: 16, fontWeight: FontWeight.w400, letterSpacing: 1),
-                      ),
-                      const Text(
-                        'Genera uno para empezar a recibir clientes.',
-                        style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black26),
-                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text('Sin códigos QR', style: AppTypography.subtitleBold),
+                      Text('Genera uno para empezar a recibir clientes.', style: AppTypography.bodyMedium),
                     ],
                   ),
                 )
@@ -530,56 +479,14 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                     final String displayDate = EcuadorDateUtils.formatEcuadorDate(rawDate);
                     final bool isCorrupt = safeCode.isEmpty;
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(32),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
-                        ],
-                        border: Border.all(color: isCorrupt ? AppTheme.accentPink.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: (isCorrupt ? AppTheme.accentPink : AppTheme.accentYellow).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Icon(
-                              isCorrupt ? Icons.warning_amber_rounded : Icons.qr_code_rounded,
-                              color: isCorrupt ? AppTheme.accentPink : AppTheme.accentYellow,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  safeLabel.toUpperCase(),
-                                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 0.5),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  isCorrupt ? 'ERROR EN DATOS' : 'CREADO EL $displayDate',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    color: isCorrupt ? AppTheme.accentPink : Colors.black38,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.chevron_right_rounded, color: Colors.black26),
-                            onPressed: () => isCorrupt ? _confirmRegenerateQR(index, safeLabel) : _showQRDialog(safeCode, safeLabel),
-                          ),
-                        ],
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: ModuleListCard(
+                        icon: isCorrupt ? LucideIcons.triangleAlert : LucideIcons.qrCode,
+                        iconBackgroundColor: isCorrupt ? AppColors.accentPink : AppColors.accentAmber,
+                        title: safeLabel,
+                        subtitle: isCorrupt ? 'Error en datos' : 'Creado el $displayDate',
+                        onTap: () => isCorrupt ? _confirmRegenerateQR(index, safeLabel) : _showQRDialog(safeCode, safeLabel),
                       ),
                     ).animate(delay: (index * 50).ms).fadeIn(duration: 400.ms).slideX(begin: 0.1, curve: Curves.easeOut);
                   },
@@ -587,8 +494,11 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
       floatingActionButton: (!_isLoading && _qrCodes.isEmpty)
           ? FloatingActionButton.extended(
               onPressed: _generateFirstQRCode,
-              label: const Text('GENERAR MI QR'),
-              icon: const Icon(Icons.add_rounded),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
+              label: Text('Generar mi QR', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 15)),
+              icon: const Icon(LucideIcons.plus),
             )
           : null,
     );

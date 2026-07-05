@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/validators/app_validators.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../../core/validators/app_validators.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/shared_widgets.dart';
 
 class StepPersonalData extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -21,40 +24,15 @@ class StepPersonalData extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Tus Datos',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
+          Text('Tus Datos', style: AppTypography.subtitleBold),
           const SizedBox(height: 8),
-          const Text(
-            'Verifica o actualiza tu información de contacto.',
-            style: TextStyle(color: Colors.black54),
-          ),
+          Text('Verifica o actualiza tu información de contacto.', style: AppTypography.bodyMedium),
           const SizedBox(height: 24),
 
-          TextFormField(
+          AppTextField(
             controller: fullNameController,
-            decoration: InputDecoration(
-              labelText: 'Nombre completo',
-              prefixIcon: const Icon(
-                Icons.person_outline,
-                color: Colors.black,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Colors.black,
-                  width: 2,
-                ),
-              ),
-            ),
+            label: 'Nombre completo',
+            prefixIcon: LucideIcons.user,
             validator: AppValidators.validateName,
             inputFormatters: [
               FilteringTextInputFormatter.allow(
@@ -64,20 +42,12 @@ class StepPersonalData extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          TextFormField(
+          AppTextField(
             controller: phoneController,
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              labelText: 'Teléfono',
-              prefixIcon: const Icon(
-                Icons.phone_outlined,
-                color: Colors.black,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              helperText: '10 dígitos (formato Ecuador)',
-            ),
+            label: 'Teléfono',
+            prefixIcon: LucideIcons.phone,
+            helperText: '10 dígitos (formato Ecuador)',
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),

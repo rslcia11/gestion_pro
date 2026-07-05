@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../auth/login_screen.dart';
 import 'widgets/business_creation/step_logo_picker.dart';
 import 'widgets/business_creation/step_personal_data.dart';
 import 'widgets/business_creation/step_business_data.dart';
 import 'widgets/business_creation/step_campaign_data.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import '../../core/models/business_category.dart';
 import '../../core/providers/supabase_provider.dart';
 import '../auth/providers/auth_provider.dart';
-import '../auth/data/auth_repository.dart';
 
 import 'providers/create_business_provider.dart';
 import 'data/business_repository.dart';
@@ -121,7 +122,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Debes seleccionar la ubicación en el mapa'),
-              backgroundColor: AppTheme.accentPink,
+              backgroundColor: AppColors.accentPink,
             ),
           );
         } else {
@@ -174,77 +175,42 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surfaceCard,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadii.card),
         ),
-        title: Text(
-          '¡TODO LISTO!',
-          style: GoogleFonts.anton(
-            letterSpacing: 1,
-            color: Colors.black,
-          ),
-          textAlign: TextAlign.center,
-        ),
+        title: Text('¡Todo listo!', style: AppTypography.titleBold, textAlign: TextAlign.center),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Tu negocio fue creado exitosamente.\n\nPara activarlo en la plataforma, comunícate con nosotros por WhatsApp o correo:',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15),
+              style: AppTypography.bodyRegular,
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => launchUrl(Uri.parse('mailto:fidelitysistemadefidelizacion@gmail.com')),
-                icon: const Icon(Icons.email_outlined, color: Colors.blue),
-                label: const Text('Enviar Correo', style: TextStyle(color: Colors.blue)),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.blue, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
+            SecondaryButton(
+              label: 'Enviar Correo',
+              icon: LucideIcons.mail,
+              onPressed: () => launchUrl(Uri.parse('mailto:fidelitysistemadefidelizacion@gmail.com')),
             ).animate(onPlay: (controller) => controller.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.03, duration: 1.2.seconds, curve: Curves.easeInOut),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => launchUrl(Uri.parse(waUrl)),
-                icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
-                label: const Text('Contactar por WhatsApp', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25D366),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
+            PrimaryButton(
+              label: 'Contactar por WhatsApp',
+              icon: LucideIcons.phone,
+              onPressed: () => launchUrl(Uri.parse(waUrl)),
             ).animate(onPlay: (controller) => controller.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.03, duration: 1.2.seconds, delay: 600.ms, curve: Curves.easeInOut),
           ],
         ),
         actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                ref.read(authStateProvider.notifier).logout();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: const Text('ENTENDIDO', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
+          SecondaryButton(
+            label: 'Entendido',
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authStateProvider.notifier).logout();
+            },
           ),
         ],
       ),
@@ -261,7 +227,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al crear negocio: ${next.error}'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       } else if (next.isSuccess && (previous?.isSuccess != next.isSuccess)) {
@@ -270,18 +236,15 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Configurar Negocio'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
         automaticallyImplyLeading: false, // Prevent going back if mandatory
       ),
       body: createBusinessState.isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
+                valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
               ),
             )
           : Stepper(
@@ -297,19 +260,9 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton(
+                        child: PrimaryButton(
+                          label: isLastStep ? 'Finalizar y Crear' : 'Siguiente',
                           onPressed: details.onStepContinue,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            isLastStep ? 'Finalizar y Crear' : 'Siguiente',
-                          ),
                         ),
                       ),
                       if (_currentStep > 0) ...[
@@ -317,7 +270,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
                         TextButton(
                           onPressed: details.onStepCancel,
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.black54,
+                            foregroundColor: AppColors.textSecondary,
                           ),
                           child: const Text('Atrás'),
                         ),

@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:confetti/confetti.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../scanner/scanner_screen.dart';
 import 'card_history_screen.dart';
 import '../profile/user_profile_screen.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import 'providers/my_cards_provider.dart';
 import 'dart:async';
 import '../../core/services/realtime_sync_service.dart';
@@ -115,19 +121,15 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
         title: Column(
           children: [
-            const Icon(Icons.waving_hand_rounded, color: AppTheme.accentPurple, size: 48),
+            const Icon(LucideIcons.partyPopper, color: AppColors.accentPurple, size: 48),
             const SizedBox(height: 16),
             Text(
-              '¡Bienvenido a Fidelity!',
-              style: GoogleFonts.anton(
-                fontSize: 24,
-                color: AppTheme.accentPurple,
-                letterSpacing: 1,
-              ),
+              '¡Bienvenido a Donde Siempre!',
+              style: AppTypography.titleBold.copyWith(color: AppColors.accentPurple, fontSize: 22),
               textAlign: TextAlign.center,
             ),
           ],
@@ -135,20 +137,14 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
         content: Text(
           '¡Hola $displayName, tu cuenta ha sido creada exitosamente!\n\nAquí podrás ver tus tarjetas y acumular puntos escaneando los códigos QR de tus negocios favoritos.',
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          style: AppTypography.bodyRegular,
         ),
         actions: [
           Center(
-            child: ElevatedButton(
+            child: PrimaryButton(
+              label: '¡Empezar!',
+              isFullWidth: false,
               onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              ),
-              child: const Text('¡Empezar!'),
             ),
           ),
         ],
@@ -198,22 +194,22 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
         title: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.accentYellow.withValues(alpha: 0.15),
+                color: AppColors.pastelOf(AppColors.accentAmber),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.card_giftcard_rounded, color: AppTheme.accentYellow, size: 44),
+              child: const Icon(LucideIcons.gift, color: AppColors.accentAmber, size: 44),
             ).animate().scale(duration: 450.ms, curve: Curves.easeOutBack),
             const SizedBox(height: 16),
             Text(
-              '¡TIENES UN PREMIO!',
-              style: GoogleFonts.anton(fontSize: 22, letterSpacing: 1, color: Colors.black),
+              '¡Tienes un premio!',
+              style: AppTypography.titleBold,
               textAlign: TextAlign.center,
             ),
           ],
@@ -221,27 +217,21 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
         content: Text(
           'Tienes un premio pendiente en ${business['name']}. ¡No te olvides de reclamarlo!',
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 15, color: Colors.black87),
+          style: AppTypography.bodyRegular,
         ),
         actions: [
           Row(
             children: [
               Expanded(
-                child: TextButton(
+                child: SecondaryButton(
+                  label: 'Después',
                   onPressed: () => Navigator.pop(ctx),
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      'DESPUÉS',
-                      maxLines: 1,
-                      style: TextStyle(color: Colors.black45, fontWeight: FontWeight.w900),
-                    ),
-                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: ElevatedButton(
+                child: PrimaryButton(
+                  label: 'Ver premio',
                   onPressed: () {
                     Navigator.pop(ctx);
                     Navigator.push(
@@ -256,10 +246,6 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                       ),
                     );
                   },
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text('VER PREMIO', maxLines: 1),
-                  ),
                 ),
               ),
             ],
@@ -308,24 +294,17 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: AppColors.background,
           appBar: AppBar(
         toolbarHeight: 100,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         centerTitle: false,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
               if (displayName.isNotEmpty)
-                Text(
-                  'Hola, $displayName',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black87,
-                  ),
-                ),
+                Text('Hola, $displayName', style: AppTypography.titleBold.copyWith(fontSize: 18)),
           ],
         ),
         leadingWidth: 70,
@@ -346,32 +325,10 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
               },
               child: Stack(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.accentPurple.withValues(alpha: 0.1),
-                      image: state.avatarUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(state.avatarUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: state.avatarUrl == null
-                        ? Center(
-                            child: Text(
-                              state.userName.isNotEmpty
-                                  ? state.userName[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: AppTheme.accentPurple,
-                              ),
-                            ),
-                          )
-                        : null,
+                  UserAvatar(
+                    imageUrl: state.avatarUrl,
+                    initials: state.userName.isNotEmpty ? state.userName[0] : '?',
+                    size: 44,
                   ),
                   Positioned(
                     right: 0,
@@ -380,7 +337,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [AppTheme.accentPurple, AppTheme.accentPink],
+                          colors: [AppColors.accentPurple, AppColors.accentPink],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -388,7 +345,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                         border: Border.all(color: Colors.white, width: 1.5),
                       ),
                       child: const Icon(
-                        Icons.edit_rounded,
+                        LucideIcons.pencil,
                         size: 10,
                         color: Colors.white,
                       ),
@@ -458,8 +415,11 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                   MaterialPageRoute(builder: (_) => const ScannerScreen()),
                 );
               },
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('ESCANEAR QR'),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
+              icon: const Icon(LucideIcons.scanLine),
+              label: Text('Escanear QR', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 15)),
             ).animate().scale(delay: 1.seconds, curve: Curves.elasticOut),
         ),
         Align(
@@ -480,52 +440,38 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
 
   Widget _buildEmptyState(ThemeData theme) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              color: AppTheme.accentPurple.withValues(alpha: 0.05),
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                color: AppColors.pastelOf(AppColors.accentPurple),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(LucideIcons.creditCard, size: 72, color: AppColors.accentPurple),
+            ).animate().scale(curve: Curves.elasticOut, duration: 800.ms),
+            const SizedBox(height: AppSpacing.xl),
+            Text('¡Empieza tu colección!', style: AppTypography.displayBold.copyWith(fontSize: 20)),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Escanea tu primer código QR en cualquier local afiliado.',
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMedium,
             ),
-            child: const Icon(
-              Icons.card_membership_rounded,
-              size: 80,
-              color: AppTheme.accentPurple,
-            ),
-          ).animate().scale(curve: Curves.elasticOut, duration: 800.ms),
-          const SizedBox(height: 32),
-          Text(
-            '¡EMPIEZA TU COLECCIÓN!',
-            style: GoogleFonts.anton(
-              fontSize: 20,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'ESCANEA TU PRIMER CÓDIGO QR EN\nCUALQUIER LOCAL AFILIADO.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Colors.black26,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 48),
-          ElevatedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ScannerScreen()),
-                ),
-                icon: const Icon(Icons.qr_code_scanner_rounded),
-                label: const Text('ESCANEAR AHORA'),
-              )
-              .animate(delay: 400.ms)
-              .fadeIn()
-              .moveY(begin: 20, curve: Curves.easeOut),
-        ],
+            const SizedBox(height: AppSpacing.xl),
+            PrimaryButton(
+              label: 'Escanear ahora',
+              icon: LucideIcons.scanLine,
+              isFullWidth: false,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ScannerScreen()),
+              ),
+            ).animate(delay: 400.ms).fadeIn().moveY(begin: 20, curve: Curves.easeOut),
+          ],
+        ),
       ),
     );
   }
@@ -550,7 +496,6 @@ class _LoyaltyCardItem extends StatelessWidget {
     final currentPoints = card['current_points'] as int;
     final pointsRequired = business['points_required'] as int;
     final progress = (currentPoints / pointsRequired).clamp(0.0, 1.0);
-    final theme = Theme.of(context);
 
     // Premios ganados pero todavía no entregados por el local (status 'pending').
     // Apenas el local lo entrega (status 'approved') deja de mostrarse.
@@ -561,12 +506,12 @@ class _LoyaltyCardItem extends StatelessWidget {
         .toList();
     final bool hasUnclaimedReward = unclaimedRewards.isNotEmpty;
 
-    // Colores dinámicos basados en el índice para variedad (Estilo Emote)
+    // Colores dinámicos basados en el índice para variedad
     final accents = [
-      AppTheme.accentPurple,
-      AppTheme.accentPink,
-      AppTheme.accentYellow,
-      AppTheme.accentGreen,
+      AppColors.accentPurple,
+      AppColors.accentPink,
+      AppColors.accentAmber,
+      AppColors.accentGreen,
     ];
     final accentColor = accents[index % accents.length];
 
@@ -588,18 +533,12 @@ class _LoyaltyCardItem extends StatelessWidget {
     return GestureDetector(
           onTap: onTap,
           child: Container(
-            margin: const EdgeInsets.only(bottom: 24),
-            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(48),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              boxShadow: AppShadows.card,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,8 +549,8 @@ class _LoyaltyCardItem extends StatelessWidget {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(24),
+                        color: AppColors.pastelOf(accentColor),
+                        borderRadius: BorderRadius.circular(AppRadii.badge),
                         image: business['logo_url'] != null
                             ? DecorationImage(
                                 image: NetworkImage(business['logo_url']),
@@ -629,7 +568,7 @@ class _LoyaltyCardItem extends StatelessWidget {
                             )
                           : null,
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -640,10 +579,8 @@ class _LoyaltyCardItem extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  business['name'].toString().toUpperCase(),
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                  ),
+                                  business['name'].toString(),
+                                  style: AppTypography.subtitleBold.copyWith(fontSize: 18),
                                 ),
                               ),
                               if (isRecentlyUpdated)
@@ -651,22 +588,19 @@ class _LoyaltyCardItem extends StatelessWidget {
                                   margin: const EdgeInsets.only(left: 8),
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.accentGreen.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppTheme.accentGreen.withValues(alpha: 0.5), width: 1),
+                                    color: AppColors.pastelOf(AppColors.accentGreen),
+                                    borderRadius: BorderRadius.circular(AppRadii.badge),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.bolt_rounded, color: AppTheme.accentGreen, size: 12),
+                                      const Icon(LucideIcons.zap, color: AppColors.accentGreen, size: 12),
                                       const SizedBox(width: 4),
-                                      const Text(
-                                        '¡NUEVO!',
-                                        style: TextStyle(
-                                          color: AppTheme.accentGreen,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.5,
+                                      Text(
+                                        '¡Nuevo!',
+                                        style: AppTypography.labelBold.copyWith(
+                                          color: AppColors.accentGreen,
+                                          fontSize: 10,
                                         ),
                                       ),
                                     ],
@@ -676,21 +610,13 @@ class _LoyaltyCardItem extends StatelessWidget {
                           ),
                           if (business['reward_description'] != null)
                             Text(
-                              business['reward_description']!
-                                  .toString()
-                                  .toUpperCase(),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w800,
-                              ),
+                              business['reward_description']!.toString(),
+                              style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
                             ),
                           if (business['reward_long_description'] != null)
                             Text(
                               business['reward_long_description'].toString(),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.black38,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: AppTypography.caption,
                             ),
                         ],
                       ),
@@ -700,67 +626,59 @@ class _LoyaltyCardItem extends StatelessWidget {
 
                 // Premio ganado visible en vivo en la tarjeta.
                 if (hasUnclaimedReward) ...[
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
                   _RewardBanner(count: unclaimedRewards.length),
                 ],
 
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Progreso Estilo Minimalista
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$currentPoints / $pointsRequired PUNTOS',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                      ),
+                      '$currentPoints / $pointsRequired puntos',
+                      style: AppTypography.labelBold,
                     ),
                     Text(
                       '${(progress * 100).toInt()}%',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: accentColor,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: AppTypography.labelBold.copyWith(color: accentColor),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 14,
-                    backgroundColor: accentColor.withValues(alpha: 0.1),
+                    backgroundColor: AppColors.pastelOf(accentColor),
                     valueColor: AlwaysStoppedAnimation(accentColor),
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Stats en horizontal
                 Row(
                   children: [
                     _MiniStat(
-                      icon: Icons.auto_awesome,
+                      icon: LucideIcons.sparkles,
                       value: (card['total_points_lifetime'] ?? 0).toString(),
                       label: 'TOTAL',
                       color: accentColor,
                     ),
                     const Spacer(),
                     _MiniStat(
-                      icon: Icons.card_giftcard,
+                      icon: LucideIcons.gift,
                       value: (card['rewards_claimed'] ?? 0).toString(),
                       label: 'CANJES',
-                      color: AppTheme.accentPink,
+                      color: AppColors.accentPink,
                     ),
                     const Spacer(),
                     _MiniStat(
-                      icon: Icons.calendar_today_outlined,
+                      icon: LucideIcons.calendarCheck,
                       value: 'ACTIVA',
                       label: 'ESTADO',
-                      color: AppTheme.accentGreen,
+                      color: AppColors.accentGreen,
                     ),
                   ],
                 ),
@@ -781,29 +699,26 @@ class _RewardBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color color = AppTheme.accentYellow;
-    final String title = count > 1
-        ? '¡TIENES $count PREMIOS!'
-        : '¡TIENES UN PREMIO!';
+    const Color color = AppColors.accentAmber;
+    final String title = count > 1 ? '¡Tienes $count premios!' : '¡Tienes un premio!';
     const String subtitle = 'Acércate al local para reclamarlo.';
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
+        color: AppColors.pastelOf(color),
+        borderRadius: BorderRadius.circular(AppRadii.card),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.18),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.card_giftcard_rounded, color: color, size: 22),
+            child: const Icon(LucideIcons.gift, color: color, size: 22),
           )
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.12, duration: 800.ms, curve: Curves.easeInOut),
@@ -812,26 +727,9 @@ class _RewardBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: color == AppTheme.accentYellow
-                        ? const Color(0xFF8A6D00)
-                        : color,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+                Text(title, style: AppTypography.subtitleBold.copyWith(color: const Color(0xFF8A6D00), fontSize: 14)),
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text(subtitle, style: AppTypography.caption),
               ],
             ),
           ),
@@ -858,23 +756,13 @@ class _MiniStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 28, color: color),
+        Icon(icon, size: 24, color: color),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
-            ),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.black38,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            Text(value, style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
+            Text(label, style: AppTypography.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w700)),
           ],
         ),
       ],

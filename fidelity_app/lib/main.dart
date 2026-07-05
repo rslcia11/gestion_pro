@@ -42,8 +42,8 @@ class FidelityApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fidelity',
-      theme: AppTheme.popTheme,
+      title: 'Donde Siempre',
+      theme: AppTheme.theme,
       debugShowCheckedModeBanner: false,
       locale: const Locale('es'),
       supportedLocales: const [Locale('es'), Locale('en')],

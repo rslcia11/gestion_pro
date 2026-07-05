@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/shared_widgets.dart';
 
 class StepCampaignData extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -21,62 +24,33 @@ class StepCampaignData extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Tu Primer Sistema de Puntos',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
+          Text('Tu Primer Sistema de Puntos', style: AppTypography.subtitleBold),
           const SizedBox(height: 8),
-          const Text(
-            '¿Qué ganan tus clientes y cuántos puntos necesitan?',
-            style: TextStyle(color: Colors.black54),
-          ),
+          Text('¿Qué ganan tus clientes y cuántos puntos necesitan?', style: AppTypography.bodyMedium),
           const SizedBox(height: 24),
 
-          TextFormField(
+          AppTextField(
             controller: rewardController,
-            decoration: InputDecoration(
-              labelText: 'Premio (ej: Café Gratis, 10% de Descuento)',
-              prefixIcon: const Icon(
-                Icons.card_giftcard,
-                color: Colors.black,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+            label: 'Premio (ej: Café Gratis, 10% de Descuento)',
+            prefixIcon: LucideIcons.gift,
             validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
           ),
           const SizedBox(height: 16),
 
-          TextFormField(
+          AppTextField(
             controller: rewardLongController,
-            maxLines: 2,
-            decoration: InputDecoration(
-              labelText: 'Descripción del premio (opcional)',
-              hintText: 'Detalles, condiciones, vigencia...',
-              prefixIcon: const Icon(Icons.description_outlined, color: Colors.black),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+            label: 'Descripción del premio (opcional)',
+            hint: 'Detalles, condiciones, vigencia...',
+            prefixIcon: LucideIcons.pencil,
           ),
           const SizedBox(height: 16),
 
-          TextFormField(
+          AppTextField(
             controller: pointsController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Escaneos / Puntos necesarios',
-              prefixIcon: const Icon(Icons.star, color: Colors.black),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              helperText: 'Recomendamos entre 5 y 10 puntos.',
-            ),
+            label: 'Escaneos / Puntos necesarios',
+            prefixIcon: LucideIcons.star,
+            helperText: 'Recomendamos entre 5 y 10 puntos.',
             validator: (v) =>
                 (int.tryParse(v ?? '') ?? 0) < 1 ? 'Mínimo 1 punto' : null,
           ),

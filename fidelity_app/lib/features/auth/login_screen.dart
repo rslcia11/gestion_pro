@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'register_screen.dart';
-import 'auth_wrapper.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/auth_error_translator.dart';
+import '../../shared/widgets/shared_widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -93,36 +97,30 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Recuperar contraseña'),
-        content: TextField(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('Recuperar contraseña', style: AppTypography.titleBold),
+        content: AppTextField(
           controller: emailController,
-          decoration: InputDecoration(
-            labelText: 'Correo electrónico',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
+          hint: 'Correo electrónico',
+          prefixIcon: LucideIcons.mail,
           keyboardType: TextInputType.emailAddress,
         ),
         actions: [
-          TextButton(
+          SecondaryButton(
+            label: 'Cancelar',
+            isFullWidth: false,
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
           ),
-          ElevatedButton(
+          PrimaryButton(
+            label: 'Enviar',
+            isFullWidth: false,
             onPressed: () {
               if (emailController.text.isNotEmpty) {
                 _resetPassword(emailController.text);
                 Navigator.pop(context);
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentPurple,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-            child: const Text('Enviar'),
           ),
         ],
       ),
@@ -131,10 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -146,84 +142,92 @@ class _LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Logo principal de la app (fondo blanco según requerido)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
-                      child: Image.asset(
-                        'assets/images/logo_texto.png',
-                        height: 150,
-                        fit: BoxFit.contain,
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(AppRadii.badge),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(LucideIcons.zap, color: AppColors.onPrimary, size: 32),
                       ),
-                    ).animate().scale(duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveElastic).fadeIn(),
+                      const SizedBox(height: AppSpacing.md),
+                      Text('Donde Siempre', style: AppTypography.displayBold),
+                    ],
+                  ).animate().scale(duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveElastic).fadeIn(),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // Formulario
                   Column(
                     children: [
-                      TextFormField(
+                      AppTextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          hintText: 'Tu email',
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
-                        validator: (value) => 
-                          (value == null || value.isEmpty) ? 'Ingresa tu email' : null,
+                        hint: 'Tu email',
+                        prefixIcon: LucideIcons.mail,
+                        validator: (value) =>
+                            (value == null || value.isEmpty) ? 'Ingresa tu email' : null,
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
+                      const SizedBox(height: AppSpacing.md),
+                      AppTextField(
                         controller: _passwordController,
                         obscureText: !_isPasswordVisible,
-                        decoration: InputDecoration(
-                          hintText: 'Tu contraseña',
-                          helperText: 'Mínimo 6 caracteres',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                            ),
-                            onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                        hint: 'Tu contraseña',
+                        prefixIcon: LucideIcons.lock,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
+                            color: AppColors.textSecondary,
                           ),
+                          onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                         ),
-                        validator: (value) => 
-                          (value == null || value.isEmpty) ? 'Ingresa tu contraseña' : null,
+                        validator: (value) =>
+                            (value == null || value.isEmpty) ? 'Ingresa tu contraseña' : null,
+                      ),
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('Mínimo 6 caracteres', style: AppTypography.caption),
+                        ),
                       ),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: _showRecoveryDialog,
-                          child: const Text('¿Olvidaste tu contraseña?', style: TextStyle(color: AppTheme.accentPurple, fontSize: 13)),
+                          child: Text(
+                            '¿Olvidaste tu contraseña?',
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.accentPurple,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   )
-                  .animate()
-                  .slideY(begin: 0.15, duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveStandard, delay: 200.ms)
-                  .fadeIn(delay: 200.ms),
+                      .animate()
+                      .slideY(begin: 0.15, duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveStandard, delay: 200.ms)
+                      .fadeIn(delay: 200.ms),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.lg),
 
-                  // Botón Login (Estilo Emote)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _login,
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
-                            )
-                          : const Text('Iniciar Sesión'),
-                    ),
+                  PrimaryButton(
+                    label: 'Iniciar Sesión',
+                    isLoading: _isLoading,
+                    onPressed: _login,
                   )
-                  .animate()
-                  .scale(duration: 400.ms, curve: Curves.easeOutBack, delay: 500.ms)
-                  .fadeIn(delay: 500.ms),
+                      .animate()
+                      .scale(duration: 400.ms, curve: Curves.easeOutBack, delay: 500.ms)
+                      .fadeIn(delay: 500.ms),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Registro
                   TextButton(
@@ -232,12 +236,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         MaterialPageRoute(builder: (_) => const RegisterScreen()),
                       );
                     },
-                    child: const Text('¿No tienes cuenta? Regístrate'),
-                  )
-                  .animate()
-                  .fadeIn(delay: 600.ms),
+                    child: Text(
+                      '¿No tienes cuenta? Regístrate',
+                      style: AppTypography.subtitleBold.copyWith(fontSize: 15),
+                    ),
+                  ).animate().fadeIn(delay: 600.ms),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),

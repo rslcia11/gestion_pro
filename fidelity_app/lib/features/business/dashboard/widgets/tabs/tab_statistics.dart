@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/theme/app_theme.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_radii.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/shared_widgets.dart';
 import '../../../../../core/utils/date_utils.dart';
 import '../../../../../core/providers/supabase_provider.dart';
 import '../../providers/dashboard_provider.dart';
@@ -19,17 +24,13 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
   void _showCustomersModal(List<Map<String, dynamic>> customers) {
     _showListModal(
       title: 'Lista de Clientes',
-      icon: Icons.people,
-      color: AppTheme.accentPurple,
+      icon: LucideIcons.users,
+      color: AppColors.accentPurple,
       items: customers,
       subtitleBuilder: (card) => '${card['total_points_lifetime'] ?? 0} escaneos en total',
       trailingBuilder: (card) => Text(
         '${card['current_points'] ?? 0} pts',
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppTheme.accentPurple,
-          fontSize: 16,
-        ),
+        style: AppTypography.subtitleBold.copyWith(color: AppColors.accentPurple, fontSize: 15),
       ),
     );
   }
@@ -42,13 +43,13 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
 
     _showListModal(
       title: 'Ranking de Escaneos',
-      icon: Icons.qr_code_scanner,
-      color: AppTheme.accentYellow,
+      icon: LucideIcons.scanLine,
+      color: AppColors.accentAmber,
       items: activeUsers,
       subtitleBuilder: (card) => 'Total de escaneos históricos',
       trailingBuilder: (card) => Text(
         '${card['total_points_lifetime'] ?? 0}',
-        style: GoogleFonts.anton(fontWeight: FontWeight.w400, fontSize: 18),
+        style: AppTypography.displayBold.copyWith(fontSize: 18),
       ),
     );
   }
@@ -61,8 +62,8 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
 
     _showListModal(
       title: 'Ranking de Premios',
-      icon: Icons.card_giftcard,
-      color: AppTheme.accentGreen,
+      icon: LucideIcons.gift,
+      color: AppColors.accentGreen,
       items: rewardUsers,
       subtitleBuilder: (card) {
         final claimed = card['rewards_claimed'] ?? 0;
@@ -72,12 +73,12 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
       trailingBuilder: (card) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppTheme.accentGreen.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.pastelOf(AppColors.accentGreen),
+          borderRadius: BorderRadius.circular(AppRadii.badge),
         ),
         child: Text(
           '${card['rewards_claimed'] ?? 0} 🎁',
-          style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
+          style: AppTypography.labelBold.copyWith(color: AppColors.accentGreen),
         ),
       ),
     );
@@ -102,9 +103,9 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
           maxChildSize: 0.95,
           builder: (_, controller) {
             return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceCard,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.card)),
               ),
               child: Column(
                 children: [
@@ -112,36 +113,24 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
                   Container(
                     height: 5,
                     width: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(10)),
                   ),
                   const SizedBox(height: 16),
                   ListTile(
-                    title: Text(
-                      title.toUpperCase(),
-                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.5),
-                    ),
-                    subtitle: Text(
-                      '${items.length} REGISTROS',
-                      style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.black26, fontSize: 10),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.black),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                    title: Text(title, style: AppTypography.titleBold.copyWith(fontSize: 16)),
+                    subtitle: Text('${items.length} registros', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
+                    trailing: IconActionButton(icon: LucideIcons.x, onPressed: () => Navigator.pop(context)),
                   ),
-                  const Divider(),
+                  const Divider(color: AppColors.border),
                   Expanded(
                     child: items.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.inbox_rounded, size: 48, color: Colors.black.withValues(alpha: 0.05)),
+                                const Icon(LucideIcons.inbox, size: 44, color: AppColors.border),
                                 const SizedBox(height: 16),
-                                const Text('NO HAY REGISTROS', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.black26)),
+                                Text('No hay registros', style: AppTypography.subtitleBold.copyWith(color: AppColors.textSecondary, fontSize: 14)),
                               ],
                             ),
                           )
@@ -152,44 +141,28 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
                             itemBuilder: (context, index) {
                               final item = items[index];
                               final profile = item['profiles'];
-                              final name = (profile?['full_name'] ?? 'USUARIO').toUpperCase();
+                              final name = (profile?['full_name'] ?? 'Usuario').toString();
 
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(24),
+                                  color: AppColors.surfaceCard,
+                                  borderRadius: BorderRadius.circular(AppRadii.card),
                                 ),
                                 child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: color.withValues(alpha: 0.1),
-                                    child: Text(
-                                      name.isNotEmpty ? name[0] : '?',
-                                      style: TextStyle(color: color, fontWeight: FontWeight.w900),
-                                    ),
-                                  ),
+                                  leading: UserAvatar(initials: name.isNotEmpty ? name[0] : '?', backgroundColor: color, size: 44),
                                   title: Row(
                                     children: [
                                       Expanded(
-                                        child: Text(name, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
+                                        child: Text(name, style: AppTypography.subtitleBold.copyWith(fontSize: 13)),
                                       ),
-                                      if (profile?['is_demo'] == true)
-                                        Container(
-                                          margin: const EdgeInsets.only(left: 8),
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.amber.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(4),
-                                            border: Border.all(color: Colors.amber, width: 0.5),
-                                          ),
-                                          child: const Text('DEMO', style: TextStyle(color: Colors.amber, fontSize: 8, fontWeight: FontWeight.bold)),
-                                        ),
+                                      if (profile?['is_demo'] == true) ...[
+                                        const SizedBox(width: 8),
+                                        StatusChip(label: 'Demo', variant: StatusChipVariant.pending),
+                                      ],
                                     ],
                                   ),
-                                  subtitle: Text(
-                                    subtitleBuilder(item).toUpperCase(),
-                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 9, color: Colors.black38),
-                                  ),
+                                  subtitle: Text(subtitleBuilder(item), style: AppTypography.caption),
                                   trailing: trailingBuilder(item),
                                 ),
                               );
@@ -214,40 +187,35 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(48)),
-          title: const Text('EDITAR PRODUCTO', textAlign: TextAlign.center),
+          backgroundColor: AppColors.surfaceCard,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+          title: Text('Editar producto', textAlign: TextAlign.center, style: AppTypography.titleBold),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: rewardController,
-                decoration: const InputDecoration(labelText: '¿QUÉ VAS A PREMIAR?', hintText: 'Ej: Un vaso de helado'),
-              ),
-              const SizedBox(height: 24),
-              TextField(
+              AppTextField(controller: rewardController, label: '¿Qué vas a premiar?', hint: 'Ej: Un vaso de helado'),
+              const SizedBox(height: AppSpacing.lg),
+              AppTextField(
                 controller: longDescController,
-                maxLines: 2,
-                decoration: const InputDecoration(labelText: 'DESCRIPCIÓN DEL PREMIO', hintText: 'Ej: Vaso de helado de cualquier sabor, tamaño mediano'),
+                label: 'Descripción del premio',
+                hint: 'Ej: Vaso de helado de cualquier sabor, tamaño mediano',
               ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: pointsController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'PUNTOS NECESARIOS', hintText: 'Ej: 3'),
-              ),
+              const SizedBox(height: AppSpacing.lg),
+              AppTextField(controller: pointsController, keyboardType: TextInputType.number, label: 'Puntos necesarios', hint: 'Ej: 3'),
             ],
           ),
           actions: [
             Center(
-              child: ElevatedButton(
+              child: PrimaryButton(
+                label: 'Guardar cambios',
+                isFullWidth: false,
                 onPressed: () async {
                   final newDesc = rewardController.text.trim().toUpperCase();
                   final newLongDesc = longDescController.text.trim();
                   final newPoints = int.tryParse(pointsController.text.trim()) ?? 10;
-                  
+
                   if (newDesc.isEmpty || newPoints < 1) return;
-                  
+
                   try {
                     await ref.read(supabaseClientProvider)
                         .from('businesses')
@@ -257,7 +225,7 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
                           'points_required': newPoints,
                         })
                         .eq('id', business['id']);
-                        
+
                     if (mounted) {
                       Navigator.pop(context);
                       ref.read(dashboardProvider.notifier).loadData(silent: true);
@@ -266,7 +234,6 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
                     debugPrint('Error updating reward: $e');
                   }
                 },
-                child: const Text('GUARDAR CAMBIOS'),
               ),
             ),
             const SizedBox(height: 16),
@@ -307,74 +274,71 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(40),
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(AppRadii.card),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'INFORMACIÓN DE CAMPAÑA',
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white, letterSpacing: 1),
-                ),
+                Text('Información de campaña', style: AppTypography.labelBold.copyWith(color: Colors.white)),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('INICIO', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.w800, fontSize: 10)),
-                    Text(formattedDate, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+                    Text('Inicio', style: AppTypography.caption.copyWith(color: Colors.white54, fontWeight: FontWeight.w700)),
+                    Text(formattedDate, style: AppTypography.subtitleBold.copyWith(color: Colors.white, fontSize: 14)),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('DÍAS ACTIVO', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.w800, fontSize: 10)),
+                    Text('Días activo', style: AppTypography.caption.copyWith(color: Colors.white54, fontWeight: FontWeight.w700)),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: AppTheme.accentGreen, borderRadius: BorderRadius.circular(8)),
-                      child: Text('$daysLive DÍAS', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 10)),
+                      decoration: BoxDecoration(color: AppColors.accentGreen, borderRadius: BorderRadius.circular(AppRadii.badge)),
+                      child: Text('$daysLive días', style: AppTypography.labelBold.copyWith(color: Colors.black, fontSize: 10)),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
           DashboardStatCard(
-            title: 'CLIENTES',
+            title: 'Clientes',
             value: '${customers.length}',
-            icon: Icons.people_rounded,
-            color: AppTheme.accentPurple,
+            icon: LucideIcons.users,
+            color: AppColors.accentPurple,
             onTap: () => _showCustomersModal(customers),
-            subtitle: 'PERSONA ÚNICAS VISITARON',
+            subtitle: 'Personas únicas visitaron',
           ).animate().fadeIn(duration: AppTheme.animDurationStandard).slideY(begin: AppTheme.animSlideYBegin, curve: AppTheme.animCurveStandard),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           DashboardStatCard(
-            title: 'ESCANEOS',
+            title: 'Escaneos',
             value: '$totalScans',
-            icon: Icons.qr_code_scanner_rounded,
-            color: AppTheme.accentYellow,
+            icon: LucideIcons.scanLine,
+            color: AppColors.accentAmber,
             onTap: () => _showTopScansModal(customers),
-            subtitle: 'VISITAS TOTALES REGISTRADAS',
+            subtitle: 'Visitas totales registradas',
           ).animate(delay: 100.ms).fadeIn(duration: AppTheme.animDurationStandard).slideY(begin: AppTheme.animSlideYBegin, curve: AppTheme.animCurveStandard),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           DashboardStatCard(
-            title: 'PREMIOS',
+            title: 'Premios',
             value: '$totalRewards',
-            icon: Icons.card_giftcard_rounded,
-            color: AppTheme.accentPink,
+            icon: LucideIcons.gift,
+            color: AppColors.accentPink,
             onTap: () => _showRewardsModal(customers),
-            subtitle: 'RECOMPENSAS CANJEADAS',
+            subtitle: 'Recompensas canjeadas',
           ).animate(delay: 200.ms).fadeIn(duration: AppTheme.animDurationStandard).slideY(begin: AppTheme.animSlideYBegin, curve: AppTheme.animCurveStandard),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           DashboardStatCard(
-            title: 'REQUISITO',
+            title: 'Requisito',
             value: '${business['points_required']}',
-            icon: Icons.star_rounded,
-            color: AppTheme.accentGreen,
+            icon: LucideIcons.star,
+            color: AppColors.accentGreen,
             onTap: () => _showEditRewardDialog(business),
-            subtitle: 'PUNTOS PARA UN PREMIO',
+            subtitle: 'Puntos para un premio',
           ).animate(delay: 300.ms).fadeIn(duration: AppTheme.animDurationStandard).slideY(begin: AppTheme.animSlideYBegin, curve: AppTheme.animCurveStandard),
         ],
       ),

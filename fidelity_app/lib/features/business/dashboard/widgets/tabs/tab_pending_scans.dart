@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../../core/theme/app_theme.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_radii.dart';
+import '../../../../../core/theme/app_shadows.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_typography.dart';
+import '../../../../../shared/widgets/shared_widgets.dart';
 import '../../../../../core/utils/date_utils.dart';
 import '../../providers/dashboard_provider.dart';
 
@@ -19,41 +26,24 @@ class TabPendingScans extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: AppTheme.accentGreen.withValues(alpha: 0.05),
+                color: AppColors.pastelOf(AppColors.accentGreen),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.check_circle_outline_rounded,
-                size: 64,
-                color: AppTheme.accentGreen,
-              ),
+              child: const Icon(LucideIcons.circleCheck, size: 56, color: AppColors.accentGreen),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              '¡TODO AL DÍA!',
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-                letterSpacing: 1,
-              ),
-            ),
-            const Text(
-              'No hay escaneos por aprobar.',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Colors.black26,
-              ),
-            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('¡Todo al día!', style: AppTypography.subtitleBold),
+            Text('No hay escaneos por aprobar.', style: AppTypography.bodyMedium),
           ],
         ),
       );
     }
 
     return RefreshIndicator(
-      color: AppTheme.accentPurple,
-      backgroundColor: Colors.white,
+      color: AppColors.accentPurple,
+      backgroundColor: AppColors.surfaceCard,
       onRefresh: () => ref.read(dashboardProvider.notifier).loadData(silent: true),
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -63,39 +53,17 @@ class TabPendingScans extends ConsumerWidget {
           final scan = pendingScans[index];
           final profile = scan['profiles'];
           return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-              border: Border.all(color: Colors.black.withValues(alpha: 0.04)),
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              boxShadow: AppShadows.card,
             ),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Colors.black.withValues(alpha: 0.04),
-                  backgroundImage: profile?['avatar_url'] != null
-                      ? NetworkImage(profile!['avatar_url'])
-                      : null,
-                  child: profile?['avatar_url'] == null
-                      ? Text(
-                          (profile?['full_name']?[0] ?? '?').toUpperCase(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: Colors.black,
-                          ),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 16),
+                UserAvatar(imageUrl: profile?['avatar_url'], initials: profile?['full_name']?[0], size: 48),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,42 +72,20 @@ class TabPendingScans extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              (profile?['full_name'] ?? 'USUARIO').toUpperCase(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13,
-                                letterSpacing: 0.5,
-                              ),
+                              (profile?['full_name'] ?? 'Usuario').toString(),
+                              style: AppTypography.subtitleBold.copyWith(fontSize: 13),
                             ),
                           ),
-                          if (profile?['is_demo'] == true)
-                            Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: Colors.amber, width: 0.5),
-                              ),
-                              child: const Text(
-                                'DEMO',
-                                style: TextStyle(
-                                  color: Colors.amber,
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
+                          if (profile?['is_demo'] == true) ...[
+                            const SizedBox(width: 8),
+                            StatusChip(label: 'Demo', variant: StatusChipVariant.pending),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        EcuadorDateUtils.formatEcuadorTime(scan['scanned_at']).toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black38,
-                        ),
+                        EcuadorDateUtils.formatEcuadorTime(scan['scanned_at']),
+                        style: AppTypography.caption,
                       ),
                     ],
                   ),
@@ -147,13 +93,17 @@ class TabPendingScans extends ConsumerWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded, color: AppTheme.accentPink),
+                    IconActionButton(
+                      icon: LucideIcons.circleX,
+                      backgroundColor: AppColors.pastelOf(AppColors.accentPink),
+                      iconColor: AppColors.accentPink,
                       onPressed: () => ref.read(dashboardProvider.notifier).rejectScan(scan['id']),
                     ),
                     const SizedBox(width: 4),
-                    IconButton(
-                      icon: const Icon(Icons.check_circle_rounded, color: AppTheme.accentGreen),
+                    IconActionButton(
+                      icon: LucideIcons.circleCheck,
+                      backgroundColor: AppColors.pastelOf(AppColors.accentGreen),
+                      iconColor: AppColors.accentGreen,
                       onPressed: () => ref.read(dashboardProvider.notifier).approveScan(scan['id'], scan['loyalty_card_id']),
                     ),
                   ],

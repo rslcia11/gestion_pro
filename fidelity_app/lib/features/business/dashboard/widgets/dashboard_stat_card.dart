@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radii.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
 
 class DashboardStatCard extends StatelessWidget {
   final String title;
@@ -26,17 +29,11 @@ class DashboardStatCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(48),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          color: AppColors.surfaceCard,
+          borderRadius: BorderRadius.circular(AppRadii.card),
+          boxShadow: AppShadows.card,
         ),
         child: Row(
           children: [
@@ -44,48 +41,29 @@ class DashboardStatCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black38,
-                      letterSpacing: 1,
-                    ),
-                  ),
+                  Text(title, style: AppTypography.bodyMedium),
                   const SizedBox(height: 8),
                   Text(
                     value,
-                    style: GoogleFonts.anton(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w400,
-                      color: color,
-                    ),
+                    style: AppTypography.displayBold.copyWith(fontSize: 28, color: color),
                   ).animate().scale(
                     curve: AppTheme.animCurveElastic,
                     duration: AppTheme.animDurationSlow,
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      subtitle!.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black26,
-                      ),
-                    ),
+                    Text(subtitle!, style: AppTypography.caption),
                   ],
                 ],
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.08),
+                color: AppColors.pastelOf(color),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 32),
+              child: Icon(icon, color: color, size: 28),
             ),
           ],
         ),

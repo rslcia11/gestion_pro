@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_typography.dart';
+
+/// Input pill gris con ícono a la izquierda, del design system.
+class AppTextField extends StatelessWidget {
+  const AppTextField({
+    super.key,
+    this.controller,
+    this.label,
+    this.hint,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.obscureText = false,
+    this.keyboardType,
+    this.validator,
+    this.errorText,
+    this.helperText,
+    this.onChanged,
+    this.textInputAction,
+    this.inputFormatters,
+    this.maxLines = 1,
+  });
+
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final IconData? prefixIcon;
+  final Widget? suffixIcon;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
+  final String? errorText;
+  final String? helperText;
+  final void Function(String)? onChanged;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (label != null) ...[
+          Text(label!, style: AppTypography.bodyMedium),
+          const SizedBox(height: 8),
+        ],
+        TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          validator: validator,
+          onChanged: onChanged,
+          textInputAction: textInputAction,
+          inputFormatters: inputFormatters,
+          maxLines: maxLines,
+          style: AppTypography.bodyRegular,
+          decoration: InputDecoration(
+            hintText: hint,
+            errorText: errorText,
+            helperText: helperText,
+            filled: true,
+            fillColor: AppColors.background,
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, size: 20, color: AppColors.textSecondary)
+                : null,
+            suffixIcon: suffixIcon,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          ),
+        ),
+      ],
+    );
+  }
+}

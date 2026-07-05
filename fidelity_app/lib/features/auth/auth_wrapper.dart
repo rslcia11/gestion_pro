@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'login_screen.dart';
 import '../business/dashboard/business_dashboard_screen.dart';
 import '../business/create_business_screen.dart';
 import '../cards/my_cards_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/services/push_notification_service.dart';
 import '../../core/services/realtime_sync_service.dart';
 import '../../core/widgets/global_celebration_dialog.dart';
 import '../../core/providers/supabase_provider.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import 'dart:async';
 import 'providers/auth_provider.dart';
+import 'design_preview_screen.dart';
+
+/// TEMPORAL mientras se termina el rediseño de UI sin backend conectado
+/// (pedido del usuario 2026-07-04, ver [SupabaseConfig]). En `true`,
+/// [AuthWrapper] salta el login/Supabase por completo y muestra
+/// [DesignPreviewScreen], donde quien esté revisando el diseño elige a mano
+/// qué rol quiere ver (cliente/negocio/admin), sin auth real. Poner en
+/// `false` para volver al flujo normal de auth cuando se reconecte un backend.
+const bool designPreviewMode = true;
 
 class AuthWrapper extends ConsumerStatefulWidget {
   const AuthWrapper({super.key});
@@ -60,74 +72,47 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceCard,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadii.card),
         ),
         title: Text(
-          'CUENTA INACTIVA',
-          style: GoogleFonts.anton(
-            letterSpacing: 1,
-          ),
+          'Cuenta inactiva',
+          style: AppTypography.titleBold,
           textAlign: TextAlign.center,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Tu negocio se encuentra inactivo.\n\nPor favor, comunícate con nosotros para procesar el pago o la activación de tu cuenta:',
               textAlign: TextAlign.center,
+              style: AppTypography.bodyRegular,
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => launchUrl(Uri.parse('mailto:fidelitysistemadefidelizacion@gmail.com')),
-                icon: const Icon(Icons.email_outlined, color: Colors.blue),
-                label: const Text('Enviar Correo', style: TextStyle(color: Colors.blue)),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.blue, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
+            SecondaryButton(
+              label: 'Enviar Correo',
+              icon: LucideIcons.mail,
+              onPressed: () => launchUrl(Uri.parse('mailto:fidelitysistemadefidelizacion@gmail.com')),
             ).animate(onPlay: (controller) => controller.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.03, duration: 1.2.seconds, curve: Curves.easeInOut),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => launchUrl(Uri.parse('https://wa.me/593995371895')),
-                icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
-                label: const Text('Contactar por WhatsApp', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25D366),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-              ),
+            SecondaryButton(
+              label: 'Contactar por WhatsApp',
+              icon: LucideIcons.phone,
+              onPressed: () => launchUrl(Uri.parse('https://wa.me/593995371895')),
             ).animate(onPlay: (controller) => controller.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.03, duration: 1.2.seconds, delay: 600.ms, curve: Curves.easeInOut),
           ],
         ),
         actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                ref.read(authStateProvider.notifier).logout();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: const Text('CERRAR SESIÓN', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
+          PrimaryButton(
+            label: 'Cerrar Sesión',
+            icon: LucideIcons.logOut,
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authStateProvider.notifier).logout();
+            },
           ),
         ],
       ),
@@ -136,6 +121,10 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    if (designPreviewMode) {
+      return const DesignPreviewScreen();
+    }
+
     final authState = ref.watch(authStateProvider);
 
     // Escuchar cambios de estado para mostrar dialogos (side-effects)
@@ -163,7 +152,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
+            valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
           ),
         ),
       );
@@ -193,7 +182,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
+          valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
         ),
       ),
     );

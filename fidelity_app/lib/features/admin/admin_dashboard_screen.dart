@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../core/services/push_notification_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_theme.dart';
-import '../auth/login_screen.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import 'admin_businesses_screen.dart';
 import 'admin_users_screen.dart';
 import 'admin_activity_screen.dart';
@@ -89,11 +91,11 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         content: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
-            color: AppTheme.accentPurple,
-            borderRadius: BorderRadius.circular(24),
+            color: AppColors.accentPurple,
+            borderRadius: BorderRadius.circular(AppRadii.card),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.accentPurple.withValues(alpha: 0.3),
+                color: AppColors.accentPurple.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -117,26 +119,15 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                   else
                     const Padding(
                       padding: EdgeInsets.only(right: 12),
-                      child: Icon(Icons.notifications_active, color: Colors.white),
+                      child: Icon(LucideIcons.bell, color: Colors.white),
                     ),
                   Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 13,
-                        letterSpacing: 1,
-                      ),
-                    ),
+                    child: Text(title, style: AppTypography.labelBold.copyWith(color: Colors.white)),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                message,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-              ),
+              Text(message, style: AppTypography.bodyMedium.copyWith(color: Colors.white)),
             ],
           ),
         ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.5, end: 0, curve: Curves.easeOutBack),
@@ -239,81 +230,61 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Panel de Administración'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadMetrics,
-            tooltip: 'Actualizar',
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
-            tooltip: 'Cerrar Sesión',
-          ),
+          IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadMetrics),
+          const SizedBox(width: 4),
+          IconActionButton(icon: LucideIcons.logOut, onPressed: _logout),
+          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
         child: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
+                  valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
                 ),
               )
             : RefreshIndicator(
                 onRefresh: _loadMetrics,
-                color: Colors.black,
+                color: AppColors.primary,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Resumen General',
-                      style: GoogleFonts.anton(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    Text('Resumen General', style: AppTypography.titleBold),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                           children: [
                             Expanded(
-                              child: _MetricCard(
-                                title: 'Negocios',
-                                value: _totalBusinesses.toString(),
-                                icon: Icons.storefront,
-                                color: AppTheme.accentPurple,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const AdminBusinessesScreen(),
-                                    ),
-                                  );
-                                },
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const AdminBusinessesScreen()),
+                                ),
+                                child: StatCard(
+                                  icon: LucideIcons.store,
+                                  label: 'Negocios',
+                                  value: _totalBusinesses.toString(),
+                                  accentColor: AppColors.accentPurple,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: AppSpacing.md),
                             Expanded(
-                              child: _MetricCard(
-                                title: 'Clientes',
-                                value: _totalUsers.toString(),
-                                icon: Icons.people_outline,
-                                color: AppTheme.accentYellow,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const AdminUsersScreen(),
-                                    ),
-                                  );
-                                },
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const AdminUsersScreen()),
+                                ),
+                                child: StatCard(
+                                  icon: LucideIcons.users,
+                                  label: 'Clientes',
+                                  value: _totalUsers.toString(),
+                                  accentColor: AppColors.accentAmber,
+                                ),
                               ),
                             ),
                           ],
@@ -324,38 +295,34 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                           begin: AppTheme.animSlideYBegin,
                           curve: AppTheme.animCurveStandard,
                         ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     Row(
                           children: [
                             Expanded(
-                              child: _MetricCard(
-                                title: 'Escaneos',
-                                value: _totalScans.toString(),
-                                icon: Icons.qr_code_scanner,
-                                color: AppTheme.accentPink,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const AdminActivityScreen(),
-                                    ),
-                                  );
-                                },
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const AdminActivityScreen()),
+                                ),
+                                child: StatCard(
+                                  icon: LucideIcons.scanLine,
+                                  label: 'Escaneos',
+                                  value: _totalScans.toString(),
+                                  accentColor: AppColors.accentPink,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: AppSpacing.md),
                             Expanded(
-                              child: _MetricCard(
-                                title: 'Premios',
-                                value: _totalRewards.toString(),
-                                icon: Icons.card_giftcard,
-                                color: AppTheme.accentGreen,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const AdminRewardsScreen(),
-                                    ),
-                                  );
-                                },
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const AdminRewardsScreen()),
+                                ),
+                                child: StatCard(
+                                  icon: LucideIcons.gift,
+                                  label: 'Premios',
+                                  value: _totalRewards.toString(),
+                                  accentColor: AppColors.accentGreen,
+                                ),
                               ),
                             ),
                           ],
@@ -366,20 +333,14 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                           begin: AppTheme.animSlideYBegin,
                           curve: AppTheme.animCurveStandard,
                         ),
-                    const SizedBox(height: 32),
-                    Text(
-                      'Módulos',
-                      style: GoogleFonts.anton(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _ModuleListTile(
+                    const SizedBox(height: AppSpacing.xl),
+                    Text('Módulos', style: AppTypography.titleBold),
+                    const SizedBox(height: AppSpacing.md),
+                    ModuleListCard(
                           title: 'Gestión de Negocios',
                           subtitle: 'Ver lista, rendimiento y detalles',
-                          icon: Icons.store,
+                          icon: LucideIcons.store,
+                          iconBackgroundColor: AppColors.accentPurple,
                           badgeCount: _pendingBusinessesCount,
                           onTap: () {
                             Navigator.of(context).push(
@@ -395,10 +356,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                           begin: AppTheme.animSlideYBegin,
                           curve: AppTheme.animCurveStandard,
                         ),
-                    _ModuleListTile(
+                    const SizedBox(height: AppSpacing.sm),
+                    ModuleListCard(
                           title: 'Gestión de Categorías',
                           subtitle: 'Agregar o eliminar categorías de negocios',
-                          icon: Icons.category_rounded,
+                          icon: LucideIcons.layers,
+                          iconBackgroundColor: AppColors.accentPurple,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -413,11 +376,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                           begin: AppTheme.animSlideYBegin,
                           curve: AppTheme.animCurveStandard,
                         ),
-                    const SizedBox(height: 12),
-                    _ModuleListTile(
+                    const SizedBox(height: AppSpacing.sm),
+                    ModuleListCard(
                           title: 'Gestión de Usuarios',
                           subtitle: 'Ver todos los perfiles y roles',
-                          icon: Icons.group,
+                          icon: LucideIcons.users,
+                          iconBackgroundColor: AppColors.accentAmber,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -432,11 +396,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                           begin: AppTheme.animSlideYBegin,
                           curve: AppTheme.animCurveStandard,
                         ),
-                    const SizedBox(height: 12),
-                    _ModuleListTile(
+                    const SizedBox(height: AppSpacing.sm),
+                    ModuleListCard(
                           title: 'Estadísticas QR',
                           subtitle: 'Ver ranking de negocios por escaneos',
-                          icon: Icons.bar_chart,
+                          icon: LucideIcons.chartNoAxesColumn,
+                          iconBackgroundColor: AppColors.accentGreen,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -451,11 +416,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                           begin: AppTheme.animSlideYBegin,
                           curve: AppTheme.animCurveStandard,
                         ),
-                    const SizedBox(height: 12),
-                    _ModuleListTile(
+                    const SizedBox(height: AppSpacing.sm),
+                    ModuleListCard(
                           title: 'Gestión de Actividad',
                           subtitle: 'Ver historial de escaneos y validaciones',
-                          icon: Icons.history,
+                          icon: LucideIcons.history,
+                          iconBackgroundColor: AppColors.textSecondary,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -470,11 +436,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                           begin: AppTheme.animSlideYBegin,
                           curve: AppTheme.animCurveStandard,
                         ),
-                    const SizedBox(height: 12),
-                    _ModuleListTile(
+                    const SizedBox(height: AppSpacing.sm),
+                    ModuleListCard(
                           title: 'Gestión de Premios',
                           subtitle: 'Ver historial de premios canjeados',
-                          icon: Icons.card_giftcard,
+                          icon: LucideIcons.gift,
+                          iconBackgroundColor: AppColors.accentPink,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -495,73 +462,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
             ),
       ),
     );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
-
-  const _MetricCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget content = Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: GoogleFonts.anton(
-              fontSize: 24,
-              fontWeight: FontWeight.w400,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(title, style: const TextStyle(fontSize: 14, color: Colors.black54)),
-        ],
-      ),
-    );
-
-    if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: content,
-      );
-    }
-    return content;
   }
 }
 
@@ -610,85 +510,3 @@ class _StatusIndicator extends StatelessWidget {
   }
 }
 
-class _ModuleListTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-  final int badgeCount;
-
-  const _ModuleListTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.onTap,
-    this.badgeCount = 0,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 12,
-        ),
-        leading: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Colors.black),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(color: Colors.black54, fontSize: 13),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (badgeCount > 0)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.accentPink,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  badgeCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            if (badgeCount > 0) const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Colors.black26),
-          ],
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        onTap: onTap,
-      ),
-    );
-  }
-}

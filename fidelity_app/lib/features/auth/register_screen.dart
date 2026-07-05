@@ -4,11 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'login_screen.dart';
-import '../business/create_business_screen.dart';
 import '../../core/validators/app_validators.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/auth_error_translator.dart';
+import '../../shared/widgets/shared_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -134,11 +138,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         content: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
-            color: AppTheme.accentGreen,
-            borderRadius: BorderRadius.circular(24),
+            color: AppColors.accentGreen,
+            borderRadius: BorderRadius.circular(AppRadii.pill),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.accentGreen.withValues(alpha: 0.3),
+                color: AppColors.accentGreen.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -146,7 +150,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.check_circle_outline, color: Colors.white),
+              const Icon(LucideIcons.circleCheck, color: Colors.white),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -174,23 +178,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-        title: const Text('¡Casi listo!', textAlign: TextAlign.center),
-        content: const Text(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('¡Casi listo!', textAlign: TextAlign.center, style: AppTypography.titleBold),
+        content: Text(
           'Te hemos enviado un correo de verificación. Por favor, confirma tu cuenta para continuar.',
           textAlign: TextAlign.center,
+          style: AppTypography.bodyRegular,
         ),
         actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: const Text('Entendido'),
-            ),
+          PrimaryButton(
+            label: 'Entendido',
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
           ),
         ],
       ),
@@ -199,12 +201,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('ÚNETE A NOSOTROS'),
+        title: const Text('Únete a nosotros'),
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -214,24 +218,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Selector de Rol (Profesional)
+                // Selector de Rol
                 Row(
                   children: [
                     Expanded(
                       child: _RoleSelectorCard(
                         title: 'CLIENTE',
-                        icon: Icons.person_outline,
-                        color: AppTheme.accentYellow,
+                        icon: LucideIcons.user,
+                        color: AppColors.accentAmber,
                         isSelected: _selectedRole == 'client',
                         onTap: () => setState(() => _selectedRole = 'client'),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: _RoleSelectorCard(
                         title: 'NEGOCIO',
-                        icon: Icons.storefront_outlined,
-                        color: AppTheme.accentPurple,
+                        icon: LucideIcons.store,
+                        color: AppColors.accentPurple,
                         isSelected: _selectedRole == 'business',
                         onTap: () => setState(() => _selectedRole = 'business'),
                       ),
@@ -239,7 +243,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                 ).animate().slideY(begin: 0.2).fadeIn(),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Selector de Imagen (Solo para Clientes)
                 if (_selectedRole == 'client')
@@ -256,24 +260,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             width: 100,
                             height: 100,
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.04),
+                              color: AppColors.pastelOf(AppColors.accentPurple),
                               shape: BoxShape.circle,
-                              image: _avatarFile != null 
-                                ? DecorationImage(image: FileImage(File(_avatarFile!.path)), fit: BoxFit.cover)
-                                : null,
+                              image: _avatarFile != null
+                                  ? DecorationImage(image: FileImage(File(_avatarFile!.path)), fit: BoxFit.cover)
+                                  : null,
                             ),
-                            child: _avatarFile == null 
-                              ? const Icon(Icons.add_a_photo_outlined, size: 32, color: Colors.black26)
-                              : null,
+                            child: _avatarFile == null
+                                ? const Icon(LucideIcons.camera, size: 32, color: AppColors.accentPurple)
+                                : null,
                           ),
                           if (_avatarFile != null)
                             Positioned(
                               right: 0,
                               bottom: 0,
                               child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(color: AppTheme.accentPurple, shape: BoxShape.circle),
-                                child: const Icon(Icons.edit, size: 14, color: Colors.white),
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(color: AppColors.accentPurple, shape: BoxShape.circle),
+                                child: const Icon(LucideIcons.pencil, size: 14, color: Colors.white),
                               ),
                             ),
                         ],
@@ -281,98 +285,96 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ).animate(delay: 100.ms).fadeIn().scale(),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: AppSpacing.xl),
 
-                Text('DATOS PERSONALES', style: theme.textTheme.labelLarge)
-                  .animate(delay: 200.ms).fadeIn(),
-                
-                const SizedBox(height: 20),
+                Text('Datos personales', style: AppTypography.labelBold)
+                    .animate(delay: 200.ms)
+                    .fadeIn(),
+
+                const SizedBox(height: AppSpacing.md),
 
                 // Campos del Formulario
                 Column(
                   children: [
-                    TextFormField(
+                    AppTextField(
                       controller: _fullNameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Nombre completo',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
+                      hint: 'Nombre completo',
+                      prefixIcon: LucideIcons.user,
                       validator: AppValidators.validateName,
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    const SizedBox(height: AppSpacing.md),
+                    AppTextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        hintText: 'email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
+                      hint: 'Email',
+                      prefixIcon: LucideIcons.mail,
                       validator: AppValidators.validateEmail,
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    const SizedBox(height: AppSpacing.md),
+                    AppTextField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        hintText: 'Teléfono',
-                        prefixIcon: Icon(Icons.phone_outlined),
-                        helperText: '10 dígitos (Ecuador)',
-                      ),
+                      hint: 'Teléfono',
+                      prefixIcon: LucideIcons.phone,
+                      helperText: '10 dígitos (Ecuador)',
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(10),
                       ],
                       validator: AppValidators.validateEcuadorPhone,
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    const SizedBox(height: AppSpacing.md),
+                    AppTextField(
                       controller: _passwordController,
                       obscureText: !_isPasswordVisible,
-                      decoration: InputDecoration(
-                        hintText: 'Contraseña segura',
-                        helperText: 'Mínimo 6 caracteres',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
-                          onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                      hint: 'Contraseña segura',
+                      helperText: 'Mínimo 6 caracteres',
+                      prefixIcon: LucideIcons.lock,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
+                          color: AppColors.textSecondary,
                         ),
+                        onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                       ),
                       validator: AppValidators.validatePassword,
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    const SizedBox(height: AppSpacing.md),
+                    AppTextField(
                       controller: _confirmPasswordController,
                       obscureText: !_isConfirmPasswordVisible,
-                      decoration: InputDecoration(
-                        hintText: 'Confirma tu contraseña',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(_isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
-                          onPressed: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                      hint: 'Confirma tu contraseña',
+                      prefixIcon: LucideIcons.lock,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isConfirmPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
+                          color: AppColors.textSecondary,
                         ),
+                        onPressed: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
                       ),
                       validator: (v) => AppValidators.validateConfirmPassword(v, _passwordController.text),
                     ),
                   ],
                 ).animate(delay: 300.ms).slideY(begin: 0.1).fadeIn(),
 
-                const SizedBox(height: 48),
+                const SizedBox(height: AppSpacing.xl),
 
-                // Botón Registro
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _register,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 3)
-                      : Text(_selectedRole == 'business' ? 'CONFIGURAR NEGOCIO' : 'CREAR MI CUENTA'),
+                PrimaryButton(
+                  label: _selectedRole == 'business' ? 'Configurar negocio' : 'Crear mi cuenta',
+                  isLoading: _isLoading,
+                  onPressed: _register,
                 ).animate(delay: 500.ms).scale(curve: Curves.easeOutBack).fadeIn(),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.md),
 
                 TextButton(
                   onPressed: () => Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      ),
+                  child: Text(
+                    '¿Ya tienes cuenta? Inicia sesión',
+                    style: AppTypography.subtitleBold.copyWith(fontSize: 15),
                   ),
-                  child: const Text('¿YA TIENES CUENTA? INICIA SESIÓN'),
                 ).animate(delay: 700.ms).fadeIn(),
               ],
             ),
@@ -402,33 +404,26 @@ class _RoleSelectorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(32),
+      borderRadius: BorderRadius.circular(AppRadii.card),
       child: AnimatedContainer(
         duration: 300.ms,
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : AppTheme.surface,
-          borderRadius: BorderRadius.circular(32),
+          color: isSelected ? AppColors.pastelOf(color) : AppColors.surfaceCard,
+          borderRadius: BorderRadius.circular(AppRadii.card),
           border: Border.all(
-            color: isSelected ? color : Colors.transparent,
-            width: 2.5,
+            color: isSelected ? color : AppColors.border,
+            width: 2,
           ),
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              size: 40,
-              color: isSelected ? color : Colors.black45,
-            ),
+            Icon(icon, size: 36, color: isSelected ? color : AppColors.textSecondary),
             const SizedBox(height: 12),
             Text(
               title,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 13,
-                color: isSelected ? Colors.black : Colors.black45,
-                letterSpacing: 0.5,
+              style: AppTypography.labelBold.copyWith(
+                color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
               ),
             ),
           ],
