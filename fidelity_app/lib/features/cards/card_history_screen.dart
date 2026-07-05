@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import 'providers/card_history_provider.dart';
 
 class CardHistoryScreen extends ConsumerStatefulWidget {
@@ -100,7 +106,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(next.transferSuccessMessage!),
-                      backgroundColor: AppTheme.accentGreen,
+                      backgroundColor: AppColors.accentGreen,
                     ),
                   );
                 }
@@ -110,9 +116,9 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceCard,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.card)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -127,46 +133,27 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                             width: 40,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: Colors.black12,
+                              color: AppColors.border,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'TRANSFERIR PREMIO',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.anton(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 18,
-                            letterSpacing: 1,
-                          ),
-                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        Text('Transferir Premio', textAlign: TextAlign.center, style: AppTypography.titleBold),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'Ingresa el email de tu amigo para transferirle este premio.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTypography.bodyMedium,
                         ),
-                        const SizedBox(height: 24),
-                        TextFormField(
+                        const SizedBox(height: AppSpacing.lg),
+                        AppTextField(
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
-                          textCapitalization: TextCapitalization.none,
-                          decoration: InputDecoration(
-                            labelText: 'Email del destinatario',
-                            hintText: 'amigo@ejemplo.com',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
+                          textInputAction: TextInputAction.done,
+                          hint: 'amigo@ejemplo.com',
+                          label: 'Email del destinatario',
+                          prefixIcon: LucideIcons.mail,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Ingresa un email';
@@ -180,114 +167,57 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                           },
                         ),
                         if (state.transferErrorMessage != null) ...[
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppTheme.accentPink.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: AppColors.pastelOf(AppColors.accentPink),
+                              borderRadius: BorderRadius.circular(AppRadii.badge),
                             ),
                             child: Column(
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(
-                                      Icons.info_outline,
-                                      color: AppTheme.accentPink,
-                                      size: 20,
-                                    ),
+                                    const Icon(LucideIcons.circleAlert, color: AppColors.accentPink, size: 20),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         state.transferErrorMessage!,
-                                        style: const TextStyle(
-                                          color: AppTheme.accentPink,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: AppTypography.labelBold.copyWith(color: AppColors.accentPink, fontSize: 12),
                                       ),
                                     ),
                                   ],
                                 ),
                                 if (state.showInviteButton) ...[
-                                  const SizedBox(height: 12),
-                                  ElevatedButton.icon(
+                                  const SizedBox(height: AppSpacing.sm),
+                                  PrimaryButton(
+                                    label: 'Invitar a un amigo',
+                                    icon: LucideIcons.share2,
+                                    isFullWidth: false,
                                     onPressed: _shareAppLink,
-                                    icon: const Icon(Icons.share, size: 18),
-                                    label: const Text('INVITAR A UN AMIGO'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppTheme.accentPink,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                        horizontal: 20,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
                                   ),
                                 ],
                               ],
                             ),
                           ),
                         ],
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppSpacing.lg),
                         Row(
                           children: [
                             Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'CANCELAR',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                              ),
+                              child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context)),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: ElevatedButton(
-                                onPressed: state.isTransferLoading
-                                    ? null
-                                    : () {
-                                        if (formKey.currentState!.validate()) {
-                                          final email = emailController.text.trim();
-                                          ref.read(cardHistoryProvider.notifier).transferReward(reward['id'] as String, email);
-                                        }
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.black,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: state.isTransferLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Text(
-                                        'TRANSFERIR',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 1,
-                                        ),
-                                      ),
+                              child: PrimaryButton(
+                                label: 'Transferir',
+                                isLoading: state.isTransferLoading,
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    final email = emailController.text.trim();
+                                    ref.read(cardHistoryProvider.notifier).transferReward(reward['id'] as String, email);
+                                  }
+                                },
                               ),
                             ),
                           ],
@@ -313,63 +243,44 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
       length: 2,
       initialIndex: widget.initialTabIndex,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           toolbarHeight: 100,
-          backgroundColor: Colors.white,
           centerTitle: true,
-          title: Text(
-            widget.businessName.toUpperCase(),
-            style: GoogleFonts.anton(
-              fontWeight: FontWeight.w400,
-              fontSize: 16,
-              letterSpacing: 1.5,
-            ),
-          ),
+          title: Text(widget.businessName, style: AppTypography.titleBold.copyWith(fontSize: 16)),
           actions: [
-            IconButton(
-              icon: Icon(
-                Icons.calendar_today_rounded,
-                color: state.dateRange == null
-                    ? Colors.black26
-                    : AppTheme.accentPurple,
-              ),
+            IconActionButton(
+              icon: LucideIcons.calendarDays,
+              iconColor: state.dateRange == null ? AppColors.textSecondary : AppColors.accentPurple,
               onPressed: () => _selectDateRange(state.dateRange),
             ),
             if (state.dateRange != null)
-              IconButton(
-                icon: const Icon(
-                  Icons.close_rounded,
-                  color: AppTheme.accentPink,
-                ),
+              IconActionButton(
+                icon: LucideIcons.x,
+                iconColor: AppColors.accentPink,
                 onPressed: () {
                   ref.read(cardHistoryProvider.notifier).updateDateRange(null);
                 },
               ),
           ],
           bottom: TabBar(
-            labelStyle: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 12,
-              letterSpacing: 1.2,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-            ),
+            labelStyle: AppTypography.labelBold,
+            unselectedLabelStyle: AppTypography.bodyMedium.copyWith(fontSize: 12),
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textSecondary,
             indicatorSize: TabBarIndicatorSize.label,
             indicator: const UnderlineTabIndicator(
-              borderSide: BorderSide(width: 4, color: Colors.black),
+              borderSide: BorderSide(width: 3, color: AppColors.primary),
               insets: EdgeInsets.symmetric(horizontal: 16),
             ),
             tabs: const [
-              Tab(text: 'ESCANEOS'),
-              Tab(text: 'PREMIOS'),
+              Tab(text: 'Escaneos'),
+              Tab(text: 'Premios'),
             ],
           ),
         ),
         body: state.isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
             : TabBarView(
                 children: [
                   _buildHistoryList(state.scans, isScan: true),
@@ -385,39 +296,19 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
     required bool isScan,
   }) {
     if (items.isEmpty) {
+      final accent = isScan ? AppColors.accentGreen : AppColors.accentPink;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: (isScan ? AppTheme.accentGreen : AppTheme.accentPink)
-                    .withValues(alpha: 0.05),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isScan ? Icons.history_rounded : Icons.card_giftcard_rounded,
-                size: 64,
-                color: isScan ? AppTheme.accentGreen : AppTheme.accentPink,
-              ),
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(color: AppColors.pastelOf(accent), shape: BoxShape.circle),
+              child: Icon(isScan ? LucideIcons.history : LucideIcons.gift, size: 56, color: accent),
             ),
-            const SizedBox(height: 24),
-            Text(
-              isScan ? 'SIN ACTIVIDAD' : 'SIN PREMIOS',
-              style: GoogleFonts.anton(
-                fontWeight: FontWeight.w400,
-                fontSize: 16,
-                letterSpacing: 1,
-              ),
-            ),
-            const Text(
-              'Pronto verás tus movimientos aquí.',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Colors.black26,
-              ),
-            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(isScan ? 'Sin actividad' : 'Sin premios', style: AppTypography.subtitleBold),
+            Text('Pronto verás tus movimientos aquí.', style: AppTypography.bodyMedium),
           ],
         ),
       );
@@ -433,26 +324,26 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
         // con qr_code_id provino de un escaneo de QR.
         final bool isGifted = isScan && (item['qr_code_id'] == null);
         final String actionTitle = isScan
-            ? (isGifted ? '+1 PUNTO DE REGALO' : '+1 PUNTO POR ESCANEO')
-            : 'PREMIO GANADO';
-        final accent = isScan ? AppTheme.accentGreen : AppTheme.accentPink;
+            ? (isGifted ? '+1 Punto de regalo' : '+1 Punto por escaneo')
+            : 'Premio ganado';
+        final accent = isScan ? AppColors.accentGreen : AppColors.accentPink;
 
         // Status logic for rewards
         final String status = !isScan
             ? (item['status'] ?? 'pending')
             : 'approved';
-        Color statusColor = AppTheme.accentYellow;
-        String statusLabel = 'PENDIENTE';
+        Color statusColor = AppColors.accentAmber;
+        String statusLabel = 'Pendiente';
 
         if (status == 'approved') {
-          statusColor = AppTheme.accentGreen;
-          statusLabel = 'ENTREGADO';
+          statusColor = AppColors.accentGreen;
+          statusLabel = 'Entregado';
         } else if (status == 'rejected') {
-          statusColor = AppTheme.accentPink;
-          statusLabel = 'RECHAZADO';
+          statusColor = AppColors.accentPink;
+          statusLabel = 'Rechazado';
         } else if (status == 'transferred_out') {
-          statusColor = AppTheme.accentPurple;
-          statusLabel = 'TRANSFERIDO';
+          statusColor = AppColors.accentPurple;
+          statusLabel = 'Transferido';
         }
 
         // Get transfer info if available
@@ -463,21 +354,12 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
         }
 
         return Container(
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: Border.all(
-                  color: Colors.black.withValues(alpha: 0.04),
-                ),
+                color: AppColors.surfaceCard,
+                borderRadius: BorderRadius.circular(AppRadii.card),
+                boxShadow: AppShadows.card,
               ),
               child: Column(
                 children: [
@@ -486,20 +368,18 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: (isScan ? accent : statusColor).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16),
+                          color: AppColors.pastelOf(isScan ? accent : statusColor),
+                          borderRadius: BorderRadius.circular(AppRadii.badge),
                         ),
                         child: Icon(
                           isScan
-                              ? (isGifted
-                                  ? Icons.redeem_rounded
-                                  : Icons.qr_code_scanner_rounded)
-                              : Icons.card_giftcard_rounded,
+                              ? (isGifted ? LucideIcons.gift : LucideIcons.scanLine)
+                              : LucideIcons.gift,
                           color: isScan ? accent : statusColor,
                           size: 24,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,52 +387,23 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                             Text(
                               isScan
                                   ? actionTitle
-                                  : (item['businesses']?['reward_description']
-                                            ?.toString()
-                                            .toUpperCase() ??
-                                        item['reward_description']
-                                            ?.toString()
-                                            .toUpperCase() ??
-                                        'PREMIO'),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13,
-                                letterSpacing: 0.5,
-                              ),
+                                  : (item['businesses']?['reward_description']?.toString() ??
+                                        item['reward_description']?.toString() ??
+                                        'Premio'),
+                              style: AppTypography.subtitleBold.copyWith(fontSize: 13),
                             ),
                             if (isScan)
                               Text(
-                                isGifted
-                                    ? 'Regalo del dueño'
-                                    : 'Por escaneo de QR',
-                                style: TextStyle(
-                                  color: isGifted
-                                      ? AppTheme.accentPurple
-                                      : Colors.black54,
-                                  fontSize: 11,
+                                isGifted ? 'Regalo del dueño' : 'Por escaneo de QR',
+                                style: AppTypography.caption.copyWith(
+                                  color: isGifted ? AppColors.accentPurple : AppColors.textSecondary,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                             if (!isScan && item['description'] != null)
-                              Text(
-                                item['description'].toString(),
-                                style: const TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              Text(item['description'].toString(), style: AppTypography.caption),
                             const SizedBox(height: 2),
-                            Text(
-                              EcuadorDateUtils.formatEcuadorTime(
-                                date,
-                              ).toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.black26,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
+                            Text(EcuadorDateUtils.formatEcuadorTime(date), style: AppTypography.caption.copyWith(fontSize: 10)),
                           ],
                         ),
                       ),
@@ -561,59 +412,33 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                statusLabel,
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 8,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
+                            StatusChip(
+                              label: statusLabel,
+                              variant: status == 'approved'
+                                  ? StatusChipVariant.success
+                                  : status == 'rejected'
+                                      ? StatusChipVariant.error
+                                      : status == 'transferred_out'
+                                          ? StatusChipVariant.info
+                                          : StatusChipVariant.pending,
                             ),
                             if (_canTransfer(item)) ...[
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: () => _showTransferDialog(item),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.accentPurple.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(999),
-                                    border: Border.all(
-                                      color: AppTheme.accentPurple.withValues(alpha: 0.3),
-                                    ),
+                                    color: AppColors.pastelOf(AppColors.accentPurple),
+                                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                                    border: Border.all(color: AppColors.accentPurple.withValues(alpha: 0.3)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(
-                                        Icons.swap_horiz_rounded,
-                                        color: AppTheme.accentPurple,
-                                        size: 12,
-                                      ),
+                                      const Icon(LucideIcons.arrowLeftRight, color: AppColors.accentPurple, size: 12),
                                       const SizedBox(width: 4),
-                                      const Text(
-                                        'TRANSFERIR',
-                                        style: TextStyle(
-                                          color: AppTheme.accentPurple,
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 8,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
+                                      Text('Transferir', style: AppTypography.labelBold.copyWith(color: AppColors.accentPurple, fontSize: 9)),
                                     ],
                                   ),
                                 ),
@@ -624,23 +449,15 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                     ],
                   ),
                   if (!isScan && transferredToName != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.subdirectory_arrow_right_rounded,
-                          size: 14,
-                          color: AppTheme.accentPurple,
-                        ),
+                        const Icon(LucideIcons.cornerDownRight, size: 14, color: AppColors.accentPurple),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             'Transferido a: $transferredToName',
-                            style: const TextStyle(
-                              color: AppTheme.accentPurple,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTypography.caption.copyWith(color: AppColors.accentPurple, fontWeight: FontWeight.w700),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -651,23 +468,15 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                   if (isScan &&
                       item['businesses'] != null &&
                       item['businesses']['name'] != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.storefront_rounded,
-                          size: 12,
-                          color: Colors.black26,
-                        ),
+                        const Icon(LucideIcons.store, size: 12, color: AppColors.border),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            item['businesses']['name'].toString().toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.black45,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            item['businesses']['name'].toString(),
+                            style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),

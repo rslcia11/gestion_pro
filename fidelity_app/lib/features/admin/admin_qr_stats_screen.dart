@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import '../../core/utils/date_utils.dart';
 
 /// Enum for date range filter options
@@ -233,10 +239,10 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppTheme.accentPurple,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
+              primary: AppColors.primary,
+              onPrimary: AppColors.onPrimary,
+              surface: AppColors.surfaceCard,
+              onSurface: AppColors.textPrimary,
             ),
           ),
           child: child!,
@@ -257,24 +263,21 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Estadísticas QR'),
-        backgroundColor: Colors.white,
+        title: Text('Estadísticas QR', style: AppTypography.titleBold),
+        backgroundColor: AppColors.background,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: AppColors.textPrimary,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadScanData,
-            tooltip: 'Actualizar',
-          ),
+          IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadScanData),
+          const SizedBox(width: AppSpacing.sm),
         ],
       ),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
+                valueColor: AlwaysStoppedAnimation(AppColors.primary),
               ),
             )
           : _errorMessage != null
@@ -286,21 +289,22 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
   Widget _buildErrorState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Color(0xFFFF4949)),
-            const SizedBox(height: 16),
+            const Icon(LucideIcons.triangleAlert, size: 64, color: AppColors.error),
+            const SizedBox(height: AppSpacing.md),
             Text(
               _errorMessage!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF666666)),
+              style: AppTypography.bodyRegular.copyWith(color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
+            const SizedBox(height: AppSpacing.lg),
+            PrimaryButton(
+              label: 'Reintentar',
               onPressed: _loadScanData,
-              child: const Text('Reintentar'),
+              isFullWidth: false,
             ),
           ],
         ),
@@ -311,25 +315,25 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
   Widget _buildContent() {
     return RefreshIndicator(
       onRefresh: _loadScanData,
-      color: Colors.black,
+      color: AppColors.primary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Date filter buttons
             _buildDateFilterButtons(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // Summary card
             _buildSummaryCard(),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // Bar chart section
             if (_scanData != null && _scanData!.topBusinesses.isNotEmpty) ...[
               _buildChartSection(),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
             ],
 
             // Ranking list
@@ -345,18 +349,11 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Período',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 12),
+        Text('Período', style: AppTypography.subtitleBold),
+        const SizedBox(height: AppSpacing.sm + 4),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
           children: DateRangeFilter.values.map((filter) {
             final isSelected = _selectedFilter == filter;
             return InkWell(
@@ -366,23 +363,22 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
                       setState(() => _selectedFilter = filter);
                       _loadScanData();
                     },
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(AppRadii.pill),
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: AppSpacing.md,
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.accentPurple : AppTheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: isSelected ? null : Border.all(color: Colors.black12),
+                  color: isSelected ? AppColors.primary : AppColors.surfaceCard,
+                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                  border: isSelected ? null : Border.all(color: AppColors.border),
                 ),
                 child: Text(
                   filter.label,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    fontSize: 14,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: isSelected ? AppColors.onPrimary : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
               ),
@@ -392,10 +388,10 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
         if (_selectedFilter == DateRangeFilter.custom &&
             _customStartDate != null &&
             _customEndDate != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             '${_formatDate(_customStartDate!)} - ${_formatDate(_customEndDate!)}',
-            style: const TextStyle(color: Color(0xFF666666), fontSize: 12),
+            style: AppTypography.caption,
           ),
         ],
       ],
@@ -403,74 +399,11 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
   }
 
   Widget _buildSummaryCard() {
-    return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppTheme.accentPurple, Color(0xFF6C63FF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.accentPurple.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.qr_code_scanner,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text(
-                      'Total de Escaneos',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _totalScans.toString(),
-                style: GoogleFonts.anton(
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -1,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'en el período seleccionado',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
+    return StatCard(
+          icon: LucideIcons.qrCode,
+          label: 'Escaneos en el período seleccionado',
+          value: _totalScans.toString(),
+          accentColor: AppColors.accentPurple,
         )
         .animate(delay: 100.ms)
         .fadeIn(duration: AppTheme.animDurationStandard)
@@ -481,28 +414,15 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Top 10 Negocios',
-          style: GoogleFonts.anton(
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 16),
+        Text('Top 10 Negocios', style: AppTypography.titleBold),
+        const SizedBox(height: AppSpacing.md),
         Container(
           height: 300,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(AppRadii.card),
+            boxShadow: AppShadows.card,
           ),
           child: _buildBarChart(),
         ),
@@ -513,10 +433,10 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
   Widget _buildBarChart() {
     final businesses = _scanData!.topBusinesses;
     if (businesses.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No hay datos para mostrar',
-          style: const TextStyle(color: Color(0xFF666666)),
+          style: AppTypography.bodyRegular.copyWith(color: AppColors.textSecondary),
         ),
       );
     }
@@ -536,16 +456,12 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
               final business = businesses[group.x.toInt()];
               return BarTooltipItem(
                 '${business.businessName}\n',
-                const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+                AppTypography.labelBold.copyWith(color: AppColors.onPrimary, fontSize: 14),
                 children: [
                   TextSpan(
                     text: '${business.scanCount} escaneos',
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: AppColors.onPrimary.withValues(alpha: 0.7),
                       fontWeight: FontWeight.normal,
                       fontSize: 12,
                     ),
@@ -574,11 +490,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
                         name.length > 14 ? '${name.substring(0, 14)}…' : name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF666666),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: AppTypography.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w500),
                       ),
                     ),
                   );
@@ -595,10 +507,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
               getTitlesWidget: (value, meta) {
                 return Text(
                   value.toInt().toString(),
-                  style: const TextStyle(
-                    color: Color(0xFF666666),
-                    fontSize: 10,
-                  ),
+                  style: AppTypography.caption.copyWith(fontSize: 10),
                 );
               },
             ),
@@ -617,7 +526,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
           horizontalInterval: maxY / 4,
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppColors.border,
               strokeWidth: 1,
             );
           },
@@ -631,7 +540,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
               BarChartRodData(
                 toY: business.scanCount.toDouble(),
                 gradient: const LinearGradient(
-                  colors: [AppTheme.accentPurple, AppTheme.accentPink],
+                  colors: [AppColors.accentPurple, AppColors.accentPink],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -652,64 +561,44 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Ranking de Negocios',
-          style: GoogleFonts.anton(
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 16),
+        Text('Ranking de Negocios', style: AppTypography.titleBold),
+        const SizedBox(height: AppSpacing.md),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(AppRadii.card),
+            boxShadow: AppShadows.card,
           ),
           child: ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _rankingList.length,
-            separatorBuilder: (_, __) =>
-                Divider(height: 1, color: Colors.black.withValues(alpha: 0.05)),
+            separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border),
             itemBuilder: (context, index) {
               final business = _rankingList[index];
               final position = index + 1;
               final isTop3 = position <= 3;
+              final positionColor = _getPositionColor(position);
 
               return ListTile(
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
-                  vertical: 8,
+                  vertical: AppSpacing.sm,
                 ),
                 leading: Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: isTop3
-                        ? _getPositionColor(position).withValues(alpha: 0.1)
-                        : AppTheme.surface,
+                    color: isTop3 ? AppColors.pastelOf(positionColor) : AppColors.background,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: isTop3
-                        ? Icon(
-                            Icons.emoji_events,
-                            color: _getPositionColor(position),
-                            size: 20,
-                          )
+                        ? Icon(LucideIcons.trophy, color: positionColor, size: 20)
                         : Text(
                             '#$position',
-                            style: const TextStyle(
+                            style: AppTypography.caption.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF666666),
                               fontSize: 12,
                             ),
                           ),
@@ -717,30 +606,26 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
                 ),
                 title: Text(
                   business.businessName,
-                  style: const TextStyle(
+                  style: AppTypography.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: AppColors.textPrimary,
                     fontSize: 15,
                   ),
                 ),
                 trailing: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                    horizontal: AppSpacing.sm + 4,
+                    vertical: AppSpacing.xs + 2,
                   ),
                   decoration: BoxDecoration(
-                    color: isTop3
-                        ? _getPositionColor(position).withValues(alpha: 0.1)
-                        : AppTheme.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    color: isTop3 ? AppColors.pastelOf(positionColor) : AppColors.background,
+                    borderRadius: BorderRadius.circular(AppRadii.badge),
                   ),
                   child: Text(
                     '${business.scanCount}',
-                    style: TextStyle(
+                    style: AppTypography.bodyMedium.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isTop3
-                          ? _getPositionColor(position)
-                          : const Color(0xFF666666),
+                      color: isTop3 ? positionColor : AppColors.textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -760,26 +645,25 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
         child: Column(
           children: [
             Icon(
-              Icons.qr_code_2,
+              LucideIcons.qrCode,
               size: 80,
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppColors.textSecondary.withValues(alpha: 0.3),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            const SizedBox(height: AppSpacing.md),
+            Text(
               'Sin escaneos en este período',
-              style: TextStyle(
+              style: AppTypography.bodyMedium.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF666666),
+                color: AppColors.textSecondary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'No hay datos de escaneos aprobados\npara el rango de fechas seleccionado.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black.withValues(alpha: 0.4),
+              style: AppTypography.bodyRegular.copyWith(
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -797,7 +681,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
       case 3:
         return const Color(0xFFCD7F32); // Bronze
       default:
-        return const Color(0xFF666666);
+        return AppColors.textSecondary;
     }
   }
 
@@ -808,5 +692,3 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
     return '$day/$month/$year';
   }
 }
-
-

@@ -57,38 +57,3 @@ class FidelityApp extends StatelessWidget {
     );
   }
 }
-
-// Pantalla temporal para probar el tema
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Fidelity')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.card_giftcard, size: 80, color: AppTheme.primary),
-            const SizedBox(height: 24),
-            Text(
-              '¡Tema Configurado!',
-              style: Theme.of(context).textTheme.headlineLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Estilo Flying Papers aplicado',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Botón de Prueba'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

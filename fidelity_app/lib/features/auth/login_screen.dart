@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Revisa tu correo para recuperar la contraseña.'),
-            backgroundColor: AppTheme.accentGreen,
+            backgroundColor: AppColors.accentGreen,
           ),
         );
       }

@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/services/export_service.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import 'widgets/export_preview_dialog.dart';
 
 class AdminUsersScreen extends StatefulWidget {
@@ -44,13 +51,16 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   int _currentPage = 0;
   static const int _pageSize = 20;
 
+  static const List<String> _roleFilterValues = ['all', 'business', 'client'];
+  static const List<String> _roleFilterLabels = ['Todos', 'Negocios', 'Clientes'];
+
   @override
   void initState() {
     super.initState();
     _loadUsers();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && 
-          !_isFetchingMore && 
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+          !_isFetchingMore &&
           _hasMore) {
         _fetchMoreUsers();
       }
@@ -209,9 +219,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   Color _getRoleColor(String? role) {
-    if (role == 'admin') return AppTheme.accentPink;
-    if (role == 'business') return AppTheme.accentPurple;
-    return AppTheme.accentYellow;
+    if (role == 'admin') return AppColors.accentPink;
+    if (role == 'business') return AppColors.accentPurple;
+    return AppColors.accentAmber;
   }
 
   void _showExportDialog() {
@@ -241,10 +251,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppTheme.accentPurple,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
+              primary: AppColors.primary,
+              onPrimary: AppColors.onPrimary,
+              surface: AppColors.surfaceCard,
+              onSurface: AppColors.textPrimary,
             ),
           ),
           child: child!,
@@ -265,22 +275,23 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Usuarios Registrados'),
-        backgroundColor: Colors.white,
+        title: Text('Usuarios Registrados', style: AppTypography.titleBold.copyWith(fontSize: 18)),
+        backgroundColor: AppColors.background,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showExportDialog,
-        icon: const Icon(Icons.download),
-        label: const Text('Exportar'),
-        backgroundColor: AppTheme.accentPurple,
-        foregroundColor: Colors.white,
+        icon: const Icon(LucideIcons.download),
+        label: Text('Exportar', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 15)),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
       ),
       body: RefreshIndicator(
         onRefresh: _loadUsers,
-        color: Colors.black,
+        color: AppColors.primary,
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
@@ -289,364 +300,277 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 children: [
                   // Barra de Búsqueda
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Buscar por nombre o email...',
-                          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
-                  prefixIcon: const Icon(Icons.search, color: AppTheme.accentPurple),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.close, size: 20),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-            ),
-          ),
-          // Filtros
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${_filteredUsers.length} usuarios',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: AppTextField(
+                      controller: _searchController,
+                      hint: 'Buscar por nombre o email...',
+                      prefixIcon: LucideIcons.search,
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
                     ),
-                    DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedRoleFilter,
-                        icon: const Icon(
-                          Icons.people_alt_rounded,
-                          color: Colors.black,
-                          size: 20,
+                  ),
+                  // Filtros
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${_filteredUsers.length} usuarios',
+                          style: AppTypography.subtitleBold.copyWith(fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        alignment: Alignment.centerRight,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'all',
-                            child: Text(
-                              'Todos',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'business',
-                            child: Text(
-                              'Negocios',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'client',
-                            child: Text(
-                              'Clientes',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
+                        const SizedBox(height: AppSpacing.sm),
+                        SegmentedToggle(
+                          options: _roleFilterLabels,
+                          selectedIndex: _roleFilterValues.indexOf(_selectedRoleFilter),
+                          onChanged: (index) {
                             setState(() {
-                              _selectedRoleFilter = value;
+                              _selectedRoleFilter = _roleFilterValues[index];
                             });
                             _loadUsers();
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: DateRangeFilter.values.map((filter) {
-                    final isSelected = _selectedFilter == filter;
-                    return InkWell(
-                      onTap: filter == DateRangeFilter.custom
-                          ? _showCustomDatePicker
-                          : () {
-                              setState(() => _selectedFilter = filter);
-                              _loadUsers();
-                            },
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                          },
                         ),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppTheme.accentPurple : AppTheme.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: isSelected ? null : Border.all(color: Colors.black12),
-                        ),
-                        child: Text(
-                          filter.label,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                if (_selectedFilter == DateRangeFilter.custom &&
-                    _customStartDate != null &&
-                    _customEndDate != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_formatDate(_customStartDate!)} - ${_formatDate(_customEndDate!)}',
-                    style: const TextStyle(color: Color(0xFF666666), fontSize: 12),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-    if (_isLoading)
-          const SliverFillRemaining(
-            child: Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
-              ),
-            ),
-          )
-        else if (_filteredUsers.isEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.search_off_rounded, size: 48, color: Colors.grey[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    _searchQuery.isEmpty 
-                        ? 'No hay usuarios registrados' 
-                        : 'No se encontraron usuarios',
-                    style: TextStyle(color: Colors.grey[500]),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                        if (index == _filteredUsers.length) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple)),
-                            ),
-                          );
-                        }
-                        final user = _filteredUsers[index];
-                        final role = user['role'] as String?;
-                        final roleColor = _getRoleColor(role);
-
-                        return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                              color: Colors.white,
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.all(16),
-                                leading: CircleAvatar(
-                                  backgroundColor: roleColor.withValues(alpha: 0.1),
-                                  child: Icon(
-                                    role == 'business'
-                                        ? Icons.store
-                                        : (role == 'admin'
-                                              ? Icons.security
-                                              : Icons.person),
-                                    color: roleColor,
+                        const SizedBox(height: AppSpacing.md),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: DateRangeFilter.values.map((filter) {
+                            final isSelected = _selectedFilter == filter;
+                            return InkWell(
+                              onTap: filter == DateRangeFilter.custom
+                                  ? _showCustomDatePicker
+                                  : () {
+                                      setState(() => _selectedFilter = filter);
+                                      _loadUsers();
+                                    },
+                              borderRadius: BorderRadius.circular(AppRadii.pill),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppColors.primary : AppColors.surfaceCard,
+                                  borderRadius: BorderRadius.circular(AppRadii.pill),
+                                  border: isSelected ? null : Border.all(color: AppColors.border),
+                                ),
+                                child: Text(
+                                  filter.label,
+                                  style: AppTypography.caption.copyWith(
+                                    color: isSelected ? AppColors.onPrimary : AppColors.textSecondary,
+                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                   ),
                                 ),
-                                title: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        user['full_name'] ?? 'Sin nombre',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    if (user['is_demo'] == true)
-                                      Container(
-                                        margin: const EdgeInsets.only(left: 8),
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(4),
-                                          border: Border.all(color: Colors.amber, width: 0.5),
-                                        ),
-                                        child: const Text(
-                                          'DEMO',
-                                          style: TextStyle(
-                                            color: Colors.amber,
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: roleColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        _getRoleLabel(role),
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                          color: roleColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        if (_selectedFilter == DateRangeFilter.custom &&
+                            _customStartDate != null &&
+                            _customEndDate != null) ...[
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            '${_formatDate(_customStartDate!)} - ${_formatDate(_customEndDate!)}',
+                            style: AppTypography.caption,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_isLoading)
+              const SliverFillRemaining(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                  ),
+                ),
+              )
+            else if (_filteredUsers.isEmpty)
+              SliverFillRemaining(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _searchQuery.isEmpty ? LucideIcons.users : LucideIcons.search,
+                        size: 48,
+                        color: AppColors.border,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        _searchQuery.isEmpty
+                            ? 'No hay usuarios registrados'
+                            : 'No se encontraron usuarios',
+                        style: AppTypography.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index == _filteredUsers.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)),
+                          ),
+                        );
+                      }
+                      final user = _filteredUsers[index];
+                      final role = user['role'] as String?;
+                      final roleColor = _getRoleColor(role);
+                      final fullName = (user['full_name'] ?? 'Sin nombre').toString();
+
+                      return Container(
+                            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceCard,
+                              borderRadius: BorderRadius.circular(AppRadii.card),
+                              boxShadow: AppShadows.card,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                UserAvatar(
+                                  initials: fullName.isNotEmpty ? fullName[0] : '?',
+                                  backgroundColor: roleColor,
                                 ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.email_outlined, size: 14, color: Colors.black45),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            user['email'] ?? 'Sin correo',
-                                            style: const TextStyle(fontSize: 12, color: Colors.black54),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    if (user['phone'] != null) ...[
-                                      const SizedBox(height: 2),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
                                       Row(
                                         children: [
-                                          const Icon(Icons.phone_android_outlined, size: 14, color: Colors.black45),
+                                          Expanded(
+                                            child: Text(
+                                              fullName,
+                                              style: AppTypography.subtitleBold.copyWith(fontSize: 15),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          if (user['is_demo'] == true) ...[
+                                            const StatusChip(label: 'Demo', variant: StatusChipVariant.pending),
+                                            const SizedBox(width: AppSpacing.xs),
+                                          ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.pastelOf(roleColor),
+                                          borderRadius: BorderRadius.circular(AppRadii.badge),
+                                        ),
+                                        child: Text(
+                                          _getRoleLabel(role),
+                                          style: AppTypography.labelBold.copyWith(fontSize: 10, color: roleColor),
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.sm),
+                                      Row(
+                                        children: [
+                                          const Icon(LucideIcons.mail, size: 14, color: AppColors.textSecondary),
                                           const SizedBox(width: 4),
                                           Expanded(
                                             child: Text(
-                                              user['phone'],
-                                              style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                              user['email'] ?? 'Sin correo',
+                                              style: AppTypography.caption,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ],
-                                    if (role == 'business' &&
-                                        (user['businesses'] as List?)?.isNotEmpty == true) ...[
-                                      const SizedBox(height: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.accentPurple.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
+                                      if (user['phone'] != null) ...[
+                                        const SizedBox(height: 2),
+                                        Row(
                                           children: [
-                                            const Icon(Icons.storefront, size: 12, color: AppTheme.accentPurple),
+                                            const Icon(LucideIcons.phone, size: 14, color: AppColors.textSecondary),
                                             const SizedBox(width: 4),
-                                            Flexible(
+                                            Expanded(
                                               child: Text(
-                                                'Dueño de: ${user['businesses'][0]['name']}',
-                                                style: const TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: AppTheme.accentPurple,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
+                                                user['phone'],
+                                                style: AppTypography.caption,
                                               ),
                                             ),
                                           ],
                                         ),
+                                      ],
+                                      if (role == 'business' &&
+                                          (user['businesses'] as List?)?.isNotEmpty == true) ...[
+                                        const SizedBox(height: AppSpacing.sm),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.pastelOf(AppColors.accentPurple),
+                                            borderRadius: BorderRadius.circular(AppRadii.badge),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(LucideIcons.store, size: 12, color: AppColors.accentPurple),
+                                              const SizedBox(width: 4),
+                                              Flexible(
+                                                child: Text(
+                                                  'Dueño de: ${user['businesses'][0]['name']}',
+                                                  style: AppTypography.labelBold.copyWith(fontSize: 11, color: AppColors.accentPurple),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      const SizedBox(height: AppSpacing.sm),
+                                      Text(
+                                        'Registro: ${EcuadorDateUtils.formatEcuadorTime(user['created_at'] ?? '')}',
+                                        style: AppTypography.caption.copyWith(fontSize: 10),
                                       ),
                                     ],
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Registro: ${EcuadorDateUtils.formatEcuadorTime(user['created_at'] ?? '')}',
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.black26,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            )
-                            .animate(delay: AppTheme.animDelayStaggered(index))
-                            .fadeIn(duration: AppTheme.animDurationStandard)
-                            .slideY(
-                              begin: AppTheme.animSlideYBegin,
-                              curve: AppTheme.animCurveStandard,
-                            );
-                      },
-                    ),
+                              ],
+                            ),
+                          )
+                          .animate(delay: AppTheme.animDelayStaggered(index))
+                          .fadeIn(duration: AppTheme.animDurationStandard)
+                          .slideY(
+                            begin: AppTheme.animSlideYBegin,
+                            curve: AppTheme.animCurveStandard,
+                          );
+                    },
                   ),
-          ),
-        ],
-      ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

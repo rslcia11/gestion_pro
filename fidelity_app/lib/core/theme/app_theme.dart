@@ -144,16 +144,5 @@ class AppTheme {
     );
   }
 
-  /// Alias legacy — mantiene compatibilidad con pantallas todavía no
-  /// migradas al design system nuevo mientras dura el rollout por fases.
-  static ThemeData get popTheme => theme;
-  static ThemeData get warmTheme => theme;
-
-  static const Color primary = AppColors.primary;
-  static const Color accentPurple = AppColors.accentPurple;
-  static const Color accentPink = AppColors.accentPink;
-  static const Color accentYellow = AppColors.accentAmber;
-  static const Color accentGreen = AppColors.accentGreen;
-  static const Color surface = AppColors.background;
 }
 

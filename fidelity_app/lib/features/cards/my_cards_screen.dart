@@ -89,7 +89,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('¡Punto aprobado! Sumaste 1 punto ✨', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: AppTheme.accentGreen,
+        backgroundColor: AppColors.accentGreen,
         duration: Duration(seconds: 3),
       ),
     );

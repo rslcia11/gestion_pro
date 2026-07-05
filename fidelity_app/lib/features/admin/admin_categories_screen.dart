@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 
 class AdminCategoriesScreen extends StatefulWidget {
   const AdminCategoriesScreen({super.key});
@@ -38,7 +45,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al cargar categorías: $e'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
         setState(() => _isLoading = false);
@@ -55,7 +62,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al guardar: $e'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       }
@@ -66,17 +73,28 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar Categoría'),
-        content: const Text('¿Estás seguro de eliminar esta categoría? Esto podría afectar a los negocios que la tengan asignada si no hay restricciones en la base de datos.'),
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('Eliminar Categoría', style: AppTypography.titleBold),
+        content: Text(
+          '¿Estás seguro de eliminar esta categoría? Esto podría afectar a los negocios que la tengan asignada si no hay restricciones en la base de datos.',
+          style: AppTypography.bodyMedium,
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentPink),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Eliminar'),
+          Row(
+            children: [
+              Expanded(
+                child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context, false)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: PrimaryButton(
+                  label: 'Eliminar',
+                  isDestructive: true,
+                  onPressed: () => Navigator.pop(context, true),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -92,7 +110,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al eliminar (probablemente en uso): $e'),
-            backgroundColor: AppTheme.accentPink,
+            backgroundColor: AppColors.accentPink,
           ),
         );
       }
@@ -104,26 +122,32 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Nueva Categoría'),
-        content: TextField(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('Nueva Categoría', style: AppTypography.titleBold),
+        content: AppTextField(
           controller: controller,
-          decoration: const InputDecoration(labelText: 'Nombre de la categoría'),
-          autofocus: true,
+          label: 'Nombre de la categoría',
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGreen),
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                Navigator.pop(context);
-                _addCategory(controller.text.trim());
-              }
-            },
-            child: const Text('Guardar'),
+          Row(
+            children: [
+              Expanded(
+                child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: PrimaryButton(
+                  label: 'Guardar',
+                  onPressed: () {
+                    if (controller.text.trim().isNotEmpty) {
+                      Navigator.pop(context);
+                      _addCategory(controller.text.trim());
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -133,55 +157,65 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Gestión de Categorías'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddDialog,
-        backgroundColor: AppTheme.accentPurple,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('NUEVA CATEGORÍA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
+        icon: const Icon(LucideIcons.plus),
+        label: Text('Nueva categoría', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 15)),
       ),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
+                valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
               ),
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               itemCount: _categories.length,
               itemBuilder: (context, index) {
                 final category = _categories[index];
-                return Card(
-                  elevation: 0,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceCard,
+                    borderRadius: BorderRadius.circular(AppRadii.card),
+                    boxShadow: AppShadows.card,
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    leading: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.accentPurple.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.pastelOf(AppColors.accentPurple),
+                          borderRadius: BorderRadius.circular(AppRadii.badge),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(LucideIcons.layers, color: AppColors.accentPurple, size: 24),
                       ),
-                      child: const Icon(Icons.category, color: AppTheme.accentPurple),
-                    ),
-                    title: Text(
-                      category['name'].toString().toUpperCase(),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: AppTheme.accentPink),
-                      onPressed: () => _deleteCategory(category['id']),
-                    ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(
+                          category['name'].toString(),
+                          style: AppTypography.subtitleBold,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconActionButton(
+                        icon: LucideIcons.trash2,
+                        backgroundColor: AppColors.pastelOf(AppColors.accentPink),
+                        iconColor: AppColors.accentPink,
+                        onPressed: () => _deleteCategory(category['id']),
+                      ),
+                    ],
                   ),
                 );
               },

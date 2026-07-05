@@ -7,6 +7,11 @@ import 'package:geocoding/geocoding.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/shared_widgets.dart';
 
 class LocationPickerMap extends StatefulWidget {
   final Function(double latitude, double longitude, String address)
@@ -75,18 +80,13 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
           final turnOn = await showDialog<bool>(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: const Text('GPS Desactivado'),
-              content: const Text('Para poder ubicarte automáticamente, necesitas encender el GPS. ¿Deseas abrir la configuración?'),
+              backgroundColor: AppColors.surfaceCard,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+              title: Text('GPS Desactivado', style: AppTypography.titleBold),
+              content: Text('Para poder ubicarte automáticamente, necesitas encender el GPS. ¿Deseas abrir la configuración?', style: AppTypography.bodyRegular),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white),
-                  child: const Text('Configuración'),
-                ),
+                SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
+                PrimaryButton(label: 'Configuración', onPressed: () => Navigator.pop(ctx, true)),
               ],
             ),
           );
@@ -140,7 +140,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.black87,
+            backgroundColor: AppColors.primary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -356,8 +356,8 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
     return Container(
       height: 400,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        border: Border.all(color: AppColors.border),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -365,7 +365,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
           // Barra de búsqueda
           Container(
             padding: const EdgeInsets.all(8),
-            color: Colors.white,
+            color: AppColors.surfaceCard,
             child: Row(
               children: [
                 Expanded(
@@ -383,13 +383,13 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                       final lat = double.tryParse(selection['lat'].toString()) ?? 0.0;
                       final lon = double.tryParse(selection['lon'].toString()) ?? 0.0;
                       final newLocation = LatLng(lat, lon);
-                      
+
                       setState(() {
                         _selectedLocation = newLocation;
                         _address = selection['display_name'] ?? '';
                         _mapController.move(newLocation, 16.0);
                       });
-                      
+
                       _searchFocusNode.unfocus();
                       widget.onLocationSelected(lat, lon, _address);
                     },
@@ -397,19 +397,16 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                       return TextField(
                         controller: textEditingController,
                         focusNode: focusNode,
+                        style: AppTypography.bodyRegular,
                         decoration: InputDecoration(
                           hintText: 'Buscar ciudad, calle, local...',
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            size: 20,
-                            color: Colors.black,
-                          ),
+                          prefixIcon: const Icon(LucideIcons.search, size: 20, color: AppColors.textSecondary),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppRadii.pill),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.black.withValues(alpha: 0.04),
+                          fillColor: AppColors.background,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12,
@@ -426,38 +423,38 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                         alignment: Alignment.topLeft,
                         child: Material(
                           elevation: 8,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppRadii.card),
                           clipBehavior: Clip.antiAlias,
-                          color: Colors.white,
+                          color: AppColors.surfaceCard,
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxHeight: 250, maxWidth: 300),
                             child: ListView.separated(
                               padding: EdgeInsets.zero,
                               shrinkWrap: true,
                               itemCount: options.length,
-                              separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.black12),
+                              separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
                               itemBuilder: (context, index) {
                                 final option = options.elementAt(index);
                                 final address = option['address'] ?? {};
                                 final road = address['road'] ?? address['pedestrian'] ?? '';
                                 final city = address['city'] ?? address['town'] ?? address['village'] ?? '';
                                 final name = option['name'] ?? '';
-                                
+
                                 final title = name.isNotEmpty ? name : (road.isNotEmpty ? road : city);
-                                
+
                                 return ListTile(
-                                  leading: const Icon(Icons.location_on_outlined, color: Colors.black54),
+                                  leading: const Icon(LucideIcons.mapPin, color: AppColors.textSecondary),
                                   title: Text(
                                     title.isNotEmpty ? title : 'Ubicación',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    style: AppTypography.subtitleBold.copyWith(fontSize: 13),
                                   ),
                                   subtitle: Text(
                                     option['display_name'] ?? '',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 11),
+                                    style: AppTypography.caption,
                                   ),
                                   onTap: () => onSelected(option),
                                 );
@@ -470,22 +467,11 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton.icon(
+                PrimaryButton(
+                  label: 'Ubicarme',
+                  icon: LucideIcons.locate,
+                  isFullWidth: false,
                   onPressed: _getCurrentLocation,
-                  icon: const Icon(Icons.my_location, size: 16),
-                  label: const Text(
-                    'UBICARME',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
                 ),
               ],
             ),
@@ -517,8 +503,8 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                             height: 40.0,
                             point: _selectedLocation!,
                             child: const Icon(
-                              Icons.location_pin,
-                              color: Colors.black,
+                              LucideIcons.mapPin,
+                              color: AppColors.primary,
                               size: 40,
                             ),
                           ),
@@ -531,9 +517,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                   Container(
                     color: Colors.black26,
                     child: const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Colors.black),
-                      ),
+                      child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
                     ),
                   ),
               ],
@@ -546,27 +530,18 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: AppColors.background,
                 borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(AppRadii.badge),
+                  bottomRight: Radius.circular(AppRadii.badge),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.location_on,
-                    size: 16,
-                    color: Colors.black,
-                  ),
+                  const Icon(LucideIcons.mapPin, size: 16, color: AppColors.textPrimary),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      _address,
-                      style: const TextStyle(fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                    ),
+                    child: Text(_address, style: AppTypography.caption, overflow: TextOverflow.ellipsis, maxLines: 2),
                   ),
                 ],
               ),

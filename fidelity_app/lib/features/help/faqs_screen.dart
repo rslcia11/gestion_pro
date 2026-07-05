@@ -1,81 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_typography.dart';
 
 class FaqsScreen extends StatelessWidget {
   const FaqsScreen({super.key});
 
   static const List<_FaqItem> _faqs = [
     _FaqItem(
-      icon: Icons.card_membership_rounded,
-      color: AppTheme.accentPurple,
+      icon: LucideIcons.idCard,
+      color: AppColors.accentPurple,
       question: '¿Qué es una tarjeta de fidelidad?',
       answer:
           'Cada tarjeta representa un negocio afiliado a Fidelity. Acumulas puntos en ese negocio escaneando su código QR y, cuando completas la tarjeta, ganas el premio que ese local te ofrece.',
     ),
     _FaqItem(
-      icon: Icons.qr_code_scanner_rounded,
-      color: AppTheme.accentGreen,
+      icon: LucideIcons.qrCode,
+      color: AppColors.accentGreen,
       question: '¿Cómo gano puntos?',
       answer:
-          'Toca el botón "ESCANEAR QR" desde tu pantalla principal y apunta la cámara al código QR del negocio. Cada escaneo válido suma 1 punto a la tarjeta de ese negocio.',
+          'Toca el botón "Escanear QR" desde tu pantalla principal y apunta la cámara al código QR del negocio. Cada escaneo válido suma 1 punto a la tarjeta de ese negocio.',
     ),
     _FaqItem(
-      icon: Icons.show_chart_rounded,
-      color: AppTheme.accentPink,
+      icon: LucideIcons.chartNoAxesColumn,
+      color: AppColors.accentPink,
       question: '¿Cómo veo mi progreso?',
       answer:
           'Dentro de cada tarjeta verás una barra que muestra tu avance hacia el premio. El porcentaje indica qué tan cerca estás de canjearlo.',
     ),
     _FaqItem(
-      icon: Icons.card_giftcard_rounded,
-      color: AppTheme.accentYellow,
+      icon: LucideIcons.gift,
+      color: AppColors.accentAmber,
       question: '¿Cómo canjeo mi premio?',
       answer:
-          'Cuando llenes la tarjeta acércate al local y muestra tu premio en la pestaña "PREMIOS". El negocio aprobará el canje y se marcará como ENTREGADO.',
+          'Cuando llenes la tarjeta acércate al local y muestra tu premio en la pestaña "Premios". El negocio aprobará el canje y se marcará como entregado.',
     ),
     _FaqItem(
-      icon: Icons.swap_horiz_rounded,
-      color: AppTheme.accentPurple,
+      icon: LucideIcons.arrowLeftRight,
+      color: AppColors.accentPurple,
       question: '¿Puedo transferir un premio a otra persona?',
       answer:
-          'Sí. En la pestaña "PREMIOS" toca "TRANSFERIR" e ingresa el correo de un amigo registrado en Fidelity. El premio se moverá a su cuenta.',
+          'Sí. En la pestaña "Premios" toca "Transferir" e ingresa el correo de un amigo registrado en Fidelity. El premio se moverá a su cuenta.',
     ),
     _FaqItem(
-      icon: Icons.access_time_rounded,
-      color: AppTheme.accentPink,
+      icon: LucideIcons.clock,
+      color: AppColors.accentPink,
       question: '¿Por qué no puedo escanear el mismo QR dos veces seguidas?',
       answer:
           'Cada negocio define un tiempo de espera entre escaneos (cooldown). Esto evita acumulaciones automáticas. Puedes escanear en otros locales mientras tanto.',
     ),
     _FaqItem(
-      icon: Icons.lock_reset_rounded,
-      color: AppTheme.accentGreen,
+      icon: LucideIcons.lock,
+      color: AppColors.accentGreen,
       question: '¿Cómo cambio mi contraseña?',
       answer:
-          'En tu perfil toca "CAMBIAR CONTRASEÑA". Necesitas al menos 6 caracteres. Tu correo no se puede modificar.',
+          'En tu perfil toca "Cambiar contraseña". Necesitas al menos 6 caracteres. Tu correo no se puede modificar.',
     ),
     _FaqItem(
-      icon: Icons.delete_outline_rounded,
-      color: Colors.black54,
+      icon: LucideIcons.trash2,
+      color: AppColors.textSecondary,
       question: '¿Cómo elimino mi cuenta?',
       answer:
-          'Desde tu perfil toca "ELIMINAR MI CUENTA". La acción es irreversible: borramos todos tus datos personales conforme a privacidad.',
+          'Desde tu perfil toca "Eliminar mi cuenta". La acción es irreversible: borramos todos tus datos personales conforme a privacidad.',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text(
-          'PREGUNTAS FRECUENTES',
-          style: GoogleFonts.anton(fontSize: 16, fontWeight: FontWeight.w400, letterSpacing: 2),
-        ),
+        title: Text('Preguntas frecuentes', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
       ),
       body: ListView(
@@ -84,22 +84,17 @@ class FaqsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppTheme.accentPurple.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(20),
+              color: AppColors.pastelOf(AppColors.accentPurple),
+              borderRadius: BorderRadius.circular(AppRadii.card),
             ),
             child: Row(
               children: [
-                const Icon(Icons.menu_book_rounded, size: 32, color: AppTheme.accentPurple),
+                const Icon(LucideIcons.fileText, size: 32, color: AppColors.accentPurple),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Manual de uso de Fidelity',
-                    style: GoogleFonts.anton(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 1,
-                      color: AppTheme.accentPurple,
-                    ),
+                    style: AppTypography.subtitleBold.copyWith(fontSize: 16, color: AppColors.accentPurple),
                   ),
                 ),
               ],
@@ -115,27 +110,22 @@ class FaqsScreen extends StatelessWidget {
                 await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
               }
             },
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadii.card),
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppTheme.accentGreen.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.accentGreen.withValues(alpha: 0.2)),
+                color: AppColors.pastelOf(AppColors.accentGreen),
+                borderRadius: BorderRadius.circular(AppRadii.card),
+                border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.2)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.support_agent_rounded, color: AppTheme.accentGreen),
-                  SizedBox(width: 12),
+                  const Icon(LucideIcons.handHeart, color: AppColors.accentGreen),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       '¿Tienes otra pregunta? Escríbenos por WhatsApp y te ayudamos en el momento.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.accentGreen,
-                        height: 1.4,
-                      ),
+                      style: AppTypography.bodyMedium.copyWith(fontSize: 12, color: AppColors.accentGreen),
                     ),
                   ),
                 ],
@@ -173,9 +163,9 @@ class _FaqCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+        color: AppColors.surfaceCard,
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        boxShadow: AppShadows.card,
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -185,23 +175,14 @@ class _FaqCard extends StatelessWidget {
           leading: Icon(item.icon, color: item.color, size: 28),
           title: Text(
             item.question,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 13,
-              letterSpacing: 0.3,
-            ),
+            style: AppTypography.bodyRegular.copyWith(fontWeight: FontWeight.w700, fontSize: 13),
           ),
           children: [
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 item.answer,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  height: 1.5,
-                ),
+                style: AppTypography.bodyMedium.copyWith(fontSize: 13, height: 1.5),
               ),
             ),
           ],

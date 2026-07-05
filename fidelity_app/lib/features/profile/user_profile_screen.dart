@@ -2,10 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../core/theme/app_theme.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/validators/app_validators.dart';
 import '../help/faqs_screen.dart';
 import '../auth/providers/auth_provider.dart';
@@ -65,7 +69,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         final error = ref.read(userProfileProvider).error;
         if (error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $error'), backgroundColor: AppTheme.accentPink),
+            SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.accentPink),
           );
         }
       }
@@ -89,30 +93,25 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 36),
             margin: const EdgeInsets.symmetric(horizontal: 48),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(32),
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(AppRadii.card),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    color: AppTheme.accentGreen,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.check_rounded, color: Colors.white, size: 48),
+                  decoration: const BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle),
+                  child: const Icon(LucideIcons.circleCheck, color: Colors.white, size: 44),
                 )
                     .animate()
                     .scale(duration: 450.ms, curve: Curves.easeOutBack)
                     .then()
                     .shimmer(duration: 600.ms, color: Colors.white70),
                 const SizedBox(height: 20),
-                Text(
-                  '¡PERFIL ACTUALIZADO!',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.anton(fontSize: 16, letterSpacing: 1, fontWeight: FontWeight.w400),
-                ).animate().fadeIn(delay: 200.ms),
+                Text('¡Perfil actualizado!', textAlign: TextAlign.center, style: AppTypography.titleBold)
+                    .animate()
+                    .fadeIn(delay: 200.ms),
               ],
             ),
           ).animate().fadeIn(duration: 250.ms).scale(begin: const Offset(0.85, 0.85), curve: Curves.easeOut),
@@ -127,39 +126,30 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       builder: (context) {
         final confirmController = TextEditingController();
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-          title: Text('¿ELIMINAR MI CUENTA?', style: GoogleFonts.anton(fontWeight: FontWeight.w400, letterSpacing: 1)),
+          backgroundColor: AppColors.surfaceCard,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+          title: Text('¿Eliminar mi cuenta?', style: AppTypography.titleBold),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Esta acción es irreversible y cumplimos con borrar todos tus datos personales.',
-                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black54),
+                style: AppTypography.bodyMedium,
               ),
-              const SizedBox(height: 24),
-              const Text('Escribe "ELIMINAR" para confirmar:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              const SizedBox(height: AppSpacing.lg),
+              Text('Escribe "ELIMINAR" para confirmar:', style: AppTypography.labelBold),
               const SizedBox(height: 8),
-              TextField(
-                controller: confirmController,
-                decoration: InputDecoration(
-                  hintText: 'ELIMINAR',
-                  filled: true,
-                  fillColor: Colors.black.withValues(alpha: 0.05),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2),
-              ),
+              AppTextField(controller: confirmController, hint: 'ELIMINAR'),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCELAR')),
-            ElevatedButton(
+            SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context, false)),
+            PrimaryButton(
+              label: 'Eliminar definitivamente',
+              isDestructive: true,
               onPressed: () {
                 if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') Navigator.pop(context, true);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentPink),
-              child: const Text('ELIMINAR DEFINITIVAMENTE'),
             ),
           ],
         );
@@ -175,7 +165,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       } else {
         final error = ref.read(userProfileProvider).error;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $error'), backgroundColor: AppTheme.accentPink),
+          SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.accentPink),
         );
       }
     }
@@ -191,51 +181,44 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocalState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text('CAMBIAR CONTRASEÑA',
-              style: GoogleFonts.anton(fontWeight: FontWeight.w400, letterSpacing: 1, fontSize: 16),
-              textAlign: TextAlign.center),
+          backgroundColor: AppColors.surfaceCard,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+          title: Text('Cambiar Contraseña', style: AppTypography.titleBold.copyWith(fontSize: 16), textAlign: TextAlign.center),
           content: Form(
             key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(
+                AppTextField(
                   controller: newPwdController,
                   obscureText: !isVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Nueva contraseña',
-                    helperText: 'Mínimo 6 caracteres',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
-                      onPressed: () => setLocalState(() => isVisible = !isVisible),
-                    ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  label: 'Nueva contraseña',
+                  helperText: 'Mínimo 6 caracteres',
+                  prefixIcon: LucideIcons.lock,
+                  suffixIcon: IconButton(
+                    icon: Icon(isVisible ? LucideIcons.eye : LucideIcons.eyeOff, color: AppColors.textSecondary),
+                    onPressed: () => setLocalState(() => isVisible = !isVisible),
                   ),
                   validator: AppValidators.validatePassword,
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: AppSpacing.md),
+                AppTextField(
                   controller: confirmPwdController,
                   obscureText: !isVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Confirmar contraseña',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
+                  label: 'Confirmar contraseña',
+                  prefixIcon: LucideIcons.lock,
                   validator: (v) => AppValidators.validateConfirmPassword(v, newPwdController.text),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCELAR')),
-            ElevatedButton(
+            SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
+            PrimaryButton(
+              label: 'Guardar',
               onPressed: () {
                 if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
               },
-              child: const Text('GUARDAR'),
             ),
           ],
         ),
@@ -248,12 +231,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Contraseña actualizada'), backgroundColor: AppTheme.accentGreen),
+          const SnackBar(content: Text('Contraseña actualizada'), backgroundColor: AppColors.accentGreen),
         );
       } else {
         final error = ref.read(userProfileProvider).error;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $error'), backgroundColor: AppTheme.accentPink),
+          SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.accentPink),
         );
       }
     }
@@ -263,17 +246,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('¿CERRAR SESIÓN?', textAlign: TextAlign.center),
-        content: const Text('¿Estás seguro que deseas salir de tu cuenta?',
-            textAlign: TextAlign.center),
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('¿Cerrar sesión?', textAlign: TextAlign.center, style: AppTypography.titleBold),
+        content: Text('¿Estás seguro que deseas salir de tu cuenta?', textAlign: TextAlign.center, style: AppTypography.bodyRegular),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('CANCELAR')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('CERRAR SESIÓN'),
-          ),
+          SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
+          PrimaryButton(label: 'Cerrar Sesión', onPressed: () => Navigator.pop(ctx, true)),
         ],
       ),
     );
@@ -297,20 +276,22 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     final state = ref.watch(userProfileProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('MI PERFIL', style: GoogleFonts.anton(fontSize: 16, fontWeight: FontWeight.w400, letterSpacing: 2)),
+        title: Text('Mi Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
         actions: [
-          IconButton(
+          IconActionButton(
+            icon: LucideIcons.circleCheck,
+            backgroundColor: AppColors.pastelOf(AppColors.accentGreen),
+            iconColor: AppColors.accentGreen,
             onPressed: state.isLoading ? null : _saveChanges,
-            icon: const Icon(Icons.check_rounded, color: AppTheme.accentGreen, size: 28),
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: state.isLoading && state.fullName.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(32),
               child: Form(
@@ -322,87 +303,86 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                         onTap: _pickImage,
                         child: Stack(
                           children: [
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.black.withValues(alpha: 0.04),
-                                image: _newAvatarFile != null
-                                    ? DecorationImage(image: FileImage(File(_newAvatarFile!.path)), fit: BoxFit.cover)
-                                    : (state.avatarUrl != null ? DecorationImage(image: NetworkImage(state.avatarUrl!), fit: BoxFit.cover) : null),
-                              ),
-                              child: (state.avatarUrl == null && _newAvatarFile == null)
-                                  ? const Icon(Icons.person_outline, size: 50, color: Colors.black26)
-                                  : null,
+                            UserAvatar(
+                              imageUrl: _newAvatarFile != null ? null : state.avatarUrl,
+                              initials: state.fullName.isNotEmpty ? state.fullName[0] : '?',
+                              size: 120,
+                              backgroundColor: AppColors.accentPurple,
                             ),
+                            if (_newAvatarFile != null)
+                              Positioned.fill(
+                                child: ClipOval(
+                                  child: Image.file(File(_newAvatarFile!.path), fit: BoxFit.cover),
+                                ),
+                              ),
                             Positioned(
                               right: 0,
                               bottom: 0,
                               child: Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(color: Colors.black, shape: BoxShape.circle),
-                                child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18),
+                                decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                                child: const Icon(LucideIcons.camera, color: Colors.white, size: 18),
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 48),
-                    _buildField(_fullNameController, 'NOMBRE COMPLETO', Icons.person_outline),
-                    const SizedBox(height: 24),
-                    _buildField(
-                      _phoneController,
-                      'TELÉFONO',
-                      Icons.phone_android_rounded,
+                    const SizedBox(height: AppSpacing.xl),
+                    AppTextField(
+                      controller: _fullNameController,
+                      label: 'Nombre completo',
+                      prefixIcon: LucideIcons.user,
+                      validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    AppTextField(
+                      controller: _phoneController,
+                      label: 'Teléfono',
+                      prefixIcon: LucideIcons.phone,
                       keyboardType: TextInputType.phone,
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(10),
                         FilteringTextInputFormatter.digitsOnly,
                       ],
+                      validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     _buildEmailReadOnly(state.email ?? ''),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ACCIONES DE CUENTA
                     _ProfileAction(
-                      icon: Icons.lock_reset_rounded,
-                      label: 'CAMBIAR CONTRASEÑA',
-                      color: AppTheme.accentPurple,
+                      icon: LucideIcons.lock,
+                      label: 'Cambiar contraseña',
+                      color: AppColors.accentPurple,
                       onTap: _changePassword,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
                     _ProfileAction(
-                      icon: Icons.help_outline_rounded,
-                      label: 'PREGUNTAS FRECUENTES',
-                      color: AppTheme.accentYellow,
+                      icon: LucideIcons.circleHelp,
+                      label: 'Preguntas frecuentes',
+                      color: AppColors.accentAmber,
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const FaqsScreen()),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
                     _ProfileAction(
-                      icon: Icons.logout_rounded,
-                      label: 'CERRAR SESIÓN',
-                      color: Colors.black54,
+                      icon: LucideIcons.logOut,
+                      label: 'Cerrar sesión',
+                      color: AppColors.textSecondary,
                       onTap: _logout,
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
                     TextButton.icon(
                       onPressed: _deleteAccount,
-                      icon: const Icon(Icons.delete_forever_rounded, color: Colors.black26),
-                      label: const Text(
-                        'ELIMINAR MI CUENTA',
-                        style: TextStyle(color: Colors.black26, fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1),
-                      ),
+                      icon: const Icon(LucideIcons.trash2, color: AppColors.border),
+                      label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.border)),
                     ),
                   ],
-                )
-                 
-                 ,
+                ),
               ),
             ),
     );
@@ -412,51 +392,24 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('CORREO REGISTRADO',
-            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: Colors.black38, letterSpacing: 1)),
+        Text('Correo registrado', style: AppTypography.labelBold.copyWith(color: AppColors.textSecondary)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(16),
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(AppRadii.pill),
           ),
           child: Row(
             children: [
-              const Icon(Icons.email_outlined, size: 20, color: Colors.black26),
+              const Icon(LucideIcons.mail, size: 20, color: AppColors.border),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  email,
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Colors.black54),
-                ),
+                child: Text(email, style: AppTypography.subtitleBold.copyWith(fontSize: 15, color: AppColors.textSecondary)),
               ),
-              const Icon(Icons.lock_outline, size: 16, color: Colors.black26),
+              const Icon(LucideIcons.lock, size: 16, color: AppColors.border),
             ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildField(TextEditingController controller, String label, IconData icon, {TextInputType keyboardType = TextInputType.text, List<TextInputFormatter>? inputFormatters}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: Colors.black38, letterSpacing: 1)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20, color: Colors.black26),
-            filled: true,
-            fillColor: Colors.black.withValues(alpha: 0.04),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-          ),
-          validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
         ),
       ],
     );
@@ -482,29 +435,21 @@ class _ProfileAction extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadii.card),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(16),
+            color: AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(AppRadii.card),
           ),
           child: Row(
             children: [
               Icon(icon, size: 22, color: color),
               const SizedBox(width: 16),
               Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13,
-                    letterSpacing: 1,
-                  ),
-                ),
+                child: Text(label, style: AppTypography.subtitleBold.copyWith(color: color, fontSize: 14)),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.black26),
+              const Icon(LucideIcons.chevronRight, color: AppColors.border),
             ],
           ),
         ),

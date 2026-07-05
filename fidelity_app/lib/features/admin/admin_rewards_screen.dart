@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/services/realtime_sync_service.dart';
+import '../../shared/widgets/shared_widgets.dart';
 import 'admin_user_rewards_detail_screen.dart';
 
 class AdminRewardsScreen extends StatefulWidget {
@@ -85,7 +90,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
 
       // Filter logic
       final startOfDayUtc = EcuadorDateUtils.getStartOfDayEcuadorUtc();
-      
+
       if (_selectedFilter == 'today') {
         query = query.gte('earned_at', startOfDayUtc.toIso8601String());
       } else if (_selectedFilter == 'week') {
@@ -120,17 +125,17 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
       for (var reward in response) {
         final rewardId = reward['id'];
         final business = reward['businesses'] ?? {};
-        
+
         // Buscar si este premio fue transferido
         final transferInfo = transfers.where((t) => t['reward_id'] == rewardId).toList();
-        
+
         bool isTransferred = transferInfo.isNotEmpty;
         String originalUserId = reward['user_id'];
         Map<String, dynamic> originalProfile = reward['loyalty_cards']?['profiles'] ?? {};
 
         String? transferredToId;
         String? transferredAt;
-        
+
         if (isTransferred) {
           // Si fue transferido, el dueño actual en 'rewards' es el destinatario.
           // El remitente original es el 'from_user_id' del primer transfer (asumiendo 1 transfer)
@@ -138,9 +143,9 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
           originalUserId = firstTransfer['from_user_id'];
           transferredToId = firstTransfer['to_user_id'];
           transferredAt = firstTransfer['transferred_at'];
-          
+
           // No tenemos el profile del remitente original en esta query si miramos 'loyalty_cards',
-          // porque loyalty_cards apunta al destinatario. 
+          // porque loyalty_cards apunta al destinatario.
           // Para simplificar y no hacer N queries, usaremos "Usuario Transferidor" si no lo tenemos.
           // Nota: lo ideal sería buscar el perfil original, pero por ahora mostramos ID si falta.
           if (originalProfile['id'] != originalUserId) {
@@ -217,123 +222,70 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           title: const Text('Premios Canjeados'),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          foregroundColor: Colors.black,
-          bottom: const TabBar(
-            tabs: [
+          bottom: TabBar(
+            labelStyle: AppTypography.labelBold,
+            unselectedLabelStyle: AppTypography.bodyMedium.copyWith(fontSize: 12),
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textSecondary,
+            indicatorSize: TabBarIndicatorSize.label,
+            indicator: const UnderlineTabIndicator(
+              borderSide: BorderSide(width: 3, color: AppColors.primary),
+              insets: EdgeInsets.symmetric(horizontal: 16),
+            ),
+            tabs: const [
               Tab(text: 'Usuarios Ganadores'),
               Tab(text: 'Historial Traspasos'),
             ],
-            labelColor: AppTheme.accentPurple,
-            unselectedLabelColor: Colors.black54,
-            indicatorColor: AppTheme.accentPurple,
           ),
         ),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverToBoxAdapter(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${_filteredUsers.length} usuarios ganadores',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _selectedFilter,
-                            icon: const Icon(
-                              Icons.filter_list,
-                              color: Colors.black,
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'all',
-                                child: Text('Todos (Últimos 100)'),
-                              ),
-                              DropdownMenuItem(value: 'today', child: Text('Hoy')),
-                              DropdownMenuItem(
-                                value: 'week',
-                                child: Text('Esta Semana'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'month',
-                                child: Text('Este Mes'),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _selectedFilter = value;
-                                });
-                                _loadRewards();
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Business Filter
-                    if (_businessesList.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverToBoxAdapter(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  child: Column(
+                    children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Local:',
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Text(
+                            '${_filteredUsers.length} usuarios ganadores',
+                            style: AppTypography.subtitleBold.copyWith(fontSize: 14),
                           ),
                           DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              value: _selectedBusinessId,
+                              value: _selectedFilter,
                               icon: const Icon(
-                                Icons.store,
-                                color: Colors.black,
+                                LucideIcons.listFilter,
+                                color: AppColors.textPrimary,
                                 size: 18,
                               ),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                              items: [
-                                const DropdownMenuItem(
+                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 14),
+                              dropdownColor: AppColors.surfaceCard,
+                              borderRadius: BorderRadius.circular(AppRadii.badge),
+                              items: const [
+                                DropdownMenuItem(
                                   value: 'all',
-                                  child: Text('Todos los locales'),
+                                  child: Text('Todos (Últimos 100)'),
                                 ),
-                                ..._businessesList.map((b) {
-                                  return DropdownMenuItem(
-                                    value: b['id'] as String,
-                                    child: Text(
-                                      b['name'] != null
-                                          ? (b['name'].toString().length > 20
-                                                ? '${b['name'].toString().substring(0, 20)}...'
-                                                : b['name'])
-                                          : 'Desconocido',
-                                    ),
-                                  );
-                                }).toList(),
+                                DropdownMenuItem(value: 'today', child: Text('Hoy')),
+                                DropdownMenuItem(
+                                  value: 'week',
+                                  child: Text('Esta Semana'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'month',
+                                  child: Text('Este Mes'),
+                                ),
                               ],
                               onChanged: (value) {
                                 if (value != null) {
                                   setState(() {
-                                    _selectedBusinessId = value;
+                                    _selectedFilter = value;
                                   });
                                   _loadRewards();
                                 }
@@ -342,202 +294,170 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                           ),
                         ],
                       ),
-                    ],
-                    const SizedBox(height: 12),
-                    // Barra de Búsqueda
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: TextField(
+                      // Business Filter
+                      if (_businessesList.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Local:',
+                              style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
+                            ),
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedBusinessId,
+                                icon: const Icon(
+                                  LucideIcons.store,
+                                  color: AppColors.textPrimary,
+                                  size: 18,
+                                ),
+                                style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 14),
+                                dropdownColor: AppColors.surfaceCard,
+                                borderRadius: BorderRadius.circular(AppRadii.badge),
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: 'all',
+                                    child: Text('Todos los locales'),
+                                  ),
+                                  ..._businessesList.map((b) {
+                                    return DropdownMenuItem(
+                                      value: b['id'] as String,
+                                      child: Text(
+                                        b['name'] != null
+                                            ? (b['name'].toString().length > 20
+                                                  ? '${b['name'].toString().substring(0, 20)}...'
+                                                  : b['name'])
+                                            : 'Desconocido',
+                                      ),
+                                    );
+                                  }),
+                                ],
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      _selectedBusinessId = value;
+                                    });
+                                    _loadRewards();
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.md),
+                      // Barra de Búsqueda
+                      AppTextField(
                         controller: _searchController,
+                        hint: 'Buscar usuario por nombre o email...',
+                        prefixIcon: LucideIcons.search,
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _searchQuery = '';
+                                  });
+                                },
+                              )
+                            : null,
                         onChanged: (value) {
                           setState(() {
                             _searchQuery = value;
                           });
                         },
-                        decoration: InputDecoration(
-                          hintText: 'Buscar usuario por nombre o email...',
-                          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
-                          prefixIcon: const Icon(Icons.search, size: 20, color: AppTheme.accentPurple),
-                          suffixIcon: _searchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.close, size: 18),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    setState(() {
-                                      _searchQuery = '';
-                                    });
-                                  },
-                                )
-                              : null,
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ];
-        },
-        body: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(AppTheme.accentPurple),
-                ),
-              )
-            : TabBarView(
-                    children: [
-                      // TAB 1: Usuarios Ganadores
-                      _filteredUsers.isEmpty
-                          ? Center(
+            ];
+          },
+          body: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
+                  ),
+                )
+              : TabBarView(
+                  children: [
+                    // TAB 1: Usuarios Ganadores
+                    _filteredUsers.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.search_off_rounded, size: 48, color: Colors.grey[300]),
-                                  const SizedBox(height: 16),
+                                  Container(
+                                    padding: const EdgeInsets.all(28),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.pastelOf(AppColors.accentPurple),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(LucideIcons.users, size: 56, color: AppColors.accentPurple),
+                                  ),
+                                  const SizedBox(height: AppSpacing.lg),
                                   Text(
-                                    _searchQuery.isEmpty 
-                                        ? 'No hay usuarios que hayan ganado premios en este período' 
+                                    _searchQuery.isEmpty
+                                        ? 'No hay usuarios que hayan ganado premios en este período'
                                         : 'No se encontraron usuarios',
-                                    style: TextStyle(color: Colors.grey[500]),
+                                    style: AppTypography.bodyMedium,
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
-                            )
-                          : RefreshIndicator(
-                              onRefresh: _loadRewards,
-                              color: Colors.black,
-                              child: ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                itemCount: _filteredUsers.length,
-                                itemBuilder: (context, index) {
-                                  final userSummary = _filteredUsers[index];
-                                  final userName = userSummary['user_name'];
-                                  final userEmail = userSummary['user_email'];
-                                  final rewardsList = userSummary['rewards'] as List;
-                                  final rewardCount = rewardsList.length;
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: _loadRewards,
+                            color: AppColors.primary,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                              itemCount: _filteredUsers.length,
+                              itemBuilder: (context, index) {
+                                final userSummary = _filteredUsers[index];
+                                final userName = (userSummary['user_name'] ?? '').toString();
+                                final userEmail = (userSummary['user_email'] ?? '').toString();
+                                final rewardsList = userSummary['rewards'] as List;
+                                final rewardCount = rewardsList.length;
 
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(20),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.03),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(20),
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => AdminUserRewardsDetailScreen(
-                                                userId: userSummary['user_id'],
-                                                userName: userName,
-                                                userEmail: userEmail,
-                                                rewards: List<Map<String, dynamic>>.from(rewardsList),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: Row(
-                                            children: [
-                                              CircleAvatar(
-                                                radius: 24,
-                                                backgroundColor: AppTheme.accentPurple.withValues(alpha: 0.1),
-                                                child: Text(
-                                                  userName.isNotEmpty ? userName[0].toUpperCase() : '?',
-                                                  style: const TextStyle(
-                                                    color: AppTheme.accentPurple,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      userName,
-                                                      style: const TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 14,
-                                                        color: Colors.black87,
-                                                      ),
-                                                      maxLines: 2,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    if (userEmail.isNotEmpty)
-                                                      Text(
-                                                        userEmail,
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black54,
-                                                        ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                                decoration: BoxDecoration(
-                                                  color: AppTheme.accentPurple,
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      '$rewardCount',
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 14,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    const Icon(
-                                                      Icons.card_giftcard,
-                                                      size: 14,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                                  child: ModuleListCard(
+                                    icon: LucideIcons.user,
+                                    iconBackgroundColor: AppColors.accentPurple,
+                                    title: userName,
+                                    subtitle: userEmail.isNotEmpty ? userEmail : 'Sin correo registrado',
+                                    badgeCount: rewardCount,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AdminUserRewardsDetailScreen(
+                                            userId: userSummary['user_id'],
+                                            userName: userName,
+                                            userEmail: userEmail,
+                                            rewards: List<Map<String, dynamic>>.from(rewardsList),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  )
-                                  .animate(delay: Duration(milliseconds: 50 * index))
-                                  .fadeIn(duration: 400.ms)
-                                  .slideX(begin: 0.1, curve: Curves.easeOutBack);
-                                },
-                              ),
+                                      );
+                                    },
+                                  ),
+                                )
+                                    .animate(delay: Duration(milliseconds: 50 * index))
+                                    .fadeIn(duration: 400.ms)
+                                    .slideX(begin: 0.1, curve: Curves.easeOutBack);
+                              },
                             ),
-                            
-                      // TAB 2: Historial Traspasos
-                      _buildTransfersList(),
-                    ],
-                  ),
+                          ),
+
+                    // TAB 2: Historial Traspasos
+                    _buildTransfersList(),
+                  ],
+                ),
         ),
       ),
     );
@@ -552,25 +472,36 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
     final filtered = _filteredTransfers;
     if (filtered.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.swap_horiz_rounded, size: 48, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              'No hay traspasos registrados',
-              style: TextStyle(color: Colors.grey[500]),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  color: AppColors.pastelOf(AppColors.accentOrange),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(LucideIcons.arrowLeftRight, size: 56, color: AppColors.accentOrange),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'No hay traspasos registrados',
+                style: AppTypography.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
-    
+
     return RefreshIndicator(
       onRefresh: _loadRewards,
-      color: Colors.black,
+      color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         itemCount: filtered.length,
         itemBuilder: (context, index) {
           final transfer = filtered[index];
@@ -580,24 +511,18 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
           final toEmail = transfer['to_user']?['email'] ?? '';
           final businessName = transfer['businesses']?['name'] ?? 'Local Desconocido';
           final pts = transfer['rewards']?['points_used'] ?? '?';
-          final dateStr = transfer['transferred_at'] != null 
-              ? EcuadorDateUtils.formatEcuadorTime(transfer['transferred_at']) 
+          final dateStr = transfer['transferred_at'] != null
+              ? EcuadorDateUtils.formatEcuadorTime(transfer['transferred_at'])
               : '';
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              boxShadow: AppShadows.card,
             ),
-            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -609,19 +534,19 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'REMITENTE',
-                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.black38, letterSpacing: 0.5),
+                            style: AppTypography.labelBold.copyWith(fontSize: 9, color: AppColors.textSecondary),
                           ),
                           Text(
                             fromName,
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                            style: AppTypography.bodyRegular.copyWith(fontWeight: FontWeight.w700, fontSize: 14),
                             maxLines: 1, overflow: TextOverflow.ellipsis,
                           ),
                           if (fromEmail.isNotEmpty)
                             Text(
                               fromEmail,
-                              style: const TextStyle(fontSize: 11, color: Colors.black54),
+                              style: AppTypography.caption,
                               maxLines: 1, overflow: TextOverflow.ellipsis,
                             ),
                         ],
@@ -629,36 +554,36 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                     ),
                     Text(
                       dateStr,
-                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      style: AppTypography.caption,
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Padding(
                       padding: EdgeInsets.only(top: 12),
-                      child: Icon(Icons.arrow_downward_rounded, size: 14, color: AppTheme.accentPurple),
+                      child: Icon(LucideIcons.cornerDownRight, size: 14, color: AppColors.accentOrange),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'DESTINATARIO',
-                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.black38, letterSpacing: 0.5),
+                            style: AppTypography.labelBold.copyWith(fontSize: 9, color: AppColors.textSecondary),
                           ),
                           Text(
                             toName,
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                            style: AppTypography.bodyRegular.copyWith(fontWeight: FontWeight.w700, fontSize: 14),
                             maxLines: 1, overflow: TextOverflow.ellipsis,
                           ),
                           if (toEmail.isNotEmpty)
                             Text(
                               toEmail,
-                              style: const TextStyle(fontSize: 11, color: Colors.black54),
+                              style: AppTypography.caption,
                               maxLines: 1, overflow: TextOverflow.ellipsis,
                             ),
                         ],
@@ -666,26 +591,33 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                     ),
                   ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Divider(height: 1, color: Colors.black12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  child: const Divider(height: 1, color: AppColors.border),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.store, size: 14, color: Colors.black45),
+                        const Icon(LucideIcons.store, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 6),
                         Text(
                           businessName,
-                          style: const TextStyle(fontSize: 13, color: Colors.black87),
+                          style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
                         ),
                       ],
                     ),
-                    Text(
-                      '$pts pts',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppTheme.accentPurple),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.pastelOf(AppColors.accentPurple),
+                        borderRadius: BorderRadius.circular(AppRadii.badge),
+                      ),
+                      child: Text(
+                        '$pts pts',
+                        style: AppTypography.labelBold.copyWith(color: AppColors.accentPurple, fontSize: 11),
+                      ),
                     ),
                   ],
                 ),

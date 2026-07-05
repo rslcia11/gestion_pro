@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:confetti/confetti.dart';
-import '../theme/app_theme.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_radii.dart';
+import '../theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 
 class GlobalCelebrationDialog extends StatefulWidget {
   final String title;
@@ -63,8 +66,8 @@ class _GlobalCelebrationDialogState extends State<GlobalCelebrationDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(48)),
+      backgroundColor: AppColors.surfaceCard,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
       content: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
@@ -78,10 +81,10 @@ class _GlobalCelebrationDialogState extends State<GlobalCelebrationDialog> {
             minBlastForce: 80,
             gravity: 0.1,
             colors: const [
-              AppTheme.accentPurple,
-              AppTheme.accentGreen,
-              AppTheme.accentYellow,
-              AppTheme.accentPink,
+              AppColors.accentPurple,
+              AppColors.accentGreen,
+              AppColors.accentAmber,
+              AppColors.accentPink,
             ],
           ),
           Column(
@@ -91,13 +94,13 @@ class _GlobalCelebrationDialogState extends State<GlobalCelebrationDialog> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentGreen.withValues(alpha: 0.1),
+                  color: AppColors.pastelOf(AppColors.accentGreen),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  widget.iconType == 'transfer' ? Icons.swap_horiz_rounded : Icons.celebration_rounded,
-                  size: 64,
-                  color: AppTheme.accentGreen,
+                  widget.iconType == 'transfer' ? LucideIcons.arrowLeftRight : LucideIcons.partyPopper,
+                  size: 56,
+                  color: AppColors.accentGreen,
                 ),
               )
               .animate(onPlay: (c) => c.repeat())
@@ -113,45 +116,16 @@ class _GlobalCelebrationDialogState extends State<GlobalCelebrationDialog> {
                 end: const Offset(0.8, 0.8),
               ),
               const SizedBox(height: 32),
-              Text(
-                widget.title,
-                style: GoogleFonts.anton(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 2,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              Text(widget.title, style: AppTypography.titleBold, textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              Text(
-                widget.message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black45,
-                  fontSize: 16,
-                ),
-              ),
+              Text(widget.message, textAlign: TextAlign.center, style: AppTypography.bodyRegular),
               const SizedBox(height: 24),
             ],
           ),
         ],
       ),
       actions: [
-        Center(
-          child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 48,
-                vertical: 16,
-              ),
-            ),
-            child: const Text('ENTENDIDO', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ),
-        const SizedBox(height: 16),
+        PrimaryButton(label: 'Entendido', onPressed: () => Navigator.pop(context)),
       ],
     );
   }
