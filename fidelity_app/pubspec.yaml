@@ -64,5 +64,5 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/images/logo_blanco.png"
-    background_color: "#FFFFFF"
-    theme_color: "#FFFFFF"
+    background_color: "#F5F5F5"
+    theme_color: "#000000"
