@@ -1,6 +1,9 @@
 # 🗄️ Esquema de Base de Datos y Lógica de Servidor
 
-Fidelity utiliza **Supabase (PostgreSQL)**. La lógica crítica reside en la base de datos para garantizar que las reglas de negocio se cumplan sin importar desde dónde se acceda a los datos.
+> [!NOTE]
+> Este documento describe el backend original de Supabase (`/supabase`), que hoy **no está conectado** a la app (ver [`architecture.md`](./architecture.md)). Queda como referencia del diseño de datos y reglas de negocio para cuando se conecte un backend nuevo.
+
+Donde Siempre utilizaba **Supabase (PostgreSQL)**. La lógica crítica residía en la base de datos para garantizar que las reglas de negocio se cumplieran sin importar desde dónde se accediera a los datos.
 
 ## 📊 Diagrama Entidad-Relación
 

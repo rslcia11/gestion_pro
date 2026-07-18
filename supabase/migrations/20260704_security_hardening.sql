@@ -1,5 +1,5 @@
 -- ============================================================================
--- FIDELITY — Hardening de seguridad (backend)
+-- DONDE SIEMPRE — Hardening de seguridad (backend)
 -- Verificado contra el uso real de la app + revisión adversarial (3 revisores).
 -- NO rompe flujos legítimos. Todo en una transacción: si algo falla, no se aplica nada.
 -- Aplicar en el SQL Editor de Supabase.

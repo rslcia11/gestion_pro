@@ -26,11 +26,11 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        working-directory: ./fidelity_app
+        working-directory: ./app
         run: flutter pub get
 
       - name: Analyze
-        working-directory: ./fidelity_app
+        working-directory: ./app
         # Solo falla el pipeline ante errores reales de compilación/tipos.
         # Warnings e infos (deprecaciones, imports sin uso menores, etc.) se
         # revisan en code review pero no deben bloquear el build — sobre todo
@@ -40,18 +40,18 @@ jobs:
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Run tests
-        working-directory: ./fidelity_app
+        working-directory: ./app
         run: flutter test
 
       - name: Build APK (release)
-        working-directory: ./fidelity_app
+        working-directory: ./app
         run: flutter build apk --release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: fidelity_app/build/app/outputs/flutter-apk/app-release.apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
 
   auto-version:

@@ -28,16 +28,16 @@ jobs:
           cache: true
 
       - name: Install Dependencies
-        working-directory: ./fidelity_app
+        working-directory: ./app
         run: flutter pub get
 
       - name: Build APK
-        working-directory: ./fidelity_app
+        working-directory: ./app
         run: flutter build apk --release
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Fidelity-App-Release
-          path: fidelity_app/build/app/outputs/flutter-apk/app-release.apk
+          name: App-Release
+          path: app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
