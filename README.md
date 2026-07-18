@@ -1,6 +1,6 @@
-# 💳 Fidelity - Plataforma de Fidelización Inteligente
+# 💳 Donde Siempre - Plataforma de Fidelización Inteligente
 
-Fidelity es una solución integral de fidelización de clientes para negocios locales. Permite a los comercios gestionar programas de recompensas de forma digital y a los usuarios acumular puntos mediante el escaneo de códigos QR, eliminando las tarjetas de cartón físicas.
+Donde Siempre es una solución integral de fidelización de clientes para negocios locales. Permite a los comercios gestionar programas de recompensas de forma digital y a los usuarios acumular puntos mediante el escaneo de códigos QR, eliminando las tarjetas de cartón físicas.
 
 ## 🚀 Arquitectura del Proyecto
 
