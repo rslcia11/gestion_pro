@@ -83,7 +83,6 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
   /// Calculate date range based on selected filter
   (DateTime start, DateTime end) _getDateRange() {
     final startOfDay = EcuadorDateUtils.getStartOfDayEcuadorUtc();
-    final nowEc = EcuadorDateUtils.nowEcuador();
     // Para simplificar y mantener la lógica de las consultas que asumen que devolvemos UTC,
     // devolveremos las fechas ya en UTC (EcuadorDateUtils.getStartOfDayEcuadorUtc es UTC).
     // Nota: 'now' no lo podemos usar directamente porque _loadScanData() llama a .toUtc().

@@ -12,7 +12,6 @@ import '../../scanner/providers/scanner_provider.dart';
 import '../data/auth_repository.dart';
 import '../../../main.dart';
 import '../../../core/services/push_notification_service.dart';
-import '../login_screen.dart';
 import 'package:flutter/material.dart';
 
 // Definición de estados posibles para la sesión

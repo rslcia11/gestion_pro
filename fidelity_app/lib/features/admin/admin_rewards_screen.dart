@@ -23,7 +23,6 @@ class AdminRewardsScreen extends StatefulWidget {
 class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
   final supabase = Supabase.instance.client;
   bool _isLoading = true;
-  List<Map<String, dynamic>> _rewards = [];
   List<Map<String, dynamic>> _businessesList = [];
   List<Map<String, dynamic>> _allTransfers = [];
   String _selectedBusinessId = 'all';
@@ -181,7 +180,6 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
 
       if (mounted) {
         setState(() {
-          _rewards = List<Map<String, dynamic>>.from(response);
           _allTransfers = transfers;
           _userSummaries = userGroups.values.toList();
           // Sort by user name

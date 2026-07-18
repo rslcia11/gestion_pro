@@ -33,8 +33,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   int _totalUsers = 0;
   int _totalScans = 0;
   int _totalRewards = 0;
-  int _approvedRewards = 0;
-  int _rejectedRewards = 0;
   int _pendingBusinessesCount = 0;
 
   RealtimeChannel? _adminChannel;
@@ -180,20 +178,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           .eq('is_demo', false)
           .count();
       
-      final approvedRewardsResponse = await supabase
-          .from('rewards')
-          .select('id')
-          .eq('status', 'approved')
-          .eq('is_demo', false)
-          .count();
-          
-      final rejectedRewardsResponse = await supabase
-          .from('rewards')
-          .select('id')
-          .eq('status', 'rejected')
-          .eq('is_demo', false)
-          .count();
-
       if (mounted) {
         setState(() {
           _totalBusinesses = businessesResponse.count;
@@ -201,8 +185,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
           _totalUsers = usersResponse.count;
           _totalScans = scansResponse.count;
           _totalRewards = rewardsResponse.count;
-          _approvedRewards = approvedRewardsResponse.count;
-          _rejectedRewards = rejectedRewardsResponse.count;
           _isLoading = false;
         });
       }
@@ -460,51 +442,6 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 ),
               ),
             ),
-      ),
-    );
-  }
-}
-
-class _StatusIndicator extends StatelessWidget {
-  final String label;
-  final String count;
-  final Color color;
-
-  const _StatusIndicator({
-    required this.label,
-    required this.count,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$label:',
-            style: TextStyle(
-              fontSize: 10,
-              color: color.withValues(alpha: 0.7),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            count,
-            style: TextStyle(
-              fontSize: 10,
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }

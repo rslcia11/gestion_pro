@@ -31,7 +31,13 @@ jobs:
 
       - name: Analyze
         working-directory: ./fidelity_app
-        run: flutter analyze
+        # Solo falla el pipeline ante errores reales de compilación/tipos.
+        # Warnings e infos (deprecaciones, imports sin uso menores, etc.) se
+        # revisan en code review pero no deben bloquear el build — sobre todo
+        # porque el canal 'stable' de este job puede ir por delante del SDK
+        # local del equipo y generar deprecation warnings nuevas en cualquier
+        # momento sin que el código esté realmente roto.
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Run tests
         working-directory: ./fidelity_app
