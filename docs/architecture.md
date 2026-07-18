@@ -1,20 +1,22 @@
 # 🏗️ Arquitectura del Frontend (Flutter)
 
-El frontend de Fidelity está diseñado siguiendo principios de **Screaming Architecture** y **Feature-first**, priorizando la cohesión y el desacoplamiento.
+El frontend de Donde Siempre está diseñado siguiendo principios de **Feature-first**, priorizando la cohesión y el desacoplamiento. Hoy es una app puramente front: no tiene backend conectado.
 
 ## 📂 Estructura de Carpetas
 
 ### `lib/core`
 El corazón compartido de la aplicación. Contiene código que no pertenece a ninguna funcionalidad específica:
--   **`config/`**: Configuraciones globales (Supabase URL, llaves de API).
--   **`services/`**: Servicios globales que interactúan con APIs externas o el sistema (Notificaciones, Exportación CSV, Transferencia de Premios).
--   **`theme/`**: El sistema de diseño "Pop-Minimalism". Centraliza colores, tipografías (Anton & Poppins) y constantes de animación.
--   **`utils/`**: Helpers para fechas, formateo de moneda, etc.
+-   **`services/`**: Servicios globales (Notificaciones push vía Firebase, Exportación CSV, Transferencia de Premios). La mayoría son stubs sin lógica real de datos, salvo el de notificaciones (Firebase sigue activo).
+-   **`theme/`**: El sistema de diseño extraído de Figma. Centraliza colores, tipografías (Poppins & Inter), radios, sombras y espaciado (`app_colors.dart`, `app_typography.dart`, `app_radii.dart`, `app_shadows.dart`, `app_spacing.dart`), orquestados por `app_theme.dart`.
+-   **`utils/`**: Helpers para fechas, formateo, etc.
 -   **`validators/`**: Lógica de validación de formularios reutilizable.
+
+### `lib/shared/widgets`
+Librería de componentes visuales compartidos (botones, inputs, cards, tags de estado, etc.) usados por todas las pantallas para mantener el diseño consistente.
 
 ### `lib/features`
 La aplicación se divide por dominios de negocio. Cada carpeta representa una "Feature" completa:
--   **`auth/`**: Login, Registro y el `AuthWrapper` (quien decide a qué pantalla enviarte según tu rol).
+-   **`auth/`**: Contiene `AuthWrapper`, que hoy siempre muestra `DesignPreviewScreen` — un selector de rol (cliente/negocio/admin) sin login real. `login_screen.dart`/`register_screen.dart` existen como UI ya diseñada pero no son navegables desde el flujo actual.
 -   **`business/`**: Todo lo relacionado con el dashboard del dueño, gestión de locales y creación de negocios.
 -   **`cards/`**: La vista de "Mis Tarjetas" para el cliente.
 -   **`scanner/`**: La interfaz de cámara y lógica de procesamiento de QR.
@@ -22,16 +24,15 @@ La aplicación se divide por dominios de negocio. Cada carpeta representa una "F
 
 ## 🎨 Sistema de Diseño y Animaciones
 
-Usamos un estilo **Pop-Minimalist** (inspirado en agencias como Emote). 
--   **Tipografía**: `Anton` para títulos impactantes y `Poppins` para legibilidad en cuerpo de texto.
--   **Animaciones**: Implementamos `flutter_animate` para micro-interacciones. 
+El diseño visual sale de un archivo de Figma de referencia: fondo claro, cards con sombra suave, botones pill, íconos del set **Lucide**, tipografía **Poppins** (títulos/CTA) e **Inter** (cuerpo).
+-   **Animaciones**: Implementamos `flutter_animate` para micro-interacciones.
     -   *Regla de Oro*: Las animaciones deben ser sutiles (300-600ms) y mejorar la UX, no retrasar al usuario.
 
-## 🔄 Flujo de Datos
+## 🔄 Flujo de Datos (estado actual: sin backend)
 
-1.  **UI (Widgets)**: Escuchan cambios y disparan eventos.
-2.  **Supabase SDK**: Actúa como nuestro Repositorio y Data Source.
-3.  **Realtime Streams**: Usamos `Supabase.instance.client.from(...).stream(...)` para que la UI se actualice sola cuando algo cambia en la base de datos (ej: el contador de puntos).
+Todos los `repository`/`provider` de `lib/features/*/data` y `lib/features/*/providers` están **stubbeados**: mantienen la misma firma pública que tenían cuando llamaban a Supabase, pero sus métodos de lectura devuelven listas/valores vacíos de forma inmediata (sin red) y los de escritura son no-ops. Esto permite que toda la UI compile y se navegue mostrando sus estados vacíos ya diseñados, sin depender de ningún servicio externo.
+
+Cuando se conecte una base de datos nueva, el trabajo es reemplazar la implementación interna de esos repositories — las pantallas y providers que los consumen no deberían necesitar cambios, porque ya están desacoplados detrás de esas interfaces.
 
 ---
 > [!TIP]

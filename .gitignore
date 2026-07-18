@@ -5,6 +5,4 @@ backup_supabase/
 supabase/.temp/
 
 # Artefactos de trabajo que no van al repo
-FIDELITY_*.png
-Fidelity.pdf
 check_policies.sql

@@ -1,6 +1,9 @@
 # ⚖️ Reglas de Negocio Críticas
 
-Este documento detalla las reglas que gobiernan el comportamiento de Fidelity. Muchas de estas reglas están implementadas a nivel de base de datos para máxima seguridad.
+> [!NOTE]
+> Este documento describe las reglas de negocio del backend original de Supabase (`/supabase`), que hoy **no está conectado** a la app (ver [`architecture.md`](./architecture.md)). Queda como referencia para cuando se conecte un backend nuevo.
+
+Este documento detalla las reglas que gobernaban el comportamiento de Donde Siempre. Muchas de estas reglas estaban implementadas a nivel de base de datos para máxima seguridad.
 
 ## 1. El Ciclo de Recompensa (Puntos ➔ Premios)
 -   Cada negocio define sus propios `points_required` (ej: 10 puntos para un café gratis).
