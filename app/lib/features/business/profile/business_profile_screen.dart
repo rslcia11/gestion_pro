@@ -295,6 +295,23 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     // Category Dropdown
                     Text('Categoría', style: AppTypography.labelBold.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 8),
+                    if (_categories.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'No hay categorías disponibles en este momento.',
+                                style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     Autocomplete<BusinessCategory>(
                       initialValue: TextEditingValue(text: _selectedCategory?.name.toUpperCase() ?? ''),
                       displayStringForOption: (BusinessCategory option) => option.name.toUpperCase(),
@@ -329,6 +346,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             ),
                           ),
                           validator: (String? value) {
+                            if (_categories.isEmpty) {
+                              return 'No hay categorías disponibles en este momento. Intentá de nuevo más tarde.';
+                            }
                             if (_selectedCategory == null || value == null || value.isEmpty) {
                               return 'Selecciona una categoría válida';
                             }

@@ -98,7 +98,11 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
     if (_currentStep == 0) {
       canContinue = true;
     } else if (_currentStep == 1) {
-      if (_personalFormKey.currentState!.validate()) canContinue = true;
+      if (_personalFormKey.currentState!.validate()) {
+        canContinue = true;
+      } else {
+        _showValidationError();
+      }
     } else if (_currentStep == 2) {
       if (_businessFormKey.currentState!.validate()) {
         if (_selectedLatitude == null || _selectedLongitude == null) {
@@ -111,17 +115,30 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         } else {
           canContinue = true;
         }
+      } else {
+        _showValidationError();
       }
     } else if (_currentStep == 3) {
       if (_campaignFormKey.currentState!.validate()) {
         _submitBusiness();
         return;
+      } else {
+        _showValidationError();
       }
     }
 
     if (canContinue && _currentStep < 3) {
       setState(() => _currentStep += 1);
     }
+  }
+
+  void _showValidationError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Revisá los campos marcados en rojo antes de continuar'),
+        backgroundColor: AppColors.accentPink,
+      ),
+    );
   }
 
   void _previousStep() {

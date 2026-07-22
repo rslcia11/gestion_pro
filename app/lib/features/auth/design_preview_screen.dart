@@ -55,7 +55,7 @@ class DesignPreviewScreen extends StatelessWidget {
                   title: 'Cliente',
                   subtitle: 'Tarjetas, QR y premios',
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const _PreviewBackWrapper(child: MyCardsScreen())),
+                    MaterialPageRoute(builder: (_) => const MyCardsScreen()),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -65,7 +65,7 @@ class DesignPreviewScreen extends StatelessWidget {
                   title: 'Dueño de Negocio',
                   subtitle: 'Panel completo de negocio',
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const _PreviewBackWrapper(child: BusinessDashboardScreen())),
+                    MaterialPageRoute(builder: (_) => const BusinessDashboardScreen()),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -75,7 +75,7 @@ class DesignPreviewScreen extends StatelessWidget {
                   title: 'Administrador',
                   subtitle: 'Panel de administración',
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const _PreviewBackWrapper(child: AdminDashboardScreen())),
+                    MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
                   ),
                 ),
               ],
@@ -83,55 +83,6 @@ class DesignPreviewScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Envuelve la home de un rol con un botón flotante para volver al selector
-/// de [DesignPreviewScreen]. No se toca el `leading` de cada home (lo usan
-/// para el avatar/logo propio), así que la flecha de volver automática de
-/// Flutter nunca aparece — este overlay soluciona eso SOLO en modo preview,
-/// sin tocar las pantallas reales de cada rol.
-class _PreviewBackWrapper extends StatelessWidget {
-  const _PreviewBackWrapper({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        child,
-        Positioned(
-          left: AppSpacing.md,
-          bottom: AppSpacing.md,
-          child: SafeArea(
-            child: Material(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(AppRadii.pill),
-              elevation: 4,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(AppRadii.pill),
-                onTap: () => Navigator.of(context).maybePop(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(LucideIcons.arrowLeft, size: 16, color: AppColors.onPrimary),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Volver a vista previa',
-                        style: AppTypography.labelBold.copyWith(color: AppColors.onPrimary, fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

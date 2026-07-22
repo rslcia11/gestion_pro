@@ -88,6 +88,9 @@ class StepBusinessData extends StatelessWidget {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
                 validator: (String? value) {
+                  if (categories.isEmpty) {
+                    return 'No hay categorías disponibles en este momento. Intentá de nuevo más tarde.';
+                  }
                   if (selectedCategory == null || value == null || value.isEmpty) {
                     return 'Selecciona una categoría válida de la lista';
                   }
@@ -123,6 +126,23 @@ class StepBusinessData extends StatelessWidget {
               );
             },
           ),
+          if (categories.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'No hay categorías disponibles en este momento.',
+                      style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 16),
 
           AppTextField(
