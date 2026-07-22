@@ -60,7 +60,7 @@ class ModuleListCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: AppTypography.subtitleBold, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(title, style: AppTypography.subtitleBold, maxLines: 2, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
                       Text(
                         subtitle,

@@ -239,7 +239,6 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Configurar Negocio'),
-        automaticallyImplyLeading: false, // Prevent going back if mandatory
       ),
       body: createBusinessState.isLoading
           ? const Center(
