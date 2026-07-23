@@ -128,6 +128,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
         prefixIconColor: AppColors.textSecondary,
+        errorMaxLines: 3,
       ),
 
       fontFamily: GoogleFonts.inter().fontFamily,
