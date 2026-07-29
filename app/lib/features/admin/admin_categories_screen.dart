@@ -171,6 +171,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                       ),
                       IconActionButton(
                         icon: LucideIcons.trash2,
+                        tooltip: 'Eliminar categoría',
                         backgroundColor: AppColors.pastelOf(AppColors.accentPink),
                         iconColor: AppColors.accentPink,
                         onPressed: () => _deleteCategory(category['id']),

@@ -561,6 +561,8 @@ class _LoyaltyCardItem extends StatelessWidget {
                             Text(
                               business['reward_long_description'].toString(),
                               style: AppTypography.caption,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                         ],
                       ),

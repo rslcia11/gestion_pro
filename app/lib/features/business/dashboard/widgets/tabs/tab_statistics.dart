@@ -118,7 +118,7 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
                   ListTile(
                     title: Text(title, style: AppTypography.titleBold.copyWith(fontSize: 16)),
                     subtitle: Text('${items.length} registros', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
-                    trailing: IconActionButton(icon: LucideIcons.x, onPressed: () => Navigator.pop(context)),
+                    trailing: IconActionButton(icon: LucideIcons.x, tooltip: 'Cerrar', onPressed: () => Navigator.pop(context)),
                   ),
                   const Divider(color: AppColors.border),
                   Expanded(
@@ -228,9 +228,9 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(dashboardProvider);
-    final customers = state.customers;
-    final business = state.business;
+    final (customers, business) = ref.watch(
+      dashboardProvider.select((s) => (s.customers, s.business)),
+    );
 
     if (business == null) return const SizedBox();
 

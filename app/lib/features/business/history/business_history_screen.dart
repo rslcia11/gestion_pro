@@ -83,12 +83,14 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
           actions: [
             IconActionButton(
               icon: _dateRange == null ? LucideIcons.listFilter : LucideIcons.filter,
+              tooltip: 'Filtrar por fecha',
               iconColor: _dateRange == null ? AppColors.textSecondary : AppColors.primary,
               onPressed: _selectDateRange,
             ),
             if (_dateRange != null)
               IconActionButton(
                 icon: LucideIcons.x,
+                tooltip: 'Quitar filtro de fecha',
                 onPressed: () { setState(() => _dateRange = null); _loadHistory(); },
               ),
           ],

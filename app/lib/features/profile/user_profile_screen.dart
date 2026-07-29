@@ -69,7 +69,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         final error = ref.read(userProfileProvider).error;
         if (error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.accentPink),
+            SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.error),
           );
         }
       }
@@ -165,7 +165,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       } else {
         final error = ref.read(userProfileProvider).error;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.accentPink),
+          SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -236,7 +236,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       } else {
         final error = ref.read(userProfileProvider).error;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.accentPink),
+          SnackBar(content: Text('Error: $error'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -283,6 +283,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         actions: [
           IconActionButton(
             icon: LucideIcons.circleCheck,
+            tooltip: 'Guardar cambios',
             backgroundColor: AppColors.pastelOf(AppColors.accentGreen),
             iconColor: AppColors.accentGreen,
             onPressed: state.isLoading ? null : _saveChanges,
@@ -378,8 +379,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     const SizedBox(height: AppSpacing.xl),
                     TextButton.icon(
                       onPressed: _deleteAccount,
-                      icon: const Icon(LucideIcons.trash2, color: AppColors.border),
-                      label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.border)),
+                      icon: const Icon(LucideIcons.trash2, color: AppColors.error),
+                      label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.error)),
                     ),
                   ],
                 ),
@@ -402,12 +403,17 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           ),
           child: Row(
             children: [
-              const Icon(LucideIcons.mail, size: 20, color: AppColors.border),
+              const Icon(LucideIcons.mail, size: 20, color: AppColors.textSecondary),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(email, style: AppTypography.subtitleBold.copyWith(fontSize: 15, color: AppColors.textSecondary)),
+                child: Text(
+                  email,
+                  style: AppTypography.subtitleBold.copyWith(fontSize: 15, color: AppColors.textSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const Icon(LucideIcons.lock, size: 16, color: AppColors.border),
+              const Icon(LucideIcons.lock, size: 16, color: AppColors.textSecondary),
             ],
           ),
         ),
@@ -449,7 +455,7 @@ class _ProfileAction extends StatelessWidget {
               Expanded(
                 child: Text(label, style: AppTypography.subtitleBold.copyWith(color: color, fontSize: 14)),
               ),
-              const Icon(LucideIcons.chevronRight, color: AppColors.border),
+              const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
             ],
           ),
         ),

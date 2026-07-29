@@ -27,4 +27,18 @@ class AppColors {
 
   /// Versión pastel (fondo del badge circular) de cada acento.
   static Color pastelOf(Color accent) => accent.withValues(alpha: 0.12);
+
+  /// Versión oscurecida de cada acento con contraste AA (≥4.5:1) para texto
+  /// o íconos sobre su propio fondo [pastelOf] — el acento "puro" solo
+  /// pasa 1.8–4.5:1 según el color, por debajo del mínimo de WCAG AA.
+  static Color pastelText(Color accent) {
+    if (accent == accentAmber) return const Color(0xFF9A6307);
+    if (accent == accentPurple) return const Color(0xFF9132E7);
+    if (accent == accentPink) return const Color(0xFFC5236B);
+    if (accent == accentGreen) return const Color(0xFF117D39);
+    if (accent == accentOrange) return const Color(0xFFB9460A);
+    if (accent == accentBlue) return const Color(0xFF2460E4);
+    if (accent == error) return const Color(0xFFCB1A41);
+    return accent;
+  }
 }

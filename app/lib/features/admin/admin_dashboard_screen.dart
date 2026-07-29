@@ -62,9 +62,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       appBar: AppBar(
         title: const Text('Panel de Administración'),
         actions: [
-          IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadMetrics),
+          IconActionButton(icon: LucideIcons.refreshCcw, tooltip: 'Actualizar', onPressed: _loadMetrics),
           const SizedBox(width: 4),
-          IconActionButton(icon: LucideIcons.logOut, onPressed: _logout),
+          IconActionButton(icon: LucideIcons.logOut, tooltip: 'Cerrar sesión', onPressed: _logout),
           const SizedBox(width: 8),
         ],
       ),

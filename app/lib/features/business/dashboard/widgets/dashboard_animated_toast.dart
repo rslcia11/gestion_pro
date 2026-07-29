@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radii.dart';
+import '../../../../core/theme/app_typography.dart';
+
 class DashboardAnimatedToast extends StatefulWidget {
   final String message;
   final Color color;
@@ -83,8 +87,8 @@ class _DashboardAnimatedToastState extends State<DashboardAnimatedToast>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(AppRadii.pill),
               boxShadow: [
                 BoxShadow(
                   color: widget.color.withValues(alpha: 0.25),
@@ -113,7 +117,7 @@ class _DashboardAnimatedToastState extends State<DashboardAnimatedToast>
                 Expanded(
                   child: Text(
                     widget.message,
-                    style: const TextStyle(
+                    style: AppTypography.bodyRegular.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
                       letterSpacing: 0.3,

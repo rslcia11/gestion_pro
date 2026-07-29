@@ -17,8 +17,7 @@ class TabPendingScans extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(dashboardProvider);
-    final pendingScans = state.pendingScans;
+    final pendingScans = ref.watch(dashboardProvider.select((s) => s.pendingScans));
 
     if (pendingScans.isEmpty) {
       return Center(
@@ -95,6 +94,7 @@ class TabPendingScans extends ConsumerWidget {
                   children: [
                     IconActionButton(
                       icon: LucideIcons.circleX,
+                      tooltip: 'Rechazar escaneo',
                       backgroundColor: AppColors.pastelOf(AppColors.accentPink),
                       iconColor: AppColors.accentPink,
                       onPressed: () => ref.read(dashboardProvider.notifier).rejectScan(scan['id']),
@@ -102,6 +102,7 @@ class TabPendingScans extends ConsumerWidget {
                     const SizedBox(width: 4),
                     IconActionButton(
                       icon: LucideIcons.circleCheck,
+                      tooltip: 'Aprobar escaneo',
                       backgroundColor: AppColors.pastelOf(AppColors.accentGreen),
                       iconColor: AppColors.accentGreen,
                       onPressed: () => ref.read(dashboardProvider.notifier).approveScan(scan['id'], scan['loyalty_card_id']),

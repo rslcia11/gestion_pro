@@ -4,6 +4,10 @@
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Necesitamos tu ubicación para mostrar el mapa y seleccionar la dirección de tu negocio</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Necesitamos tu cámara para escanear el código QR del negocio y para tomar la foto de tu logo o perfil</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Necesitamos acceder a tus fotos para elegir la imagen de tu logo o perfil</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

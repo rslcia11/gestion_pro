@@ -92,6 +92,12 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
       ),
     );
 
+    // Cede un frame para que el SnackBar se pinte antes de la rasterización
+    // del QR: el Canvas/Picture de dart:ui no es serializable, así que no se
+    // puede mover a compute()/un isolate — esto evita que la UI se sienta
+    // congelada mientras corre.
+    await WidgetsBinding.instance.endOfFrame;
+
     try {
 
       final painter = QrPainter(

@@ -31,6 +31,7 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _color;
+    final textColor = AppColors.pastelText(color);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -39,7 +40,7 @@ class StatusChip extends StatelessWidget {
       ),
       child: Text(
         label.toUpperCase(),
-        style: AppTypography.labelBold.copyWith(color: color, fontSize: 11),
+        style: AppTypography.labelBold.copyWith(color: textColor, fontSize: 11),
       ),
     );
   }

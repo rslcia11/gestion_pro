@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_typography.dart';
 
 class FaqsScreen extends StatelessWidget {
@@ -89,12 +90,12 @@ class FaqsScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(LucideIcons.fileText, size: 32, color: AppColors.accentPurple),
+                Icon(LucideIcons.fileText, size: 32, color: AppColors.pastelText(AppColors.accentPurple)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Manual de uso de Donde Siempre',
-                    style: AppTypography.subtitleBold.copyWith(fontSize: 16, color: AppColors.accentPurple),
+                    style: AppTypography.subtitleBold.copyWith(fontSize: 16, color: AppColors.pastelText(AppColors.accentPurple)),
                   ),
                 ),
               ],
@@ -105,7 +106,7 @@ class FaqsScreen extends StatelessWidget {
           const SizedBox(height: 24),
           InkWell(
             onTap: () async {
-              final Uri whatsappUrl = Uri.parse('https://wa.me/593995371895');
+              final Uri whatsappUrl = Uri.parse('https://wa.me/${AppTheme.supportWhatsApp}');
               if (await canLaunchUrl(whatsappUrl)) {
                 await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
               }
@@ -120,12 +121,12 @@ class FaqsScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.handHeart, color: AppColors.accentGreen),
+                  Icon(LucideIcons.handHeart, color: AppColors.pastelText(AppColors.accentGreen)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       '¿Tienes otra pregunta? Escríbenos por WhatsApp y te ayudamos en el momento.',
-                      style: AppTypography.bodyMedium.copyWith(fontSize: 12, color: AppColors.accentGreen),
+                      style: AppTypography.bodyMedium.copyWith(fontSize: 12, color: AppColors.pastelText(AppColors.accentGreen)),
                     ),
                   ),
                 ],
@@ -172,7 +173,15 @@ class _FaqCard extends StatelessWidget {
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          leading: Icon(item.icon, color: item.color, size: 28),
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.pastelOf(item.color),
+              borderRadius: BorderRadius.circular(AppRadii.badge),
+            ),
+            child: Icon(item.icon, color: AppColors.pastelText(item.color), size: 22),
+          ),
           title: Text(
             item.question,
             style: AppTypography.bodyRegular.copyWith(fontWeight: FontWeight.w700, fontSize: 13),

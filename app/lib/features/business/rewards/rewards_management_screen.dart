@@ -59,7 +59,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $error'),
-            backgroundColor: AppColors.accentPink,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -81,7 +81,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $error'),
-            backgroundColor: AppColors.accentPink,
+            backgroundColor: AppColors.error,
           ),
         );
       }

@@ -189,6 +189,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         actions: [
           IconActionButton(
             icon: LucideIcons.circleCheck,
+            tooltip: 'Guardar cambios',
             backgroundColor: AppColors.pastelOf(AppColors.accentGreen),
             iconColor: AppColors.accentGreen,
             onPressed: _isLoading ? null : _saveChanges,
@@ -234,7 +235,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 ),
                                 child:
                                     (_logoUrl == null && _newLogoFile == null)
-                                    ? const Icon(LucideIcons.store, size: 44, color: AppColors.border)
+                                    ? const Icon(LucideIcons.store, size: 44, color: AppColors.textSecondary)
                                     : null,
                               ),
                             ),
@@ -446,14 +447,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               child: Text(
                                 _address ?? 'Seleccionar en el mapa',
                                 style: AppTypography.bodyMedium.copyWith(
-                                  color: _address == null ? AppColors.border : AppColors.textPrimary,
+                                  color: _address == null ? AppColors.textSecondary : AppColors.textPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const Icon(LucideIcons.chevronRight, color: AppColors.border),
+                            const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary),
                           ],
                         ),
                       ),
@@ -531,8 +532,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     Center(
                       child: TextButton.icon(
                         onPressed: _deleteAccount,
-                        icon: const Icon(LucideIcons.trash2, color: AppColors.border),
-                        label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.border)),
+                        icon: const Icon(LucideIcons.trash2, color: AppColors.error),
+                        label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.error)),
                       ),
                     ),
                     const SizedBox(height: 100),

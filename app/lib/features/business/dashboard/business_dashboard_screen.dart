@@ -132,10 +132,10 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPink), shape: BoxShape.circle),
-                  child: const Icon(LucideIcons.trash2, color: AppColors.accentPink),
+                  decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.error), shape: BoxShape.circle),
+                  child: const Icon(LucideIcons.trash2, color: AppColors.error),
                 ),
-                title: Text('Eliminar foto', style: AppTypography.subtitleBold.copyWith(fontSize: 14, color: AppColors.accentPink)),
+                title: Text('Eliminar foto', style: AppTypography.subtitleBold.copyWith(fontSize: 14, color: AppColors.error)),
                 onTap: () => Navigator.pop(context, 'delete'),
               ),
             ],
@@ -213,7 +213,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
           DashboardAnimatedToast.show(
             context,
             next.toastMessage!,
-            next.toastIsError ? AppColors.accentPink : AppColors.accentGreen,
+            next.toastIsError ? AppColors.error : AppColors.accentGreen,
             next.toastIsError ? LucideIcons.circleAlert : LucideIcons.circleCheck,
           );
         }
@@ -331,7 +331,12 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
             children: [
               if (ownerDisplayName.isNotEmpty)
                 Text('Hola, $ownerDisplayName', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
-              Text(business['name'].toString(), style: AppTypography.titleBold.copyWith(fontSize: 18)),
+              Text(
+                business['name'].toString(),
+                style: AppTypography.titleBold.copyWith(fontSize: 18),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               Row(
                 children: [
                   Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle)),
@@ -344,6 +349,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
           actions: [
             IconActionButton(
               icon: LucideIcons.logOut,
+              tooltip: 'Cerrar sesión',
               onPressed: () async {
                 await ref.read(authStateProvider.notifier).logout();
               },

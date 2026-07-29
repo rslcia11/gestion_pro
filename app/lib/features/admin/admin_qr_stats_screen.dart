@@ -180,7 +180,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
         actions: [
-          IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadScanData),
+          IconActionButton(icon: LucideIcons.refreshCcw, tooltip: 'Actualizar', onPressed: _loadScanData),
           const SizedBox(width: AppSpacing.sm),
         ],
       ),

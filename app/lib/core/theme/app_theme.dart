@@ -35,7 +35,8 @@ class AppTheme {
   }
 
   // Soporte y Contacto
-  static const String supportWhatsApp = '+593995371895';
+  /// Formato wa.me (sin '+', sin el 0 nacional) — único valor fuente para todos los links de WhatsApp.
+  static const String supportWhatsApp = '593989000163';
   static const String supportEmail = 'soporte@dondesiempre.app';
 
   static Duration animDelayStaggered(int index) => Duration(milliseconds: index * 50);

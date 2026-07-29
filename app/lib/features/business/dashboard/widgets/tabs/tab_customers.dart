@@ -100,10 +100,9 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(dashboardProvider);
-    final customers = state.customers;
-    final pendingRewards = state.pendingRewards;
-    final business = state.business;
+    final (customers, pendingRewards, business) = ref.watch(
+      dashboardProvider.select((s) => (s.customers, s.pendingRewards, s.business)),
+    );
 
     if (business == null) return const SizedBox();
 

@@ -109,7 +109,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Debes seleccionar la ubicación en el mapa'),
-              backgroundColor: AppColors.accentPink,
+              backgroundColor: AppColors.error,
             ),
           );
         } else {
@@ -136,7 +136,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Revisá los campos marcados en rojo antes de continuar'),
-        backgroundColor: AppColors.accentPink,
+        backgroundColor: AppColors.error,
       ),
     );
   }
@@ -169,7 +169,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
 
   void _showSuccessDialog() {
     final String waMessage = 'Hola, he creado mi negocio y quiero fidelizar a mis clientes ya';
-    final String waUrl = 'https://wa.me/593995371895?text=${Uri.encodeComponent(waMessage)}';
+    final String waUrl = 'https://wa.me/${AppTheme.supportWhatsApp}?text=${Uri.encodeComponent(waMessage)}';
 
     showDialog(
       context: context,
@@ -227,7 +227,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al crear negocio: ${next.error}'),
-            backgroundColor: AppColors.accentPink,
+            backgroundColor: AppColors.error,
           ),
         );
       } else if (next.isSuccess && (previous?.isSuccess != next.isSuccess)) {

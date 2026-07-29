@@ -13,4 +13,7 @@ class AppRadii {
 
   /// Avatares (52px de diámetro / 2).
   static const double avatar = 26;
+
+  /// Círculo completo — badges numéricos (CounterBadge).
+  static const double full = 999;
 }

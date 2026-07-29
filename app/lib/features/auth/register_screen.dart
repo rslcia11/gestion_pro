@@ -67,6 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         title: const Text('Únete a nosotros'),
         leading: IconActionButton(
           icon: LucideIcons.arrowLeft,
+          tooltip: 'Volver',
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -137,7 +138,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: const BoxDecoration(color: AppColors.accentPurple, shape: BoxShape.circle),
-                                child: const Icon(LucideIcons.pencil, size: 14, color: Colors.white),
+                                child: const Icon(LucideIcons.pencil, size: 14, color: AppColors.onPrimary),
                               ),
                             ),
                         ],

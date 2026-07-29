@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_shadows.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_typography.dart';
 
 class BusinessFaqsScreen extends StatelessWidget {
@@ -125,10 +126,10 @@ class BusinessFaqsScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   LucideIcons.store,
                   size: 32,
-                  color: AppColors.accentPurple,
+                  color: AppColors.pastelText(AppColors.accentPurple),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -137,7 +138,7 @@ class BusinessFaqsScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Guía para dueños',
-                        style: AppTypography.subtitleBold.copyWith(fontSize: 15, color: AppColors.accentPurple),
+                        style: AppTypography.subtitleBold.copyWith(fontSize: 15, color: AppColors.pastelText(AppColors.accentPurple)),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -156,7 +157,7 @@ class BusinessFaqsScreen extends StatelessWidget {
           // Footer contact
           InkWell(
             onTap: () async {
-              final Uri whatsappUrl = Uri.parse('https://wa.me/593995371895');
+              final Uri whatsappUrl = Uri.parse('https://wa.me/${AppTheme.supportWhatsApp}');
               if (await canLaunchUrl(whatsappUrl)) {
                 await launchUrl(whatsappUrl);
               }
@@ -171,12 +172,12 @@ class BusinessFaqsScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.handHeart, color: AppColors.accentGreen),
+                  Icon(LucideIcons.handHeart, color: AppColors.pastelText(AppColors.accentGreen)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       '¿Tienes otra pregunta? Escríbenos por WhatsApp y te ayudamos en el momento.',
-                      style: AppTypography.bodyMedium.copyWith(fontSize: 12, color: AppColors.accentGreen),
+                      style: AppTypography.bodyMedium.copyWith(fontSize: 12, color: AppColors.pastelText(AppColors.accentGreen)),
                     ),
                   ),
                 ],
@@ -230,7 +231,7 @@ class _FaqCard extends StatelessWidget {
               color: AppColors.pastelOf(item.color),
               borderRadius: BorderRadius.circular(AppRadii.badge),
             ),
-            child: Icon(item.icon, color: item.color, size: 22),
+            child: Icon(item.icon, color: AppColors.pastelText(item.color), size: 22),
           ),
           title: Text(
             item.question,

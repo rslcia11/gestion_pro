@@ -247,16 +247,23 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
         appBar: AppBar(
           toolbarHeight: 100,
           centerTitle: true,
-          title: Text(widget.businessName, style: AppTypography.titleBold.copyWith(fontSize: 16)),
+          title: Text(
+            widget.businessName,
+            style: AppTypography.titleBold.copyWith(fontSize: 16),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           actions: [
             IconActionButton(
               icon: LucideIcons.calendarDays,
+              tooltip: 'Filtrar por fecha',
               iconColor: state.dateRange == null ? AppColors.textSecondary : AppColors.accentPurple,
               onPressed: () => _selectDateRange(state.dateRange),
             ),
             if (state.dateRange != null)
               IconActionButton(
                 icon: LucideIcons.x,
+                tooltip: 'Quitar filtro de fecha',
                 iconColor: AppColors.accentPink,
                 onPressed: () {
                   ref.read(cardHistoryProvider.notifier).updateDateRange(null);

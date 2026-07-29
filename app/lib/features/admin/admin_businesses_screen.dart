@@ -215,7 +215,8 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconActionButton(
                               icon: LucideIcons.x,
-                              size: 32,
+                              tooltip: 'Limpiar búsqueda',
+                              size: 44,
                               onPressed: () {
                                 _searchController.clear();
                                 setState(() {
