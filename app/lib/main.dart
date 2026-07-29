@@ -31,6 +31,8 @@ class AppRoot extends StatelessWidget {
     return MaterialApp(
       title: 'Donde Siempre',
       theme: AppTheme.theme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       locale: const Locale('es'),
       supportedLocales: const [Locale('es'), Locale('en')],

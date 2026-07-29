@@ -144,5 +144,107 @@ class AppTheme {
     );
   }
 
+  /// Theme para Modo Oscuro (Dark Theme)
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: AppColors.primaryDark,
+        onPrimary: AppColors.onPrimaryDark,
+        secondary: AppColors.accentPurple,
+        onSecondary: Colors.white,
+        error: AppColors.error,
+        onError: Colors.white,
+        surface: AppColors.surfaceCardDark,
+        onSurface: AppColors.textPrimaryDark,
+      ),
+
+      scaffoldBackgroundColor: AppColors.backgroundDark,
+
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.backgroundDark,
+        foregroundColor: AppColors.textPrimaryDark,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: AppTypography.titleBold.copyWith(color: AppColors.textPrimaryDark),
+      ),
+
+      cardTheme: CardThemeData(
+        color: AppColors.surfaceCardDark,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.card),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryDark,
+          foregroundColor: AppColors.onPrimaryDark,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+          ),
+          textStyle: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primaryDark,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          textStyle: GoogleFonts.poppins(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceCardDark,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          borderSide: const BorderSide(color: AppColors.primaryDark, width: 2.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 20,
+        ),
+        labelStyle: GoogleFonts.inter(
+          color: AppColors.textSecondaryDark,
+          fontWeight: FontWeight.w500,
+        ),
+        prefixIconColor: AppColors.textSecondaryDark,
+      ),
+
+      fontFamily: GoogleFonts.inter().fontFamily,
+      textTheme: TextTheme(
+        headlineLarge: AppTypography.displayBold.copyWith(color: AppColors.textPrimaryDark),
+        headlineMedium: AppTypography.titleBold.copyWith(color: AppColors.textPrimaryDark),
+        titleLarge: AppTypography.titleBold.copyWith(color: AppColors.textPrimaryDark),
+        titleMedium: AppTypography.subtitleBold.copyWith(color: AppColors.textPrimaryDark),
+        bodyLarge: AppTypography.bodyRegular.copyWith(color: AppColors.textPrimaryDark),
+        bodyMedium: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondaryDark),
+        bodySmall: AppTypography.caption.copyWith(color: AppColors.textSecondaryDark),
+        labelLarge: AppTypography.labelBold.copyWith(color: AppColors.textPrimaryDark),
+      ),
+    );
+  }
 }
 

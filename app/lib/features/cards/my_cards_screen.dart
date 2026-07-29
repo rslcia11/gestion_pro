@@ -251,105 +251,101 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                 Text('Hola, $displayName', style: AppTypography.titleBold.copyWith(fontSize: 18)),
           ],
         ),
-        leadingWidth: 70,
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0),
           child: Center(
-            child: GestureDetector(
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const UserProfileScreen()),
-                );
-                if (result == true) {
-                  // Refresco silencioso (sin spinner): actualiza foto y nombre en
-                  // su lugar, sin recargar toda la pantalla ni parpadear.
-                  ref.read(myCardsProvider.notifier).refreshCards(silent: true);
-                }
-              },
-              child: Stack(
-                children: [
-                  UserAvatar(
-                    imageUrl: state.avatarUrl,
-                    initials: state.userName.isNotEmpty ? state.userName[0] : '?',
-                    size: 44,
-                  ),
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.accentPurple, AppColors.accentPink],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+            child: Semantics(
+              button: true,
+              label: 'Perfil de usuario y foto de perfil',
+              child: GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const UserProfileScreen()),
+                  );
+                  if (result == true) {
+                    // Refresco silencioso (sin spinner): actualiza foto y nombre en
+                    // su lugar, sin recargar toda la pantalla ni parpadear.
+                    ref.read(myCardsProvider.notifier).refreshCards(silent: true);
+                  }
+                },
+                child: Stack(
+                  children: [
+                    UserAvatar(
+                      imageUrl: state.avatarUrl,
+                      initials: state.userName.isNotEmpty ? state.userName[0] : '?',
+                      size: 44,
+                    ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.accentPurple, AppColors.accentPink],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: theme.colorScheme.surface, width: 1.5),
                         ),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
-                      ),
-                      child: const Icon(
-                        LucideIcons.pencil,
-                        size: 10,
-                        color: Colors.white,
-                      ),
-                    )
-                        .animate(
-                          onPlay: (controller) => controller.repeat(reverse: true),
-                        )
-                        .scale(
-                          duration: const Duration(seconds: 1),
-                          begin: const Offset(1, 1),
-                          end: const Offset(1.15, 1.15),
-                          curve: Curves.easeInOut,
-                        )
-                        .shimmer(
-                          duration: const Duration(seconds: 3),
-                          color: Colors.white.withValues(alpha: 0.5),
+                        child: const Icon(
+                          LucideIcons.pencil,
+                          size: 10,
+                          color: Colors.white,
                         ),
-                  ),
-                ],
+                      ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
       body: SafeArea(
-        child: state.isLoading && state.cards.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : state.cards.isEmpty
-            ? _buildEmptyState(theme)
-            : RefreshIndicator(
-                onRefresh: () => ref.read(myCardsProvider.notifier).refreshCards(),
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 24,
-                  ),
-                  itemCount: state.cards.length,
-                  itemBuilder: (context, index) {
-                    return _LoyaltyCardItem(
-                      card: state.cards[index],
-                      index: index,
-                      sessionLastViewedAt: state.sessionLastViewedAt,
-                      onTap: () {
-                        final card = state.cards[index];
-                        final business = card['businesses'];
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CardHistoryScreen(
-                              loyaltyCardId: card['id'],
-                              businessId: business['id'],
-                              businessName: business['name'],
-                            ),
-                          ),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: state.isLoading && state.cards.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : state.cards.isEmpty
+                ? _buildEmptyState(theme)
+                : RefreshIndicator(
+                    onRefresh: () => ref.read(myCardsProvider.notifier).refreshCards(),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 24,
+                      ),
+                      itemCount: state.cards.length,
+                      itemBuilder: (context, index) {
+                        return _LoyaltyCardItem(
+                          card: state.cards[index],
+                          index: index,
+                          sessionLastViewedAt: state.sessionLastViewedAt,
+                          onTap: () {
+                            final card = state.cards[index];
+                            final business = card['businesses'];
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CardHistoryScreen(
+                                  loyaltyCardId: card['id'],
+                                  businessId: business['id'],
+                                  businessName: business['name'],
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                ),
-              ),
+                    ),
+                  ),
+          ),
+        ),
       ),
       floatingActionButton: state.cards.isEmpty
           ? null
@@ -359,11 +355,11 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                   MaterialPageRoute(builder: (_) => const ScannerScreen()),
                 );
               },
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
               icon: const Icon(LucideIcons.scanLine),
-              label: Text('Escanear QR', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 15)),
+              label: Text('Escanear QR', style: AppTypography.subtitleBold.copyWith(color: theme.colorScheme.onPrimary, fontSize: 15)),
             ).animate().scale(delay: 1.seconds, curve: Curves.elasticOut),
         ),
         Align(
@@ -474,13 +470,17 @@ class _LoyaltyCardItem extends StatelessWidget {
       }
     }
 
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+    final onSurfaceColor = theme.colorScheme.onSurface;
+
     return GestureDetector(
           onTap: onTap,
           child: Container(
             margin: const EdgeInsets.only(bottom: AppSpacing.lg),
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: AppColors.surfaceCard,
+              color: cardColor,
               borderRadius: BorderRadius.circular(AppRadii.card),
               boxShadow: AppShadows.card,
             ),
@@ -524,7 +524,10 @@ class _LoyaltyCardItem extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   business['name'].toString(),
-                                  style: AppTypography.subtitleBold.copyWith(fontSize: 18),
+                                  style: AppTypography.subtitleBold.copyWith(
+                                    fontSize: 18,
+                                    color: onSurfaceColor,
+                                  ),
                                 ),
                               ),
                               if (isRecentlyUpdated)

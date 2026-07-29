@@ -97,66 +97,70 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
-          child: SingleChildScrollView(
-            // Sin rebote: el contenido entra en pantalla, pero seguimos
-            // permitiendo scroll si el teclado achica el espacio.
-            physics: const ClampingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(AppRadii.badge),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Icon(LucideIcons.zap, color: AppColors.onPrimary, size: 32),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text('Donde Siempre', style: AppTypography.displayBold),
-                    ],
-                  ).animate().scale(duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveElastic).fadeIn(),
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Formulario
-                  Column(
-                    children: [
-                      AppTextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        hint: 'Tu email',
-                        prefixIcon: LucideIcons.mail,
-                        validator: (value) =>
-                            (value == null || value.isEmpty) ? 'Ingresa tu email' : null,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      AppTextField(
-                        controller: _passwordController,
-                        obscureText: !_isPasswordVisible,
-                        hint: 'Tu contraseña',
-                        prefixIcon: LucideIcons.lock,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
-                            color: AppColors.textSecondary,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: SingleChildScrollView(
+              // Sin rebote: el contenido entra en pantalla, pero seguimos
+              // permitiendo scroll si el teclado achica el espacio.
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary,
+                            borderRadius: BorderRadius.circular(AppRadii.badge),
                           ),
-                          onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                          alignment: Alignment.center,
+                          child: Icon(LucideIcons.zap, color: theme.colorScheme.onPrimary, size: 32),
                         ),
-                        validator: (value) =>
-                            (value == null || value.isEmpty) ? 'Ingresa tu contraseña' : null,
-                      ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text('Donde Siempre', style: AppTypography.displayBold.copyWith(color: theme.colorScheme.onSurface)),
+                      ],
+                    ).animate().scale(duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveElastic).fadeIn(),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Formulario
+                    Column(
+                      children: [
+                        AppTextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          hint: 'Tu email',
+                          prefixIcon: LucideIcons.mail,
+                          validator: (value) =>
+                              (value == null || value.isEmpty) ? 'Ingresa tu email' : null,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        AppTextField(
+                          controller: _passwordController,
+                          obscureText: !_isPasswordVisible,
+                          hint: 'Tu contraseña',
+                          prefixIcon: LucideIcons.lock,
+                          suffixIcon: IconButton(
+                            tooltip: _isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña',
+                            icon: Icon(
+                              _isPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                            onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                          ),
+                          validator: (value) =>
+                              (value == null || value.isEmpty) ? 'Ingresa tu contraseña' : null,
+                        ),
                       const SizedBox(height: 4),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),

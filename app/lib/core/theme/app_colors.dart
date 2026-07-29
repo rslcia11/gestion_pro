@@ -16,6 +16,15 @@ class AppColors {
 
   static const Color error = Color(0xFFE11D48);
 
+  // Colores para Modo Oscuro (Dark Theme)
+  static const Color backgroundDark = Color(0xFF121212);
+  static const Color surfaceCardDark = Color(0xFF1E1E1E);
+  static const Color borderDark = Color(0xFF2C2C2C);
+  static const Color primaryDark = Color(0xFFFFFFFF);
+  static const Color onPrimaryDark = Color(0xFF000000);
+  static const Color textPrimaryDark = Color(0xFFF3F4F6);
+  static const Color textSecondaryDark = Color(0xFF9CA3AF);
+
   // Acentos usados en badges de módulo/categoría.
   static const Color accentAmber = Color(0xFFF59E0B);
   static const Color accentPurple = Color(0xFF9333EA);
