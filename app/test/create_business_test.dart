@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app/features/business/create_business_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'support/supabase_test_setup.dart';
 
 void main() {
   setUpAll(() async {
-    SharedPreferences.setMockInitialValues({});
+    await initializeTestSupabase();
   });
 
   testWidgets('CreateBusinessScreen smoke test: renders the 4-step wizard', (
