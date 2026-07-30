@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -41,3 +43,54 @@ jobs:
           name: App-Release
           path: app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Upload APK to S3
+        run: aws s3 cp app/build/app/outputs/flutter-apk/app-release.apk s3://donde-siempre-app/donde-siempre.apk
+
+      - name: Check if index.html changed
+        id: check_landing
+        run: |
+          set +e
+
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "Not a push event (event: ${{ github.event_name }}); defaulting to changed=true"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BEFORE="${{ github.event.before }}"
+          ZERO_SHA="0000000000000000000000000000000000000000"
+
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "$ZERO_SHA" ]; then
+            echo "No valid 'before' SHA (new branch or empty); defaulting to changed=true"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHANGED_FILES=$(git diff --name-only "$BEFORE" "${{ github.sha }}" 2>&1)
+          DIFF_STATUS=$?
+
+          if [ $DIFF_STATUS -ne 0 ]; then
+            echo "git diff failed; defaulting to changed=true"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qx "landing/index.html"; then
+            echo "landing/index.html changed"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "landing/index.html did not change"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload index.html to S3
+        if: steps.check_landing.outputs.changed == 'true'
+        run: aws s3 cp landing/index.html s3://donde-siempre-app/index.html --content-type text/html
