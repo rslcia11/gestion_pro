@@ -37,13 +37,6 @@ jobs:
         working-directory: ./app
         run: flutter build apk --release
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: App-Release
-          path: app/build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 7
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
