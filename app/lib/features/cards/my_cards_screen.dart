@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:confetti/confetti.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../scanner/scanner_screen.dart';
 import 'card_history_screen.dart';
@@ -21,9 +22,10 @@ import '../../core/widgets/global_celebration_dialog.dart';
 class MyCardsScreen extends ConsumerStatefulWidget {
   const MyCardsScreen({super.key});
 
-  /// Resetea el flag de sesión (recordatorio de premio) al cerrar sesión,
-  /// para que el próximo usuario en el mismo proceso lo vea bien.
+  /// Resetea los flags de sesión (bienvenida / recordatorio de premio) al cerrar
+  /// sesión, para que el próximo usuario en el mismo proceso los vea bien.
   static void resetSessionFlags() {
+    _MyCardsScreenState._welcomeShown = false;
     _MyCardsScreenState._pendingRewardShown = false;
   }
 
@@ -33,6 +35,7 @@ class MyCardsScreen extends ConsumerStatefulWidget {
 
 class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
   late ConfettiController _confettiController;
+  static bool _welcomeShown = false;
   static bool _pendingRewardShown = false;
 
   StreamSubscription<void>? _rewardsSub;
@@ -92,9 +95,62 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     );
   }
 
-  // Stub: sin backend conectado — no hay señal real de "usuario nuevo",
-  // así que el mensaje de bienvenida no se dispara automáticamente.
-  void _checkWelcomeMessage() {}
+  void _checkWelcomeMessage() async {
+    if (_welcomeShown) return;
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      final hasSeen = user.userMetadata?['has_seen_welcome'] == true;
+      if (!hasSeen) {
+        _welcomeShown = true;
+        if (mounted) {
+          _showWelcomeDialog();
+        }
+        try {
+          await Supabase.instance.client.auth.updateUser(
+            UserAttributes(data: {'has_seen_welcome': true}),
+          );
+        } catch (_) {}
+      }
+    }
+  }
+
+  void _showWelcomeDialog() {
+    final state = ref.read(myCardsProvider);
+    final displayName = _getDisplayName(state.userName);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Column(
+          children: [
+            const Icon(LucideIcons.partyPopper, color: AppColors.accentPurple, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              '¡Bienvenido a Donde Siempre!',
+              style: AppTypography.titleBold.copyWith(color: AppColors.accentPurple),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        content: Text(
+          '¡Hola $displayName, tu cuenta ha sido creada exitosamente!\n\nAquí podrás ver tus tarjetas y acumular puntos escaneando los códigos QR de tus negocios favoritos.',
+          textAlign: TextAlign.center,
+          style: AppTypography.bodyRegular,
+        ),
+        actions: [
+          Center(
+            child: PrimaryButton(
+              label: '¡Empezar!',
+              isFullWidth: false,
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
+    );
+  }
 
   void _showCelebrationDialog() {
     if (!mounted) return;
@@ -212,12 +268,17 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     final theme = Theme.of(context);
     final state = ref.watch(myCardsProvider);
     
-    // Listen to error state
+    // Listen to error state.
+    // Si ya hay tarjetas cargadas, un fallo de refresco en segundo plano no
+    // amerita el estado de error persistente (el usuario sigue viendo datos
+    // válidos) — alcanza con un aviso transitorio, sin el texto crudo de la
+    // excepción. Si NO hay tarjetas cargadas, el body ya muestra su propio
+    // CardsErrorState persistente, así que evitamos duplicar el mensaje acá.
     ref.listen<MyCardsState>(myCardsProvider, (previous, next) {
-      if (next.error != null && next.error != previous?.error) {
+      if (next.error != null && next.error != previous?.error && next.cards.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${next.error}'),
+            content: const Text('No pudimos actualizar tus tarjetas. Mostrando la última versión guardada.'),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -243,80 +304,84 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
         toolbarHeight: 100,
         backgroundColor: AppColors.background,
         centerTitle: false,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-              if (displayName.isNotEmpty)
-                Text('Hola, $displayName', style: AppTypography.titleBold.copyWith(fontSize: 18)),
-          ],
-        ),
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: Center(
-            child: GestureDetector(
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const UserProfileScreen()),
-                );
-                if (result == true) {
-                  // Refresco silencioso (sin spinner): actualiza foto y nombre en
-                  // su lugar, sin recargar toda la pantalla ni parpadear.
-                  ref.read(myCardsProvider.notifier).refreshCards(silent: true);
-                }
-              },
-              child: Stack(
-                children: [
-                  UserAvatar(
-                    imageUrl: state.avatarUrl,
-                    initials: state.userName.isNotEmpty ? state.userName[0] : '?',
-                    size: 44,
-                  ),
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.accentPurple, AppColors.accentPink],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
+        title: displayName.isNotEmpty
+            ? AppBarTitle('Hola, $displayName', style: AppTypography.titleBold)
+            : null,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Semantics(
+                label: 'Editar perfil',
+                button: true,
+                child: GestureDetector(
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const UserProfileScreen()),
+                    );
+                    if (result == true) {
+                      // Refresco silencioso (sin spinner): actualiza foto y nombre en
+                      // su lugar, sin recargar toda la pantalla ni parpadear.
+                      ref.read(myCardsProvider.notifier).refreshCards(silent: true);
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      UserAvatar(
+                        imageUrl: state.avatarUrl,
+                        initials: state.userName.isNotEmpty ? state.userName[0] : '?',
+                        size: 48,
                       ),
-                      child: const Icon(
-                        LucideIcons.pencil,
-                        size: 10,
-                        color: Colors.white,
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [AppColors.accentPurple, AppColors.accentPink],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                          child: const Icon(
+                            LucideIcons.pencil,
+                            size: 10,
+                            color: Colors.white,
+                          ),
+                        )
+                            .animate(
+                              onPlay: (controller) => controller.repeat(reverse: true),
+                            )
+                            .scale(
+                              duration: const Duration(seconds: 1),
+                              begin: const Offset(1, 1),
+                              end: const Offset(1.15, 1.15),
+                              curve: Curves.easeInOut,
+                            )
+                            .shimmer(
+                              duration: const Duration(seconds: 3),
+                              color: Colors.white.withValues(alpha: 0.5),
+                            ),
                       ),
-                    )
-                        .animate(
-                          onPlay: (controller) => controller.repeat(reverse: true),
-                        )
-                        .scale(
-                          duration: const Duration(seconds: 1),
-                          begin: const Offset(1, 1),
-                          end: const Offset(1.15, 1.15),
-                          curve: Curves.easeInOut,
-                        )
-                        .shimmer(
-                          duration: const Duration(seconds: 3),
-                          color: Colors.white.withValues(alpha: 0.5),
-                        ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
       body: SafeArea(
         child: state.isLoading && state.cards.isEmpty
             ? const Center(child: CircularProgressIndicator())
+            : state.error != null && state.cards.isEmpty
+            ? CardsErrorState(
+                onRetry: () => ref.read(myCardsProvider.notifier).refreshCards(),
+              )
             : state.cards.isEmpty
             ? _buildEmptyState(theme)
             : RefreshIndicator(
@@ -363,7 +428,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
               foregroundColor: AppColors.onPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
               icon: const Icon(LucideIcons.scanLine),
-              label: Text('Escanear QR', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 15)),
+              label: Text('Escanear QR', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 14)),
             ).animate().scale(delay: 1.seconds, curve: Curves.elasticOut),
         ),
         Align(
@@ -390,7 +455,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(40),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
                 color: AppColors.pastelOf(AppColors.accentPurple),
                 shape: BoxShape.circle,
@@ -414,6 +479,67 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                 MaterialPageRoute(builder: (_) => const ScannerScreen()),
               ),
             ).animate(delay: 400.ms).fadeIn().moveY(begin: 20, curve: Curves.easeOut),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Estado de error persistente para la lista de tarjetas — distinto del
+/// estado "todavía no tengo tarjetas". Se muestra cuando falló la carga
+/// inicial y no hay tarjetas para mostrar en su lugar (ver spec
+/// `cards-error-state`: nunca debe confundirse con la ilustración de
+/// "¡Empieza tu colección!" que ve un usuario genuinamente nuevo).
+///
+/// Widget público (no privado) a propósito: se testea en aislamiento en
+/// `app/test/cards_error_state_test.dart`, ya que `MyCardsScreen` completo
+/// no se puede montar en un widget test sin un backend/repositorio falso.
+class CardsErrorState extends StatelessWidget {
+  const CardsErrorState({
+    super.key,
+    required this.onRetry,
+    this.message = 'No pudimos cargar tus tarjetas. Revisá tu conexión e intentá de nuevo.',
+  });
+
+  final VoidCallback onRetry;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              decoration: BoxDecoration(
+                color: AppColors.pastelOf(AppColors.error),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(LucideIcons.wifiOff, size: 56, color: AppColors.error),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              'No se pudo conectar',
+              style: AppTypography.displayBold.copyWith(fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            PrimaryButton(
+              label: 'Reintentar',
+              icon: LucideIcons.refreshCcw,
+              isFullWidth: false,
+              onPressed: onRetry,
+            ),
           ],
         ),
       ),
@@ -524,7 +650,7 @@ class _LoyaltyCardItem extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   business['name'].toString(),
-                                  style: AppTypography.subtitleBold.copyWith(fontSize: 18),
+                                  style: AppTypography.subtitleBold,
                                 ),
                               ),
                               if (isRecentlyUpdated)
@@ -544,7 +670,7 @@ class _LoyaltyCardItem extends StatelessWidget {
                                         '¡Nuevo!',
                                         style: AppTypography.labelBold.copyWith(
                                           color: AppColors.accentGreen,
-                                          fontSize: 10,
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ],
@@ -556,11 +682,6 @@ class _LoyaltyCardItem extends StatelessWidget {
                             Text(
                               business['reward_description']!.toString(),
                               style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          if (business['reward_long_description'] != null)
-                            Text(
-                              business['reward_long_description'].toString(),
-                              style: AppTypography.caption,
                             ),
                         ],
                       ),
@@ -585,7 +706,7 @@ class _LoyaltyCardItem extends StatelessWidget {
                     ),
                     Text(
                       '${(progress * 100).toInt()}%',
-                      style: AppTypography.labelBold.copyWith(color: accentColor),
+                      style: AppTypography.labelBold.copyWith(color: AppColors.onLightOf(accentColor)),
                     ),
                   ],
                 ),
@@ -603,26 +724,19 @@ class _LoyaltyCardItem extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
 
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _MiniStat(
                       icon: LucideIcons.sparkles,
                       value: (card['total_points_lifetime'] ?? 0).toString(),
                       label: 'TOTAL',
-                      color: accentColor,
+                      color: AppColors.onLightOf(accentColor),
                     ),
-                    const Spacer(),
                     _MiniStat(
                       icon: LucideIcons.gift,
                       value: (card['rewards_claimed'] ?? 0).toString(),
                       label: 'CANJES',
-                      color: AppColors.accentPink,
-                    ),
-                    const Spacer(),
-                    _MiniStat(
-                      icon: LucideIcons.calendarCheck,
-                      value: 'ACTIVA',
-                      label: 'ESTADO',
-                      color: AppColors.accentGreen,
+                      color: AppColors.accentPinkOnLight,
                     ),
                   ],
                 ),
@@ -657,7 +771,7 @@ class _RewardBanner extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
@@ -671,7 +785,7 @@ class _RewardBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.subtitleBold.copyWith(color: const Color(0xFF8A6D00), fontSize: 14)),
+                Text(title, style: AppTypography.subtitleBold.copyWith(color: AppColors.accentAmberOnLight, fontSize: 14)),
                 const SizedBox(height: 2),
                 Text(subtitle, style: AppTypography.caption),
               ],
@@ -706,7 +820,7 @@ class _MiniStat extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(value, style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
-            Text(label, style: AppTypography.caption.copyWith(fontSize: 10, fontWeight: FontWeight.w700)),
+            Text(label, style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
           ],
         ),
       ],
