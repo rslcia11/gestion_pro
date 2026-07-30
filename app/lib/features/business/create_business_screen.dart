@@ -19,6 +19,8 @@ import '../auth/providers/auth_provider.dart';
 
 import 'providers/create_business_provider.dart';
 import 'data/business_repository.dart';
+import '../../core/providers/supabase_provider.dart';
+import '../profile/data/profile_repository.dart';
 
 class CreateBusinessScreen extends ConsumerStatefulWidget {
   const CreateBusinessScreen({super.key});
@@ -34,6 +36,15 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
   final _personalFormKey = GlobalKey<FormState>();
   final _businessFormKey = GlobalKey<FormState>();
   final _campaignFormKey = GlobalKey<FormState>();
+
+  // Field keys: permiten ubicar y scrollear hasta el primer campo que falla
+  // su validación (en vez de dejar al usuario buscando el error a ciegas).
+  final _fullNameFieldKey = GlobalKey<FormFieldState<String>>();
+  final _phoneFieldKey = GlobalKey<FormFieldState<String>>();
+  final _businessNameFieldKey = GlobalKey<FormFieldState<String>>();
+  final _categoryFieldKey = GlobalKey<FormFieldState<String>>();
+  final _rewardFieldKey = GlobalKey<FormFieldState<String>>();
+  final _pointsFieldKey = GlobalKey<FormFieldState<String>>();
 
   // Controllers & Data
   XFile? _logoFile;
@@ -78,7 +89,23 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
     }
   }
 
-  Future<void> _loadExistingProfileData() async {}
+  Future<void> _loadExistingProfileData() async {
+    final user = ref.read(supabaseClientProvider).auth.currentUser;
+    if (user != null) {
+      try {
+        final repo = ref.read(profileRepositoryProvider);
+        final profile = await repo.getProfile(user.id);
+        if (profile != null && mounted) {
+          setState(() {
+            _fullNameController.text = profile['full_name'] ?? '';
+            _phoneController.text = profile['phone'] ?? '';
+          });
+        }
+      } catch (e) {
+        debugPrint('Error loading profile: $e');
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -102,6 +129,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         canContinue = true;
       } else {
         _showValidationError();
+        _scrollToFirstError([_fullNameFieldKey, _phoneFieldKey]);
       }
     } else if (_currentStep == 2) {
       if (_businessFormKey.currentState!.validate()) {
@@ -117,6 +145,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         }
       } else {
         _showValidationError();
+        _scrollToFirstError([_businessNameFieldKey, _categoryFieldKey]);
       }
     } else if (_currentStep == 3) {
       if (_campaignFormKey.currentState!.validate()) {
@@ -124,6 +153,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         return;
       } else {
         _showValidationError();
+        _scrollToFirstError([_rewardFieldKey, _pointsFieldKey]);
       }
     }
 
@@ -139,6 +169,25 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         backgroundColor: AppColors.accentPink,
       ),
     );
+  }
+
+  /// Lleva el scroll hasta el primer campo de [keys] que quedó con error
+  /// tras la validación, en vez de dejar el mensaje fuera de la vista.
+  void _scrollToFirstError(List<GlobalKey<FormFieldState<String>>> keys) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final key in keys) {
+        final fieldContext = key.currentContext;
+        if (fieldContext != null && (key.currentState?.hasError ?? false)) {
+          Scrollable.ensureVisible(
+            fieldContext,
+            alignment: 0.2,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+          return;
+        }
+      }
+    });
   }
 
   void _previousStep() {
@@ -238,7 +287,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Configurar Negocio'),
+        title: const AppBarTitle('Configurar Negocio'),
       ),
       body: createBusinessState.isLoading
           ? const Center(
@@ -302,6 +351,8 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
                     formKey: _personalFormKey,
                     fullNameController: _fullNameController,
                     phoneController: _phoneController,
+                    fullNameFieldKey: _fullNameFieldKey,
+                    phoneFieldKey: _phoneFieldKey,
                   ),
                 ),
                 Step(
@@ -329,6 +380,8 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
                         _selectedAddress = address;
                       });
                     },
+                    nameFieldKey: _businessNameFieldKey,
+                    categoryFieldKey: _categoryFieldKey,
                   ),
                 ),
                 Step(
@@ -343,6 +396,8 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
                     rewardController: _rewardDescriptionController,
                     rewardLongController: _rewardLongDescriptionController,
                     pointsController: _pointsRequiredController,
+                    rewardFieldKey: _rewardFieldKey,
+                    pointsFieldKey: _pointsFieldKey,
                   ),
                 ),
               ],

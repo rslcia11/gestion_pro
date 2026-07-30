@@ -278,7 +278,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Mi Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
+        title: AppBarTitle('Mi Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
         actions: [
           IconActionButton(

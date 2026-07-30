@@ -150,7 +150,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Escanear QR'),
+        title: const AppBarTitle('Escanear QR'),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         actions: [

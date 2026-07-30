@@ -1,5 +1,5 @@
 name: app
-description: "App de fidelización — capa de front, sin backend conectado"
+description: "App de fidelización"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -42,6 +42,7 @@ dependencies:
   flutter_local_notifications: ^17.1.2
   http: ^1.6.0
   shared_preferences: ^2.5.3
+  supabase_flutter: ^2.5.0
 
 dev_dependencies:
   flutter_test:

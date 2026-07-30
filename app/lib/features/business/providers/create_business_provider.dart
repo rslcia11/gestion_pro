@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../profile/data/profile_repository.dart';
 import '../data/business_repository.dart';
 
@@ -28,7 +29,6 @@ class CreateBusinessState {
   }
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class CreateBusinessNotifier extends Notifier<CreateBusinessState> {
   @override
   CreateBusinessState build() {
@@ -49,7 +49,12 @@ class CreateBusinessNotifier extends Notifier<CreateBusinessState> {
     String? rewardLongDescription,
     required int pointsRequired,
   }) async {
-    const userId = '';
+    final userId = ref.read(supabaseClientProvider).auth.currentUser?.id;
+
+    if (userId == null) {
+      state = state.copyWith(error: 'Usuario no autenticado', isLoading: false);
+      return;
+    }
 
     state = state.copyWith(isLoading: true, error: null);
 
@@ -69,7 +74,7 @@ class CreateBusinessNotifier extends Notifier<CreateBusinessState> {
       if (logoFile != null) {
         final fileBytes = await logoFile.readAsBytes();
         final fileExt = logoFile.name.split('.').last.toLowerCase();
-        
+
         logoUrl = await businessRepo.uploadLogo(
           userId: userId,
           fileBytes: fileBytes,

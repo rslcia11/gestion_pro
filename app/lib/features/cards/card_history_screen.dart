@@ -247,7 +247,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
         appBar: AppBar(
           toolbarHeight: 100,
           centerTitle: true,
-          title: Text(widget.businessName, style: AppTypography.titleBold.copyWith(fontSize: 16)),
+          title: AppBarTitle(widget.businessName, style: AppTypography.titleBold.copyWith(fontSize: 16)),
           actions: [
             IconActionButton(
               icon: LucideIcons.calendarDays,

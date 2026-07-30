@@ -9,4 +9,5 @@ export 'display/status_chip.dart';
 export 'display/user_avatar.dart';
 export 'inputs/app_text_field.dart';
 export 'inputs/segmented_toggle.dart';
+export 'navigation/app_bar_title.dart';
 export 'navigation/app_bottom_nav_bar.dart';

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'login_screen.dart';
@@ -10,6 +11,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/utils/auth_error_translator.dart';
 import '../../shared/widgets/shared_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -33,6 +35,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   XFile? _avatarFile;
 
+  final supabase = Supabase.instance.client;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -43,18 +47,154 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // Stub: sin backend conectado — pendiente de integrar nueva DB.
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
+
+    try {
+      final metadata = {
+        'role': _selectedRole,
+        'full_name': _fullNameController.text.trim(),
+      };
+      final authResponse = await supabase.auth.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        data: metadata,
+      );
+
+      if (authResponse.user == null) throw Exception('Error al crear usuario');
+
+      final userId = authResponse.user!.id;
+
+      // Subir Avatar si existe
+      String? avatarUrl;
+      if (_avatarFile != null) {
+        try {
+          final fileBytes = await _avatarFile!.readAsBytes();
+          final fileExt = _avatarFile!.name.split('.').last.toLowerCase();
+          final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+          final imagePath = '$userId/$fileName';
+
+          await supabase.storage.from('avatars').uploadBinary(
+            imagePath,
+            fileBytes,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+          );
+          avatarUrl = supabase.storage.from('avatars').getPublicUrl(imagePath);
+        } catch (e) {
+          debugPrint('Error uploading avatar: $e');
+        }
+      }
+
+      await supabase.from('profiles').upsert({
+        'id': userId,
+        'full_name': _fullNameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'avatar_url': avatarUrl,
+        'role': _selectedRole,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
+
+      if (mounted) {
+        _showSuccessToast();
+        if (authResponse.session == null) {
+          _showVerificationDialog();
+        } else {
+          // Si es cliente, cerramos la sesión para obligarlo a loguearse (como pidió el usuario)
+          // y evitar que MyCardsScreen lance el diálogo de bienvenida en el fondo.
+          if (_selectedRole == 'client') {
+            await supabase.auth.signOut();
+          }
+
+          Future.delayed(1500.ms, () {
+            if (mounted) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AuthErrorTranslator.translate(e)),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSuccessToast() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Backend no conectado.'),
-        backgroundColor: Theme.of(context).colorScheme.error,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        duration: const Duration(milliseconds: 2500),
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppColors.accentGreen,
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.accentGreen.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              const Icon(LucideIcons.circleCheck, color: Colors.white),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  '¡CUENTA CREADA CON ÉXITO!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 400.ms)
+        .slideY(begin: 0.5, end: 0, curve: Curves.easeOutBack),
+      ),
+    );
+  }
+
+  void _showVerificationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Text('¡Casi listo!', textAlign: TextAlign.center, style: AppTypography.titleBold),
+        content: Text(
+          'Te hemos enviado un correo de verificación. Por favor, confirma tu cuenta para continuar.',
+          textAlign: TextAlign.center,
+          style: AppTypography.bodyRegular,
+        ),
+        actions: [
+          PrimaryButton(
+            label: 'Entendido',
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -64,7 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Únete a nosotros'),
+        title: const AppBarTitle('Únete a nosotros'),
         leading: IconActionButton(
           icon: LucideIcons.arrowLeft,
           onPressed: () => Navigator.of(context).pop(),

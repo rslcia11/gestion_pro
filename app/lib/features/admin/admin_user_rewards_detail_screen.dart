@@ -34,8 +34,8 @@ class AdminUserRewardsDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Premios de Usuario', style: AppTypography.subtitleBold.copyWith(fontSize: 16)),
-            Text(userName, style: AppTypography.caption),
+            AppBarTitle('Premios de Usuario', style: AppTypography.subtitleBold.copyWith(fontSize: 16)),
+            AppBarTitle(userName, style: AppTypography.caption),
           ],
         ),
       ),

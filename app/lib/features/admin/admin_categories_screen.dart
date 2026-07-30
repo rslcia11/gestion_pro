@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
@@ -15,11 +16,10 @@ class AdminCategoriesScreen extends StatefulWidget {
   State<AdminCategoriesScreen> createState() => _AdminCategoriesScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = true;
-  final List<Map<String, dynamic>> _categories = [];
-  int _nextLocalId = 1;
+  List<Map<String, dynamic>> _categories = [];
 
   @override
   void initState() {
@@ -28,15 +28,45 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   }
 
   Future<void> _loadCategories() async {
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = true);
+    try {
+      final response = await supabase
+          .from('business_categories')
+          .select()
+          .order('name');
+      if (mounted) {
+        setState(() {
+          _categories = List<Map<String, dynamic>>.from(response);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar categorías: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _addCategory(String name) async {
-    setState(() {
-      _categories.add({'id': _nextLocalId++, 'name': name});
-    });
+    try {
+      await supabase.from('business_categories').insert({'name': name});
+      _loadCategories();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al guardar: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _deleteCategory(int id) async {
@@ -72,9 +102,19 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
 
     if (confirm != true) return;
 
-    setState(() {
-      _categories.removeWhere((c) => c['id'] == id);
-    });
+    try {
+      await supabase.from('business_categories').delete().eq('id', id);
+      _loadCategories();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar (probablemente en uso): $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+      }
+    }
   }
 
   void _showAddDialog() {
@@ -119,7 +159,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Gestión de Categorías'),
+        title: const AppBarTitle('Gestión de Categorías'),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddDialog,

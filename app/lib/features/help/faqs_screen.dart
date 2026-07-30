@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_typography.dart';
+import '../../shared/widgets/shared_widgets.dart';
 
 class FaqsScreen extends StatelessWidget {
   const FaqsScreen({super.key});
@@ -75,7 +76,7 @@ class FaqsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('Preguntas frecuentes', style: AppTypography.titleBold.copyWith(fontSize: 16)),
+        title: AppBarTitle('Preguntas frecuentes', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
       ),
       body: ListView(

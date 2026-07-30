@@ -21,6 +21,9 @@ class StepBusinessData extends StatelessWidget {
   final String address;
   final Function(double, double, String) onLocationSelected;
 
+  final GlobalKey<FormFieldState<String>> nameFieldKey;
+  final GlobalKey<FormFieldState<String>> categoryFieldKey;
+
   const StepBusinessData({
     super.key,
     required this.formKey,
@@ -33,6 +36,8 @@ class StepBusinessData extends StatelessWidget {
     required this.longitude,
     required this.address,
     required this.onLocationSelected,
+    required this.nameFieldKey,
+    required this.categoryFieldKey,
   });
 
   @override
@@ -48,6 +53,7 @@ class StepBusinessData extends StatelessWidget {
           const SizedBox(height: 24),
 
           AppTextField(
+            fieldKey: nameFieldKey,
             controller: nameController,
             label: 'Nombre del negocio',
             prefixIcon: LucideIcons.store,
@@ -71,6 +77,7 @@ class StepBusinessData extends StatelessWidget {
             },
             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
               return TextFormField(
+                key: categoryFieldKey,
                 controller: textEditingController,
                 focusNode: focusNode,
                 style: AppTypography.bodyRegular,

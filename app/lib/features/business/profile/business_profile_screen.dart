@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
@@ -28,8 +29,8 @@ class BusinessProfileScreen extends StatefulWidget {
   State<BusinessProfileScreen> createState() => _BusinessProfileScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
 
@@ -48,7 +49,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   XFile? _newLogoFile;
 
   BusinessCategory? _selectedCategory;
-  final List<BusinessCategory> _categories = [];
+  List<BusinessCategory> _categories = [];
 
   double? _latitude;
   double? _longitude;
@@ -85,9 +86,52 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     _loadCategories();
   }
 
-  Future<void> _loadProfileData() async {}
+  Future<void> _loadProfileData() async {
+    try {
+      final userId = supabase.auth.currentUser!.id;
+      final profile = await supabase
+          .from('profiles')
+          .select('phone')
+          .eq('id', userId)
+          .single();
 
-  Future<void> _loadCategories() async {}
+      if (mounted) {
+        setState(() {
+          _phoneController.text = profile['phone'] ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading profile phone: $e');
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final response = await supabase
+          .from('business_categories')
+          .select()
+          .order('name');
+
+      if (mounted) {
+        setState(() {
+          _categories = (response as List)
+              .map((c) => BusinessCategory.fromJson(c))
+              .toList();
+
+          final categoryId = widget.business['category_id'];
+          if (categoryId != null) {
+            try {
+              _selectedCategory = _categories.firstWhere(
+                (c) => c.id == categoryId,
+              );
+            } catch (_) {}
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading categories: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -116,16 +160,83 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Perfil actualizado exitosamente'),
-        backgroundColor: AppColors.accentGreen,
-      ),
-    );
-    Navigator.pop(context, true); // Indicate success to refresh parent
+    try {
+      final userId = supabase.auth.currentUser!.id;
+      final businessId = widget.business['id'];
+
+      // 1. Upload Logo if changed
+      String? finalLogoUrl = _logoUrl;
+      if (_newLogoFile != null) {
+        final fileBytes = await _newLogoFile!.readAsBytes();
+        final fileExt = _newLogoFile!.name.split('.').last.toLowerCase();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+        final imagePath = '$userId/$fileName';
+
+        await supabase.storage
+            .from('business-logos')
+            .uploadBinary(
+              imagePath,
+              fileBytes,
+              fileOptions: const FileOptions(
+                cacheControl: '3600',
+                upsert: true,
+              ),
+            );
+        final rawUrl = supabase.storage
+            .from('business-logos')
+            .getPublicUrl(imagePath);
+        finalLogoUrl = '$rawUrl?v=${DateTime.now().millisecondsSinceEpoch}';
+      }
+
+      // 2. Update Profile
+      await supabase
+          .from('profiles')
+          .update({
+            'full_name': _fullNameController.text.trim(),
+            'phone': _phoneController.text.trim(),
+          })
+          .eq('id', userId);
+
+      // 3. Update Business
+      await supabase
+          .from('businesses')
+          .update({
+            'name': _businessNameController.text.trim(),
+            'description': _businessDescriptionController.text.trim(),
+            'logo_url': finalLogoUrl,
+            'category_id': _selectedCategory?.id,
+            'address': _address,
+            'latitude': _latitude,
+            'longitude': _longitude,
+            'reward_description': _rewardDescriptionController.text.trim(),
+            'reward_long_description': _rewardLongDescriptionController.text
+                .trim(),
+            'points_required': int.parse(_pointsRequiredController.text),
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', businessId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado exitosamente'),
+            backgroundColor: AppColors.accentGreen,
+          ),
+        );
+        Navigator.pop(context, true); // Indicate success to refresh parent
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _deleteAccount() async {
@@ -172,10 +283,41 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     );
 
     if (confirm != true) return;
-    if (!mounted) return;
 
     setState(() => _isLoading = true);
-    await ProviderScope.containerOf(context).read(authStateProvider.notifier).logout();
+    try {
+      final userId = supabase.auth.currentUser!.id;
+
+      // Intentamos llamar a la Edge Function (recomendado para GDPR completo)
+      try {
+        await supabase.functions.invoke(
+          'hyper-action',
+          headers: {
+            'Authorization':
+                'Bearer ${supabase.auth.currentSession?.accessToken}',
+          },
+        );
+      } catch (e) {
+        debugPrint('Edge Function failed, using RPC fallback: $e');
+        // Fallback: Si no has desplegado la Edge Function, al menos limpiamos los datos públicos
+        await supabase.rpc(
+          'delete_user_data',
+          params: {'user_id_param': userId},
+        );
+      }
+
+      await ProviderScope.containerOf(context).read(authStateProvider.notifier).logout();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -184,7 +326,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         toolbarHeight: 80,
-        title: Text('Editar Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
+        title: AppBarTitle('Editar Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
         actions: [
           IconActionButton(
@@ -399,7 +541,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           MaterialPageRoute(
                             builder: (context) => Scaffold(
                               appBar: AppBar(
-                                title: const Text('Seleccionar Ubicación'),
+                                title: const AppBarTitle('Seleccionar Ubicación'),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(context),

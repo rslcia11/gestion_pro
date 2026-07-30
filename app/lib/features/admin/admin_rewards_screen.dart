@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
@@ -20,7 +21,7 @@ class AdminRewardsScreen extends StatefulWidget {
 }
 
 class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
-  // Stub: sin backend conectado — pendiente de integrar nueva DB.
+  final supabase = Supabase.instance.client;
   bool _isLoading = true;
   List<Map<String, dynamic>> _businessesList = [];
   List<Map<String, dynamic>> _allTransfers = [];
@@ -55,10 +56,18 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
   }
 
   Future<void> _loadBusinesses() async {
-    if (mounted) {
-      setState(() {
-        _businessesList = [];
-      });
+    try {
+      final response = await supabase
+          .from('businesses')
+          .select('id, name')
+          .order('name');
+      if (mounted) {
+        setState(() {
+          _businessesList = List<Map<String, dynamic>>.from(response);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading businesses: $e');
     }
   }
 
@@ -66,12 +75,133 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
 
   Future<void> _loadRewards() async {
     setState(() => _isLoading = true);
-    if (mounted) {
-      setState(() {
-        _allTransfers = [];
-        _userSummaries = [];
-        _isLoading = false;
-      });
+    try {
+      var query = supabase.from('rewards').select('''
+            id,
+            points_used,
+            earned_at,
+            user_id,
+            businesses (name, reward_description, points_required),
+            loyalty_cards (
+              profiles (id, full_name, email)
+            )
+          ''');
+
+      // Filter logic
+      final startOfDayUtc = EcuadorDateUtils.getStartOfDayEcuadorUtc();
+
+      if (_selectedFilter == 'today') {
+        query = query.gte('earned_at', startOfDayUtc.toIso8601String());
+      } else if (_selectedFilter == 'week') {
+        final startOfWeek = startOfDayUtc.subtract(const Duration(days: 7));
+        query = query.gte('earned_at', startOfWeek.toIso8601String());
+      } else if (_selectedFilter == 'month') {
+        final startOfMonth = startOfDayUtc.subtract(const Duration(days: 30));
+        query = query.gte('earned_at', startOfMonth.toIso8601String());
+      }
+
+      if (_selectedBusinessId != 'all') {
+        query = query.eq('business_id', _selectedBusinessId);
+      }
+
+      final response = await query
+          .order('earned_at', ascending: false)
+          .limit(500); // Expanded limit for grouping
+
+      final transfersResponse = await supabase.from('reward_transfer_history').select('''
+        *,
+        from_user:from_user_id(full_name, email),
+        to_user:to_user_id(full_name, email),
+        businesses(name),
+        rewards(points_used)
+      ''').order('transferred_at', ascending: false);
+
+      final transfers = List<Map<String, dynamic>>.from(transfersResponse);
+
+      // Agrupar por usuario original (el que ganó el premio)
+      Map<String, Map<String, dynamic>> userGroups = {};
+
+      for (var reward in response) {
+        final rewardId = reward['id'];
+        final business = reward['businesses'] ?? {};
+
+        // Buscar si este premio fue transferido
+        final transferInfo = transfers.where((t) => t['reward_id'] == rewardId).toList();
+
+        bool isTransferred = transferInfo.isNotEmpty;
+        String originalUserId = reward['user_id'];
+        Map<String, dynamic> originalProfile = reward['loyalty_cards']?['profiles'] ?? {};
+
+        String? transferredToId;
+        String? transferredAt;
+
+        if (isTransferred) {
+          // Si fue transferido, el dueño actual en 'rewards' es el destinatario.
+          // El remitente original es el 'from_user_id' del primer transfer (asumiendo 1 transfer)
+          final firstTransfer = transferInfo.first;
+          originalUserId = firstTransfer['from_user_id'];
+          transferredToId = firstTransfer['to_user_id'];
+          transferredAt = firstTransfer['transferred_at'];
+
+          // No tenemos el profile del remitente original en esta query si miramos 'loyalty_cards',
+          // porque loyalty_cards apunta al destinatario.
+          // Para simplificar y no hacer N queries, usaremos "Usuario Transferidor" si no lo tenemos.
+          // Nota: lo ideal sería buscar el perfil original, pero por ahora mostramos ID si falta.
+          if (originalProfile['id'] != originalUserId) {
+             originalProfile = {
+               'id': originalUserId,
+               'full_name': 'Usuario (Remitente)',
+               'email': 'Transferencia'
+             };
+          }
+        }
+
+        if (!userGroups.containsKey(originalUserId)) {
+          userGroups[originalUserId] = {
+            'user_id': originalUserId,
+            'user_name': originalProfile['full_name'] ?? originalProfile['email'] ?? 'Usuario Desconocido',
+            'user_email': originalProfile['email'] ?? '',
+            'rewards': <Map<String, dynamic>>[],
+          };
+        }
+
+        userGroups[originalUserId]!['rewards'].add({
+          'reward_id': rewardId,
+          'reward_description': business['reward_description'],
+          'business_name': business['name'],
+          'points_used': reward['points_used'],
+          'points_required': business['points_required'],
+          'earned_at': reward['earned_at'],
+          'transferred': isTransferred,
+          'transferred_to_name': transferredToId, // ID por ahora para no sobrecargar
+          'transferred_at': transferredAt,
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _allTransfers = transfers;
+          _userSummaries = userGroups.values.toList();
+          // Sort by user name
+          _userSummaries.sort((a, b) => (a['user_name'] as String).compareTo(b['user_name'] as String));
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading rewards: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error Supabase: $e',
+              style: const TextStyle(fontSize: 12),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
     }
   }
 
@@ -92,7 +222,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text('Premios Canjeados'),
+          title: const AppBarTitle('Premios Canjeados'),
           bottom: TabBar(
             labelStyle: AppTypography.labelBold,
             unselectedLabelStyle: AppTypography.bodyMedium.copyWith(fontSize: 12),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/theme/app_colors.dart';
@@ -13,8 +14,8 @@ class BusinessHistoryScreen extends StatefulWidget {
   State<BusinessHistoryScreen> createState() => _BusinessHistoryScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
+  final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _scans = [];
   List<Map<String, dynamic>> _rewards = [];
   List<Map<String, dynamic>> _transfers = [];
@@ -28,12 +29,70 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
   }
 
   Future<void> _loadHistory() async {
-    setState(() {
-      _scans = [];
-      _rewards = [];
-      _transfers = [];
-      _isLoading = false;
-    });
+    setState(() => _isLoading = true);
+
+    try {
+      var scansQuery = supabase
+          .from('scans')
+          .select('*, profiles!inner(full_name)')
+          .eq('business_id', widget.businessId)
+          .eq('status', 'approved');
+
+      var rewardsQuery = supabase
+          .from('rewards')
+          .select('*, description, profiles!inner(full_name)')
+          .eq('business_id', widget.businessId);
+
+      var transfersQuery = supabase
+          .from('reward_transfer_history')
+          .select('*, from_user:from_user_id(full_name), to_user:to_user_id(full_name), rewards(points_used)')
+          .eq('business_id', widget.businessId);
+
+      if (_dateRange != null) {
+        final start = _dateRange!.start.toUtc().toIso8601String();
+        final end = _dateRange!.end.add(const Duration(days: 1)).toUtc().toIso8601String();
+
+        final sQ = scansQuery.gte('scanned_at', start).lt('scanned_at', end);
+        final rQ = rewardsQuery.gte('earned_at', start).lt('earned_at', end);
+        final tQ = transfersQuery.gte('created_at', start).lt('created_at', end);
+
+        final scansResponse = await sQ.order('scanned_at', ascending: false);
+        final rewardsResponse = await rQ.order('earned_at', ascending: false);
+        final transfersResponse = await tQ.order('created_at', ascending: false);
+
+        if (mounted) {
+          setState(() {
+            _scans = List<Map<String, dynamic>>.from(scansResponse);
+            _rewards = List<Map<String, dynamic>>.from(rewardsResponse);
+            _transfers = List<Map<String, dynamic>>.from(transfersResponse);
+            _isLoading = false;
+          });
+        }
+      } else {
+        final scansResponse = await scansQuery.order('scanned_at', ascending: false);
+        final rewardsResponse = await rewardsQuery.order('earned_at', ascending: false);
+        final transfersResponse = await transfersQuery.order('created_at', ascending: false);
+
+        if (mounted) {
+          setState(() {
+            _scans = List<Map<String, dynamic>>.from(scansResponse);
+            _rewards = List<Map<String, dynamic>>.from(rewardsResponse);
+            _transfers = List<Map<String, dynamic>>.from(transfersResponse);
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        // Silenciar error de tabla no existente temporalmente si el admin no ha pusheado la migracion
+        if (e.toString().contains('relation "public.reward_transfers" does not exist')) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Aviso: La tabla de transferencias aún no está disponible.')));
+        } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
+      }
+    }
   }
 
   Future<void> _selectDateRange() async {
@@ -68,7 +127,7 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text('Historial de Actividad'),
+          title: const AppBarTitle('Historial de Actividad'),
           bottom: TabBar(
             tabs: const [
               Tab(text: 'Escaneos'),
@@ -170,4 +229,3 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
     );
   }
 }
-
