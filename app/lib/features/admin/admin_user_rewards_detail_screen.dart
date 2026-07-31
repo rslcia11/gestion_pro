@@ -30,6 +30,10 @@ class AdminUserRewardsDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,

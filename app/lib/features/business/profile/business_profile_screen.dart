@@ -328,6 +328,10 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         toolbarHeight: 80,
         title: AppBarTitle('Editar Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconActionButton(
             icon: LucideIcons.circleCheck,
@@ -550,6 +554,10 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             builder: (context) => Scaffold(
                               appBar: AppBar(
                                 title: const AppBarTitle('Seleccionar Ubicación'),
+                                leading: IconActionButton(
+                                  icon: LucideIcons.arrowLeft,
+                                  onPressed: () => Navigator.pop(context),
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(context),

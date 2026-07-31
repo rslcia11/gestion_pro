@@ -288,6 +288,12 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const AppBarTitle('Configurar Negocio'),
+        leading: Navigator.canPop(context)
+            ? IconActionButton(
+                icon: LucideIcons.arrowLeft,
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
       ),
       body: createBusinessState.isLoading
           ? const Center(

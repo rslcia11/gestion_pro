@@ -128,6 +128,10 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: const AppBarTitle('Historial de Actividad'),
+          leading: IconActionButton(
+            icon: LucideIcons.arrowLeft,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           bottom: TabBar(
             tabs: const [
               Tab(text: 'Escaneos'),

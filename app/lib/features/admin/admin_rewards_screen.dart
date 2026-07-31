@@ -223,6 +223,10 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: const AppBarTitle('Premios Canjeados'),
+          leading: IconActionButton(
+            icon: LucideIcons.arrowLeft,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           bottom: TabBar(
             labelStyle: AppTypography.labelBold,
             unselectedLabelStyle: AppTypography.bodyMedium.copyWith(fontSize: 12),

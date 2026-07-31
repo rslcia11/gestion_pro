@@ -280,6 +280,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
         title: AppBarTitle('Usuarios Registrados', style: AppTypography.titleBold.copyWith(fontSize: 18)),
         backgroundColor: AppColors.background,
         elevation: 0,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showExportDialog,

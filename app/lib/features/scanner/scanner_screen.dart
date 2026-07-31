@@ -153,6 +153,12 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
         title: const AppBarTitle('Escanear QR'),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          backgroundColor: Colors.white24,
+          iconColor: Colors.white,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconActionButton(
             icon: LucideIcons.zap,

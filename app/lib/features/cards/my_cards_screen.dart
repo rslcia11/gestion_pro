@@ -304,6 +304,12 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
         toolbarHeight: 100,
         backgroundColor: AppColors.background,
         centerTitle: false,
+        leading: Navigator.canPop(context)
+            ? IconActionButton(
+                icon: LucideIcons.arrowLeft,
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         title: displayName.isNotEmpty
             ? AppBarTitle('Hola, $displayName', style: AppTypography.titleBold)
             : null,
