@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'register_screen.dart';
+import '../../core/validators/app_validators.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
@@ -105,6 +107,9 @@ class _LoginScreenState extends State<LoginScreen> {
           hint: 'Correo electrónico',
           prefixIcon: LucideIcons.mail,
           keyboardType: TextInputType.emailAddress,
+          inputFormatters: [
+            FilteringTextInputFormatter.deny(RegExp(r'\s')),
+          ],
         ),
         actions: [
           SecondaryButton(
@@ -170,8 +175,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         hint: 'Tu email',
                         prefixIcon: LucideIcons.mail,
-                        validator: (value) =>
-                            (value == null || value.isEmpty) ? 'Ingresa tu email' : null,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                        ],
+                        validator: AppValidators.validateEmail,
                       ),
                       const SizedBox(height: AppSpacing.md),
                       AppTextField(
@@ -179,6 +186,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: !_isPasswordVisible,
                         hint: 'Tu contraseña',
                         prefixIcon: LucideIcons.lock,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                        ],
                         suffixIcon: IconButton(
                           icon: Icon(
                             _isPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
@@ -186,8 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                         ),
-                        validator: (value) =>
-                            (value == null || value.isEmpty) ? 'Ingresa tu contraseña' : null,
+                        validator: AppValidators.validatePassword,
                       ),
                       const SizedBox(height: 4),
                       Padding(

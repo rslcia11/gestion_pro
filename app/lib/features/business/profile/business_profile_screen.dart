@@ -480,7 +480,15 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             fillColor: AppColors.background,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(AppRadii.pill),
-                              borderSide: BorderSide.none,
+                              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(AppRadii.pill),
+                              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(AppRadii.pill),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
