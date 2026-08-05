@@ -78,6 +78,10 @@ class FaqsScreen extends StatelessWidget {
         elevation: 0,
         title: AppBarTitle('Preguntas frecuentes', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),

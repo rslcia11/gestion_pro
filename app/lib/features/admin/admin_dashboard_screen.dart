@@ -215,6 +215,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const AppBarTitle('Panel de Administración'),
+        leading: Navigator.canPop(context)
+            ? IconActionButton(
+                icon: LucideIcons.arrowLeft,
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         actions: [
           IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadMetrics),
           const SizedBox(width: 4),

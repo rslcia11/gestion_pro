@@ -312,6 +312,10 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const AppBarTitle('Negocios Registrados'),
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showExportDialog,

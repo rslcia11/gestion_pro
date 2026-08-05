@@ -160,6 +160,10 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const AppBarTitle('Gestión de Categorías'),
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddDialog,

@@ -280,6 +280,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       appBar: AppBar(
         title: AppBarTitle('Mi Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconActionButton(
             icon: LucideIcons.circleCheck,

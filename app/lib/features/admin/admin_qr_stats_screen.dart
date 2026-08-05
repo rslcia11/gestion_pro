@@ -268,6 +268,10 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadScanData),
           const SizedBox(width: AppSpacing.sm),

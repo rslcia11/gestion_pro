@@ -354,7 +354,15 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     if (business == null) {
       return Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(title: const AppBarTitle('Mi Negocio')),
+        appBar: AppBar(
+          title: const AppBarTitle('Mi Negocio'),
+          leading: Navigator.canPop(context)
+              ? IconActionButton(
+                  icon: LucideIcons.arrowLeft,
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : null,
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -400,8 +408,13 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
         appBar: AppBar(
           toolbarHeight: 90,
           leadingWidth: 90,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+          leading: Navigator.canPop(context)
+              ? IconActionButton(
+                  icon: LucideIcons.arrowLeft,
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
             child: GestureDetector(
               onTap: () async {
                 final result = await Navigator.push(

@@ -40,6 +40,10 @@ class AppValidators {
       return 'Ingresa tu email';
     }
 
+    if (value.contains(' ')) {
+      return 'El email no debe contener espacios';
+    }
+
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Email inválido';
@@ -52,6 +56,10 @@ class AppValidators {
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Ingresa tu contraseña';
+    }
+
+    if (value.contains(' ')) {
+      return 'La contraseña no debe contener espacios';
     }
 
     if (value.length < 6) {

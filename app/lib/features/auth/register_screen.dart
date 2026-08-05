@@ -308,6 +308,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       keyboardType: TextInputType.emailAddress,
                       hint: 'Email',
                       prefixIcon: LucideIcons.mail,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                      ],
                       validator: AppValidators.validateEmail,
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -330,6 +333,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'Contraseña segura',
                       helperText: 'Mínimo 6 caracteres',
                       prefixIcon: LucideIcons.lock,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                      ],
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
@@ -345,6 +351,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       obscureText: !_isConfirmPasswordVisible,
                       hint: 'Confirma tu contraseña',
                       prefixIcon: LucideIcons.lock,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                      ],
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isConfirmPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
