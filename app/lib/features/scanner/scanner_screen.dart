@@ -6,11 +6,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/utils/qr_code_link.dart';
 import '../../shared/widgets/shared_widgets.dart';
 import 'providers/scanner_provider.dart';
 
 class ScannerScreen extends ConsumerStatefulWidget {
-  const ScannerScreen({super.key});
+  final String? initialCode;
+  const ScannerScreen({super.key, this.initialCode});
 
   @override
   ConsumerState<ScannerScreen> createState() => _ScannerScreenState();
@@ -18,6 +20,17 @@ class ScannerScreen extends ConsumerStatefulWidget {
 
 class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   final MobileScannerController cameraController = MobileScannerController();
+
+  @override
+  void initState() {
+    super.initState();
+    final initialCode = widget.initialCode;
+    if (initialCode != null) {
+      Future.microtask(
+        () => ref.read(scannerProvider.notifier).validateScan(initialCode),
+      );
+    }
+  }
 
   void _showSuccessDialog(String businessName) {
     showDialog(
@@ -170,19 +183,23 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       ),
       body: Stack(
         children: [
-          MobileScanner(
-            controller: cameraController,
-            onDetect: (capture) {
-              final barcodes = capture.barcodes;
-              for (final barcode in barcodes) {
-                if (barcode.rawValue != null && !state.isProcessing) {
-                  cameraController.stop();
-                  ref.read(scannerProvider.notifier).validateScan(barcode.rawValue!);
-                  break;
+          if (widget.initialCode == null)
+            MobileScanner(
+              controller: cameraController,
+              onDetect: (capture) {
+                final barcodes = capture.barcodes;
+                for (final barcode in barcodes) {
+                  if (barcode.rawValue != null && !state.isProcessing) {
+                    final code = QrCodeLink.extractQrCode(barcode.rawValue!);
+                    if (code != null) {
+                      cameraController.stop();
+                      ref.read(scannerProvider.notifier).validateScan(code);
+                    }
+                    break;
+                  }
                 }
-              }
-            },
-          ),
+              },
+            ),
 
           // Custom Overlay
           Center(

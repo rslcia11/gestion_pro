@@ -87,3 +87,6 @@ jobs:
       - name: Upload index.html to S3
         if: steps.check_landing.outputs.changed == 'true'
         run: aws s3 cp landing/index.html s3://donde-siempre-app/index.html --content-type text/html
+
+      - name: Upload assetlinks.json to S3
+        run: aws s3 cp landing/.well-known/assetlinks.json s3://donde-siempre-app/.well-known/assetlinks.json --content-type application/json
