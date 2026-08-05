@@ -157,7 +157,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     GlobalCelebrationDialog.show(
       context,
       title: '¡FELICIDADES!',
-      message: '¡Felicidades! Espera o acércate al local para que aprueben tu premio.',
+      message: '¡Felicidades! Andá a Premios para solicitarlo o transferirlo.',
       iconType: 'reward',
     );
   }
@@ -215,7 +215,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
           ],
         ),
         content: Text(
-          'Tienes un premio pendiente en ${business['name']}. ¡No te olvides de reclamarlo!',
+          'Tienes un premio pendiente en ${business['name']}. ¡Solicitalo cuando estés listo para retirarlo!',
           textAlign: TextAlign.center,
           style: AppTypography.bodyRegular,
         ),
@@ -765,7 +765,7 @@ class _RewardBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     const Color color = AppColors.accentAmber;
     final String title = count > 1 ? '¡Tienes $count premios!' : '¡Tienes un premio!';
-    const String subtitle = 'Acércate al local para reclamarlo.';
+    const String subtitle = 'Andá a Premios para solicitarlo o transferirlo.';
 
     return Container(
       width: double.infinity,

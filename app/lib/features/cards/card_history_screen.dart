@@ -71,7 +71,34 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
 
   bool _canTransfer(Map<String, dynamic> reward) {
     final status = reward['status'] ?? 'pending';
-    return status == 'approved';
+    return status == 'pending' || status == 'approved';
+  }
+
+  bool _canRequest(Map<String, dynamic> reward) {
+    final status = reward['status'] ?? 'pending';
+    return status == 'pending';
+  }
+
+  Future<void> _requestReward(Map<String, dynamic> reward) async {
+    final rewardId = reward['id'] as String;
+    final success = await ref.read(cardHistoryProvider.notifier).requestReward(rewardId);
+    if (!mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Listo! Le avisamos al negocio que vas a retirar tu premio.'),
+          backgroundColor: AppColors.accentGreen,
+        ),
+      );
+    } else {
+      final error = ref.read(cardHistoryProvider).error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No pudimos solicitar el premio. ${error ?? ''}'),
+          backgroundColor: AppColors.accentPink,
+        ),
+      );
+    }
   }
 
   Future<void> _shareAppLink() async {
@@ -339,7 +366,10 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
         Color statusColor = AppColors.accentAmber;
         String statusLabel = 'Pendiente';
 
-        if (status == 'approved') {
+        if (status == 'requested') {
+          statusColor = AppColors.accentBlue;
+          statusLabel = 'Solicitado';
+        } else if (status == 'approved') {
           statusColor = AppColors.accentGreen;
           statusLabel = 'Entregado';
         } else if (status == 'rejected') {
@@ -422,10 +452,32 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                   ? StatusChipVariant.success
                                   : status == 'rejected'
                                       ? StatusChipVariant.error
-                                      : status == 'transferred_out'
+                                      : status == 'transferred_out' || status == 'requested'
                                           ? StatusChipVariant.info
                                           : StatusChipVariant.pending,
                             ),
+                            if (_canRequest(item)) ...[
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () => _requestReward(item),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.pastelOf(AppColors.accentGreen),
+                                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                                    border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(LucideIcons.handPlatter, color: AppColors.accentGreen, size: 12),
+                                      const SizedBox(width: 4),
+                                      Text('Solicitar', style: AppTypography.labelBold.copyWith(color: AppColors.accentGreen, fontSize: 9)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                             if (_canTransfer(item)) ...[
                               const SizedBox(height: 8),
                               GestureDetector(

@@ -49,10 +49,13 @@ class RewardTransferService {
       throw TransferException('ERROR', 'El premio no existe.');
     }
 
-    if (reward['status'] != 'approved') {
+    final rewardStatus = reward['status'];
+    if (rewardStatus != 'pending' && rewardStatus != 'approved') {
       throw TransferException(
         'ERROR',
-        'Solo se pueden transferir premios aprobados.',
+        rewardStatus == 'requested'
+            ? 'Ya solicitaste este premio, no se puede transferir.'
+            : 'Este premio no se puede transferir.',
       );
     }
 

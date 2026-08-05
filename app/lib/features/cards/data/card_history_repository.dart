@@ -75,4 +75,10 @@ class CardHistoryRepository {
       allRewards,
     ];
   }
+
+  /// Marca un premio 'pending' como 'requested': avisa al dueño del negocio
+  /// que el cliente está listo para retirarlo.
+  Future<void> requestReward(String rewardId) async {
+    await _supabase.rpc('request_reward', params: {'p_reward_id': rewardId});
+  }
 }
