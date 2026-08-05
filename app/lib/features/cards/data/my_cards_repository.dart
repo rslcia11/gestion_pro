@@ -80,6 +80,7 @@ class MyCardsRepository {
 
   RealtimeChannel setupRealtimeSubscription({
     required void Function(Map<String, dynamic> newData, Map<String, dynamic> oldData) onCardUpdated,
+    required void Function(Map<String, dynamic> newData, Map<String, dynamic> oldData) onRewardUpdated,
   }) {
     final userId = currentUserId;
     return _supabase
@@ -97,6 +98,21 @@ class MyCardsRepository {
             final newData = payload.newRecord;
             final oldData = payload.oldRecord;
             onCardUpdated(newData, oldData);
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'rewards',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'user_id',
+            value: userId,
+          ),
+          callback: (payload) {
+            final newData = payload.newRecord;
+            final oldData = payload.oldRecord;
+            onRewardUpdated(newData, oldData);
           },
         )
         .subscribe();

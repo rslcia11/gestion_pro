@@ -71,7 +71,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
 
   bool _canTransfer(Map<String, dynamic> reward) {
     final status = reward['status'] ?? 'pending';
-    return status == 'pending' || status == 'approved';
+    return status == 'pending';
   }
 
   bool _canRequest(Map<String, dynamic> reward) {
@@ -388,8 +388,8 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
         }
 
         return Container(
-              margin: const EdgeInsets.only(bottom: AppSpacing.md),
-              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surfaceCard,
                 borderRadius: BorderRadius.circular(AppRadii.card),
@@ -400,7 +400,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: AppColors.pastelOf(isScan ? accent : statusColor),
                           borderRadius: BorderRadius.circular(AppRadii.badge),
@@ -410,10 +410,10 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                               ? (isGifted ? LucideIcons.gift : LucideIcons.scanLine)
                               : LucideIcons.gift,
                           color: isScan ? accent : statusColor,
-                          size: 24,
+                          size: 20,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,7 +424,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                   : (item['businesses']?['reward_description']?.toString() ??
                                         item['reward_description']?.toString() ??
                                         'Premio'),
-                              style: AppTypography.subtitleBold.copyWith(fontSize: 13),
+                              style: AppTypography.subtitleBold.copyWith(fontSize: 12),
                             ),
                             if (isScan)
                               Text(
@@ -432,12 +432,13 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                 style: AppTypography.caption.copyWith(
                                   color: isGifted ? AppColors.accentPurple : AppColors.textSecondary,
                                   fontWeight: FontWeight.w700,
+                                  fontSize: 10,
                                 ),
                               ),
                             if (!isScan && item['description'] != null)
-                              Text(item['description'].toString(), style: AppTypography.caption),
+                              Text(item['description'].toString(), style: AppTypography.caption.copyWith(fontSize: 10)),
                             const SizedBox(height: 2),
-                            Text(EcuadorDateUtils.formatEcuadorTime(date), style: AppTypography.caption.copyWith(fontSize: 10)),
+                            Text(EcuadorDateUtils.formatEcuadorTime(date), style: AppTypography.caption.copyWith(fontSize: 9)),
                           ],
                         ),
                       ),
@@ -457,11 +458,11 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                           : StatusChipVariant.pending,
                             ),
                             if (_canRequest(item)) ...[
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () => _requestReward(item),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: AppColors.pastelOf(AppColors.accentGreen),
                                     borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -470,20 +471,20 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(LucideIcons.handPlatter, color: AppColors.accentGreen, size: 12),
-                                      const SizedBox(width: 4),
-                                      Text('Solicitar', style: AppTypography.labelBold.copyWith(color: AppColors.accentGreen, fontSize: 9)),
+                                      const Icon(LucideIcons.handPlatter, color: AppColors.accentGreen, size: 10),
+                                      const SizedBox(width: 3),
+                                      Text('Solicitar', style: AppTypography.labelBold.copyWith(color: AppColors.accentGreen, fontSize: 8)),
                                     ],
                                   ),
                                 ),
                               ),
                             ],
                             if (_canTransfer(item)) ...[
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               GestureDetector(
                                 onTap: () => _showTransferDialog(item),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: AppColors.pastelOf(AppColors.accentPurple),
                                     borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -492,9 +493,9 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(LucideIcons.arrowLeftRight, color: AppColors.accentPurple, size: 12),
-                                      const SizedBox(width: 4),
-                                      Text('Transferir', style: AppTypography.labelBold.copyWith(color: AppColors.accentPurple, fontSize: 9)),
+                                      const Icon(LucideIcons.arrowLeftRight, color: AppColors.accentPurple, size: 10),
+                                      const SizedBox(width: 3),
+                                      Text('Transferir', style: AppTypography.labelBold.copyWith(color: AppColors.accentPurple, fontSize: 8)),
                                     ],
                                   ),
                                 ),

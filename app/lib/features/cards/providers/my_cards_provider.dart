@@ -48,7 +48,9 @@ class MyCardsNotifier extends Notifier<MyCardsState> {
   bool _realtimeSubscribed = false;
 
   // We use events to notify the UI of celebrations or points
-  void Function()? onCardCompleted;
+  // onRewardDelivered: el dueño ya ENTREGÓ el premio (status -> 'approved').
+  // La celebración va acá, no cuando se completa la tarjeta / se aprueba el punto.
+  void Function()? onRewardDelivered;
   void Function()? onPointEarned;
 
   // Debounce: varios eventos realtime (loyalty_cards + rewards + scans) por una
@@ -139,9 +141,6 @@ class MyCardsNotifier extends Notifier<MyCardsState> {
 
     _repository.setupRealtimeSubscription(
       onCardUpdated: (newData, oldData) {
-        final newClaimed = (newData['rewards_claimed'] as int?) ?? 0;
-        final oldClaimed = (oldData['rewards_claimed'] as int?) ?? 0;
-        
         final newPoints = (newData['current_points'] as int?) ?? 0;
         final oldPoints = (oldData['current_points'] as int?) ?? 0;
 
@@ -150,14 +149,21 @@ class MyCardsNotifier extends Notifier<MyCardsState> {
         final business = existingCard['businesses'] as Map<String, dynamic>?;
         final requiredPoints = business?['points_required'] as int? ?? 0;
 
-        if (newPoints > oldPoints && newPoints >= requiredPoints && requiredPoints > 0) {
-          onCardCompleted?.call();
-        } else if (newPoints > oldPoints) {
+        // La celebración grande ya NO va acá (eso es solo "se completó la
+        // tarjeta / se aprobó el punto"); ver onRewardUpdated más abajo.
+        if (newPoints > oldPoints && newPoints < requiredPoints) {
           onPointEarned?.call();
-        } else if (newClaimed > oldClaimed) {
-          // You could optionally add an onRewardClaimed callback here if needed later
         }
 
+        scheduleRefresh();
+      },
+      onRewardUpdated: (newData, oldData) {
+        final newStatus = newData['status'];
+        final oldStatus = oldData['status'];
+        // Celebración grande recién cuando el dueño ENTREGA el premio.
+        if (newStatus == 'approved' && oldStatus != 'approved') {
+          onRewardDelivered?.call();
+        }
         scheduleRefresh();
       },
     );

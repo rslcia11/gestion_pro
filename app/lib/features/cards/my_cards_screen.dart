@@ -49,7 +49,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     // Bind real-time event handlers
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final notifier = ref.read(myCardsProvider.notifier);
-      notifier.onCardCompleted = _showCelebrationDialog;
+      notifier.onRewardDelivered = _showCelebrationDialog;
       notifier.onPointEarned = _showPointEarnedAnimation;
       
       // Evitar que el diálogo salte si la pantalla está oculta detrás del RegisterScreen
@@ -157,7 +157,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     GlobalCelebrationDialog.show(
       context,
       title: '¡FELICIDADES!',
-      message: '¡Felicidades! Andá a Premios para solicitarlo o transferirlo.',
+      message: '¡Felicidades! Ya tenés tu premio en la mano.',
       iconType: 'reward',
     );
   }
