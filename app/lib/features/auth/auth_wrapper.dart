@@ -14,11 +14,15 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/services/push_notification_service.dart';
 import '../../core/services/realtime_sync_service.dart';
+import '../../core/services/deep_link_service.dart';
 import '../../core/widgets/global_celebration_dialog.dart';
 import '../../core/providers/supabase_provider.dart';
 import '../../shared/widgets/shared_widgets.dart';
+import '../scanner/scanner_screen.dart';
+import '../scanner/providers/pending_qr_provider.dart';
 import 'dart:async';
 import 'providers/auth_provider.dart';
+import '../../main.dart';
 
 class AuthWrapper extends ConsumerStatefulWidget {
   const AuthWrapper({super.key});
@@ -50,6 +54,36 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
         );
       }
     });
+
+    DeepLinkService().initialize(
+      onQrCodeReceived: (code) {
+        if (!mounted) return;
+        ref.read(pendingQrCodeProvider.notifier).state = code;
+      },
+    );
+  }
+
+  // Intenta consumir un código QR pendiente (capturado desde un App Link).
+  // Se llama tanto cuando cambia el estado de auth como cuando llega un
+  // nuevo código, porque no hay garantía de qué evento ocurre primero.
+  void _tryConsumePendingQr() {
+    final code = ref.read(pendingQrCodeProvider);
+    if (code == null) return;
+
+    final authState = ref.read(authStateProvider);
+
+    if (authState is AuthClient) {
+      ref.read(pendingQrCodeProvider.notifier).state = null;
+      globalNavigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => ScannerScreen(initialCode: code)),
+      );
+    } else if (authState is! AuthInitial && authState is! AuthUnauthenticated) {
+      // Dueño de negocio / admin / negocio inactivo o pendiente de crear:
+      // descartamos el código en silencio, la app abre normal.
+      ref.read(pendingQrCodeProvider.notifier).state = null;
+    }
+    // AuthInitial / AuthUnauthenticated: dejamos el código guardado hasta
+    // que el login resuelva.
   }
 
   @override
@@ -134,6 +168,12 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
         RealtimeSyncService().reset();
         MyCardsScreen.resetSessionFlags();
       }
+
+      _tryConsumePendingQr();
+    });
+
+    ref.listen<String?>(pendingQrCodeProvider, (previous, next) {
+      if (next != null) _tryConsumePendingQr();
     });
 
     if (authState is AuthInitial) {

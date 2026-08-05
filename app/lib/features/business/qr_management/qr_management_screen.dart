@@ -19,6 +19,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../core/utils/qr_code_link.dart';
 import '../../../core/services/realtime_sync_service.dart';
 import 'dart:async';
 
@@ -122,7 +123,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
     try {
 
       final painter = QrPainter(
-        data: code,
+        data: QrCodeLink.build(code),
         version: QrVersions.auto,
         gapless: true,
         errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -248,7 +249,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                     children: [
                       pw.BarcodeWidget(
                         barcode: pw.Barcode.qrCode(errorCorrectLevel: pw.BarcodeQRCorrectionLevel.high),
-                        data: code,
+                        data: QrCodeLink.build(code),
                         width: 300,
                         height: 300,
                       ),
@@ -332,7 +333,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                   boxShadow: AppShadows.card,
                 ),
                 child: QrImageView(
-                  data: code,
+                  data: QrCodeLink.build(code),
                   version: QrVersions.auto,
                   size: 200.0,
                   eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Colors.black),
