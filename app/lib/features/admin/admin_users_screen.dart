@@ -566,6 +566,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                             curve: AppTheme.animCurveStandard,
                           );
                     },
+                    childCount: _filteredUsers.length + (_hasMore ? 1 : 0),
                   ),
                 ),
               ),

@@ -729,6 +729,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                         ),
                       );
                     },
+                    childCount: _filteredBusinesses.length + (_hasMore ? 1 : 0),
                   ),
                 ),
               ),
