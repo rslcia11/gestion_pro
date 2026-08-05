@@ -79,15 +79,22 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
           style: AppTypography.bodyRegular,
         ),
         actions: [
-          SecondaryButton(
-            label: 'Cancelar',
-            isFullWidth: false,
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          PrimaryButton(
-            label: 'Canjear',
-            isFullWidth: false,
-            onPressed: () => Navigator.pop(context, true),
+          Row(
+            children: [
+              Expanded(
+                child: SecondaryButton(
+                  label: 'Cancelar',
+                  onPressed: () => Navigator.pop(context, false),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: PrimaryButton(
+                  label: 'Canjear',
+                  onPressed: () => Navigator.pop(context, true),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -12,33 +12,50 @@ class SecondaryButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.isFullWidth = true,
+    this.padding,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
   final bool isFullWidth;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
+    final effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14);
+
     final button = OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.textPrimary,
         side: const BorderSide(color: AppColors.border, width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+        padding: effectivePadding,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
             Icon(icon, size: 18, color: AppColors.textPrimary),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
           ],
-          Text(label, style: AppTypography.labelBold),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Text(
+                label,
+                style: AppTypography.labelBold,
+                maxLines: 1,
+              ),
+            ),
+          ),
         ],
       ),
     );

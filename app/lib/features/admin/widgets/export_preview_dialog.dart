@@ -94,9 +94,19 @@ class ExportPreviewDialog extends StatelessWidget {
         ],
       ),
       actions: [
-        SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context)),
-        if (!isOverLimit)
-          PrimaryButton(label: 'Exportar', icon: LucideIcons.download, onPressed: () => _export(context)),
+        Row(
+          children: [
+            Expanded(
+              child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context)),
+            ),
+            if (!isOverLimit) ...[
+              const SizedBox(width: 8),
+              Expanded(
+                child: PrimaryButton(label: 'Exportar', icon: LucideIcons.download, onPressed: () => _export(context)),
+              ),
+            ],
+          ],
+        ),
       ],
     );
   }

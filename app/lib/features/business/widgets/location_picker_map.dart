@@ -85,8 +85,17 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
               title: Text('GPS Desactivado', style: AppTypography.titleBold),
               content: Text('Para poder ubicarte automáticamente, necesitas encender el GPS. ¿Deseas abrir la configuración?', style: AppTypography.bodyRegular),
               actions: [
-                SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
-                PrimaryButton(label: 'Configuración', onPressed: () => Navigator.pop(ctx, true)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: PrimaryButton(label: 'Configuración', onPressed: () => Navigator.pop(ctx, true)),
+                    ),
+                  ],
+                ),
               ],
             ),
           );

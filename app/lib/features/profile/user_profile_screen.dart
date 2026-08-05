@@ -143,13 +143,22 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             ],
           ),
           actions: [
-            SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context, false)),
-            PrimaryButton(
-              label: 'Eliminar definitivamente',
-              isDestructive: true,
-              onPressed: () {
-                if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') Navigator.pop(context, true);
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(context, false)),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Eliminar definitivamente',
+                    isDestructive: true,
+                    onPressed: () {
+                      if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') Navigator.pop(context, true);
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -213,12 +222,21 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             ),
           ),
           actions: [
-            SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
-            PrimaryButton(
-              label: 'Guardar',
-              onPressed: () {
-                if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Guardar',
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -251,8 +269,17 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         title: Text('¿Cerrar sesión?', textAlign: TextAlign.center, style: AppTypography.titleBold),
         content: Text('¿Estás seguro que deseas salir de tu cuenta?', textAlign: TextAlign.center, style: AppTypography.bodyRegular),
         actions: [
-          SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
-          PrimaryButton(label: 'Cerrar Sesión', onPressed: () => Navigator.pop(ctx, true)),
+          Row(
+            children: [
+              Expanded(
+                child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: PrimaryButton(label: 'Cerrar Sesión', onPressed: () => Navigator.pop(ctx, true)),
+              ),
+            ],
+          ),
         ],
       ),
     );

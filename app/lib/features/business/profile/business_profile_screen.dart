@@ -264,18 +264,27 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             ],
           ),
           actions: [
-            SecondaryButton(
-              label: 'Cancelar',
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            PrimaryButton(
-              label: 'Eliminar definitivamente',
-              isDestructive: true,
-              onPressed: () {
-                if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') {
-                  Navigator.pop(context, true);
-                }
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: SecondaryButton(
+                    label: 'Cancelar',
+                    onPressed: () => Navigator.pop(context, false),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Eliminar definitivamente',
+                    isDestructive: true,
+                    onPressed: () {
+                      if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') {
+                        Navigator.pop(context, true);
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         );
