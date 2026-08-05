@@ -471,11 +471,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       initialValue: TextEditingValue(text: _selectedCategory?.name.toUpperCase() ?? ''),
                       displayStringForOption: (BusinessCategory option) => option.name.toUpperCase(),
                       optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
+                        final query = textEditingValue.text.trim();
+                        if (query.isEmpty || query.toUpperCase() == _selectedCategory?.name.trim().toUpperCase()) {
                           return _categories;
                         }
                         return _categories.where((BusinessCategory option) {
-                          return option.name.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                          return option.name.toLowerCase().contains(query.toLowerCase());
                         });
                       },
                       onSelected: (BusinessCategory selection) {
@@ -522,26 +523,55 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<BusinessCategory> onSelected, Iterable<BusinessCategory> options) {
                         return Align(
                           alignment: Alignment.topLeft,
-                          child: Material(
-                            elevation: 8.0,
-                            borderRadius: BorderRadius.circular(AppRadii.card),
-                            clipBehavior: Clip.antiAlias,
-                            child: Container(
-                              constraints: const BoxConstraints(maxHeight: 250),
-                              width: MediaQuery.of(context).size.width - 48,
-                              child: ListView.builder(
-                                padding: EdgeInsets.zero,
-                                shrinkWrap: true,
-                                itemCount: options.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final BusinessCategory option = options.elementAt(index);
-                                  return ListTile(
-                                    title: Text(option.name.toUpperCase(), style: AppTypography.labelBold),
-                                    onTap: () => onSelected(option),
-                                  );
-                                },
-                              ),
-                            ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Material(
+                                elevation: 8.0,
+                                shadowColor: Colors.black26,
+                                color: AppColors.surfaceCard,
+                                borderRadius: BorderRadius.circular(AppRadii.card),
+                                clipBehavior: Clip.antiAlias,
+                                child: Container(
+                                  width: constraints.maxWidth,
+                                  constraints: const BoxConstraints(maxHeight: 280),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(AppRadii.card),
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: options.isEmpty
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Text('No se encontraron categorías', style: AppTypography.bodyMedium),
+                                        )
+                                      : ListView.separated(
+                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                          shrinkWrap: true,
+                                          itemCount: options.length,
+                                          separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                                          itemBuilder: (BuildContext context, int index) {
+                                            final BusinessCategory option = options.elementAt(index);
+                                            final isSelected = _selectedCategory?.id == option.id;
+                                            return ListTile(
+                                              dense: true,
+                                              tileColor: isSelected ? AppColors.primary.withValues(alpha: 0.08) : null,
+                                              leading: Icon(
+                                                LucideIcons.layers,
+                                                size: 18,
+                                                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                                              ),
+                                              title: Text(
+                                                option.name.toUpperCase(),
+                                                style: AppTypography.labelBold.copyWith(
+                                                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                                ),
+                                              ),
+                                              onTap: () => onSelected(option),
+                                            );
+                                          },
+                                        ),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
