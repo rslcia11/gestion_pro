@@ -83,7 +83,7 @@ class _StepLogoPickerState extends State<StepLogoPicker> {
                       : null,
                 ),
                 child: _imageFile == null
-                    ? const Icon(LucideIcons.store, size: 56, color: AppColors.accentPurple)
+                    ? Icon(LucideIcons.store, size: 56, color: AppColors.accentPurple)
                     : null,
               ),
               Positioned(
@@ -119,11 +119,11 @@ class _StepLogoPickerState extends State<StepLogoPicker> {
                   },
                   child: Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(LucideIcons.camera, color: Colors.white, size: 20),
+                    child: Icon(LucideIcons.camera, color: AppColors.onPrimary, size: 20),
                   ),
                 ),
               ),

@@ -89,8 +89,8 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
       await _loadQRCodes();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Código QR generado exitosamente'),
+          SnackBar(
+            content: const Text('Código QR generado exitosamente'),
             backgroundColor: AppColors.accentGreen,
           ),
         );
@@ -179,7 +179,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                       color: AppColors.pastelOf(AppColors.accentGreen),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 44),
+                    child: Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 44),
                   ),
                   const SizedBox(height: 16),
                   Text('¡Código guardado!', style: AppTypography.titleBold, textAlign: TextAlign.center),
@@ -283,10 +283,10 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ PDF generado. Selecciona "Guardar en Archivos" para enviarlo a Documentos.'),
+          SnackBar(
+            content: const Text('✅ PDF generado. Selecciona "Guardar en Archivos" para enviarlo a Documentos.'),
             backgroundColor: AppColors.accentGreen,
-            duration: Duration(seconds: 4),
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -328,7 +328,10 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceCard,
+                  // Fijo en blanco (no AppColors.surfaceCard): el QR necesita
+                  // máximo contraste con los módulos negros para escanear
+                  // bien, independientemente del modo de la app.
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(AppRadii.card),
                   boxShadow: AppShadows.card,
                 ),
@@ -451,7 +454,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
+          ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : _qrCodes.isEmpty
               ? Center(
                   child: Column(
@@ -460,7 +463,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                       Container(
                         padding: const EdgeInsets.all(28),
                         decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentAmber), shape: BoxShape.circle),
-                        child: const Icon(LucideIcons.qrCode, size: 56, color: AppColors.accentAmber),
+                        child: Icon(LucideIcons.qrCode, size: 56, color: AppColors.accentAmber),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Text('Sin códigos QR', style: AppTypography.subtitleBold),

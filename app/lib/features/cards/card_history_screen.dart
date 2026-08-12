@@ -49,19 +49,6 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
           ),
       firstDate: DateTime(2023),
       lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Colors.black,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (pickedRange != null) {
@@ -85,8 +72,8 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
     if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Listo! Le avisamos al negocio que vas a retirar tu premio.'),
+        SnackBar(
+          content: const Text('¡Listo! Le avisamos al negocio que vas a retirar tu premio.'),
           backgroundColor: AppColors.accentGreen,
         ),
       );
@@ -205,7 +192,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(LucideIcons.circleAlert, color: AppColors.accentPink, size: 20),
+                                    Icon(LucideIcons.circleAlert, color: AppColors.accentPink, size: 20),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
@@ -300,9 +287,9 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorSize: TabBarIndicatorSize.label,
-            indicator: const UnderlineTabIndicator(
+            indicator: UnderlineTabIndicator(
               borderSide: BorderSide(width: 3, color: AppColors.primary),
-              insets: EdgeInsets.symmetric(horizontal: 16),
+              insets: const EdgeInsets.symmetric(horizontal: 16),
             ),
             tabs: const [
               Tab(text: 'Escaneos'),
@@ -311,7 +298,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
           ),
         ),
         body: state.isLoading
-            ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
+            ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
             : TabBarView(
                 children: [
                   _buildHistoryList(state.scans, isScan: true),
@@ -471,7 +458,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(LucideIcons.handPlatter, color: AppColors.accentGreen, size: 10),
+                                      Icon(LucideIcons.handPlatter, color: AppColors.accentGreen, size: 10),
                                       const SizedBox(width: 3),
                                       Text('Solicitar', style: AppTypography.labelBold.copyWith(color: AppColors.accentGreen, fontSize: 8)),
                                     ],
@@ -493,7 +480,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(LucideIcons.arrowLeftRight, color: AppColors.accentPurple, size: 10),
+                                      Icon(LucideIcons.arrowLeftRight, color: AppColors.accentPurple, size: 10),
                                       const SizedBox(width: 3),
                                       Text('Transferir', style: AppTypography.labelBold.copyWith(color: AppColors.accentPurple, fontSize: 8)),
                                     ],
@@ -509,7 +496,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        const Icon(LucideIcons.cornerDownRight, size: 14, color: AppColors.accentPurple),
+                        Icon(LucideIcons.cornerDownRight, size: 14, color: AppColors.accentPurple),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -528,7 +515,7 @@ class _CardHistoryScreenState extends ConsumerState<CardHistoryScreen> {
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        const Icon(LucideIcons.store, size: 12, color: AppColors.border),
+                        Icon(LucideIcons.store, size: 12, color: AppColors.border),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(

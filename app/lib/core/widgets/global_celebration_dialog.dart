@@ -80,7 +80,7 @@ class _GlobalCelebrationDialogState extends State<GlobalCelebrationDialog> {
             maxBlastForce: 100,
             minBlastForce: 80,
             gravity: 0.1,
-            colors: const [
+            colors: [
               AppColors.accentPurple,
               AppColors.accentGreen,
               AppColors.accentAmber,

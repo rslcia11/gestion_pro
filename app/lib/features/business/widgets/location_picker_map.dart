@@ -406,10 +406,10 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                   style: AppTypography.bodyRegular,
                   decoration: InputDecoration(
                     hintText: 'Buscar ciudad, calle, local...',
-                    prefixIcon: const Icon(LucideIcons.search, size: 20, color: AppColors.textSecondary),
+                    prefixIcon: Icon(LucideIcons.search, size: 20, color: AppColors.textSecondary),
                     suffixIcon: textEditingController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
+                            icon: Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
                             onPressed: () {
                               textEditingController.clear();
                               setState(() {});
@@ -455,7 +455,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             shrinkWrap: true,
                             itemCount: options.length,
-                            separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                            separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.border),
                             itemBuilder: (context, index) {
                               final option = options.elementAt(index);
                               final address = option['address'] ?? {};
@@ -467,7 +467,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
 
                               return ListTile(
                                 dense: true,
-                                leading: const Icon(LucideIcons.mapPin, color: AppColors.primary, size: 20),
+                                leading: Icon(LucideIcons.mapPin, color: AppColors.primary, size: 20),
                                 title: Text(
                                   title.isNotEmpty ? title : 'Ubicación',
                                   maxLines: 1,
@@ -518,7 +518,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                             width: 40.0,
                             height: 40.0,
                             point: _selectedLocation!,
-                            child: const Icon(
+                            child: Icon(
                               LucideIcons.mapPin,
                               color: AppColors.primary,
                               size: 40,
@@ -545,7 +545,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(LucideIcons.locate, size: 18, color: AppColors.primary),
+                            Icon(LucideIcons.locate, size: 18, color: AppColors.primary),
                             const SizedBox(width: 6),
                             Text(
                               'Ubicarme',
@@ -564,7 +564,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                 if (_isLoading)
                   Container(
                     color: Colors.black26,
-                    child: const Center(
+                    child: Center(
                       child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
                     ),
                   ),
@@ -586,7 +586,7 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.mapPin, size: 16, color: AppColors.textPrimary),
+                  Icon(LucideIcons.mapPin, size: 16, color: AppColors.textPrimary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(_address, style: AppTypography.caption, overflow: TextOverflow.ellipsis, maxLines: 2),

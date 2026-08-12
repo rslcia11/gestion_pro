@@ -31,7 +31,7 @@ class TabPendingScans extends ConsumerWidget {
                 color: AppColors.pastelOf(AppColors.accentGreen),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(LucideIcons.circleCheck, size: 56, color: AppColors.accentGreen),
+              child: Icon(LucideIcons.circleCheck, size: 56, color: AppColors.accentGreen),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text('¡Todo al día!', style: AppTypography.subtitleBold),

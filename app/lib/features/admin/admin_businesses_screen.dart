@@ -284,12 +284,10 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.accentPurple,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: AppColors.accentPurple,
+                  onPrimary: Colors.white,
+                ),
           ),
           child: child!,
         );
@@ -429,7 +427,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
               ),
             ),
             if (_isLoading)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 child: Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
@@ -461,8 +459,8 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       if (index == _filteredBusinesses.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
                             child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
                           ),
@@ -530,7 +528,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                                         const SizedBox(height: AppSpacing.sm),
                                         Row(
                                           children: [
-                                            const Icon(LucideIcons.user, size: 14, color: AppColors.textSecondary),
+                                            Icon(LucideIcons.user, size: 14, color: AppColors.textSecondary),
                                             const SizedBox(width: AppSpacing.xs),
                                             Expanded(
                                               child: Text(
@@ -547,7 +545,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                                         const SizedBox(height: AppSpacing.xs),
                                         Row(
                                           children: [
-                                            const Icon(LucideIcons.mail, size: 14, color: AppColors.textSecondary),
+                                            Icon(LucideIcons.mail, size: 14, color: AppColors.textSecondary),
                                             const SizedBox(width: AppSpacing.xs),
                                             Expanded(
                                               child: Text(
@@ -561,7 +559,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                                         const SizedBox(height: AppSpacing.xs),
                                         Row(
                                           children: [
-                                            const Icon(LucideIcons.phone, size: 14, color: AppColors.textSecondary),
+                                            Icon(LucideIcons.phone, size: 14, color: AppColors.textSecondary),
                                             const SizedBox(width: AppSpacing.xs),
                                             Expanded(
                                               child: Text(
@@ -597,7 +595,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                                   children: [
                                     Row(
                                       children: [
-                                        const Icon(LucideIcons.megaphone, size: 18, color: AppColors.accentPurple),
+                                        Icon(LucideIcons.megaphone, size: 18, color: AppColors.accentPurple),
                                         const SizedBox(width: AppSpacing.sm),
                                         Text(
                                           'Campaña Activa',
@@ -608,7 +606,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                                         ),
                                       ],
                                     ),
-                                    const Divider(height: 16, color: AppColors.border),
+                                    Divider(height: 16, color: AppColors.border),
                                     _CampaignDetailRow(
                                       icon: LucideIcons.gift,
                                       label: 'Premio:',
@@ -643,7 +641,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                                   ),
                                   title: Row(
                                     children: [
-                                      const Icon(LucideIcons.users, size: 16, color: AppColors.textSecondary),
+                                      Icon(LucideIcons.users, size: 16, color: AppColors.textSecondary),
                                       const SizedBox(width: AppSpacing.xs),
                                       Text(
                                         '${clientsList.length} Clientes Activos',

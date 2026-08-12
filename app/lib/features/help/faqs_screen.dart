@@ -10,7 +10,7 @@ import '../../shared/widgets/shared_widgets.dart';
 class FaqsScreen extends StatelessWidget {
   const FaqsScreen({super.key});
 
-  static const List<_FaqItem> _faqs = [
+  static final List<_FaqItem> _faqs = [
     _FaqItem(
       icon: LucideIcons.idCard,
       color: AppColors.accentPurple,
@@ -94,7 +94,7 @@ class FaqsScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(LucideIcons.fileText, size: 32, color: AppColors.accentPurple),
+                Icon(LucideIcons.fileText, size: 32, color: AppColors.accentPurple),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -125,7 +125,7 @@ class FaqsScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.handHeart, color: AppColors.accentGreen),
+                  Icon(LucideIcons.handHeart, color: AppColors.accentGreen),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

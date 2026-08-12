@@ -13,16 +13,17 @@ class StatCard extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
-    this.accentColor = AppColors.accentPurple,
+    this.accentColor,
   });
 
   final IconData icon;
   final String label;
   final String value;
-  final Color accentColor;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedAccent = accentColor ?? AppColors.accentPurple;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -37,11 +38,11 @@ class StatCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.pastelOf(accentColor),
+              color: AppColors.pastelOf(resolvedAccent),
               borderRadius: BorderRadius.circular(AppRadii.badge),
             ),
             alignment: Alignment.center,
-            child: Icon(icon, color: accentColor, size: 20),
+            child: Icon(icon, color: resolvedAccent, size: 20),
           ),
           const SizedBox(height: 12),
           Text(

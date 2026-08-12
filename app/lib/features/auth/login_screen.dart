@@ -76,8 +76,9 @@ class _LoginScreenState extends State<LoginScreen> {
       await Supabase.instance.client.auth.resetPasswordForEmail(email);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Revisa tu correo para recuperar la contraseña.'),
+          SnackBar(
+            content:
+                const Text('Revisa tu correo para recuperar la contraseña.'),
             backgroundColor: AppColors.accentGreen,
           ),
         );
@@ -100,7 +101,8 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surfaceCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.card)),
         title: Text('Recuperar contraseña', style: AppTypography.titleBold),
         content: AppTextField(
           controller: emailController,
@@ -134,14 +136,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: SingleChildScrollView(
+              // Sin rebote: el contenido entra en pantalla, pero seguimos
+              // permitiendo scroll si el teclado achica el espacio.
               physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               child: Form(
@@ -155,16 +158,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 64,
                           height: 64,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(AppRadii.badge),
                           ),
                           alignment: Alignment.center,
-                          child: Icon(LucideIcons.zap, color: theme.colorScheme.onPrimary, size: 32),
+                          child: Icon(LucideIcons.zap,
+                              color: AppColors.onPrimary, size: 32),
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        Text('Donde Siempre', style: AppTypography.displayBold.copyWith(color: theme.colorScheme.onSurface)),
+                        Text('Donde Siempre', style: AppTypography.displayBold),
                       ],
-                    ).animate().scale(duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveElastic).fadeIn(),
+                    )
+                        .animate()
+                        .scale(
+                            duration: AppTheme.animDurationSlow,
+                            curve: AppTheme.animCurveElastic)
+                        .fadeIn(),
 
                     const SizedBox(height: AppSpacing.xl),
 
@@ -191,12 +200,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             FilteringTextInputFormatter.deny(RegExp(r'\s')),
                           ],
                           suffixIcon: IconButton(
-                            tooltip: _isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña',
                             icon: Icon(
-                              _isPasswordVisible ? LucideIcons.eye : LucideIcons.eyeOff,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              _isPasswordVisible
+                                  ? LucideIcons.eye
+                                  : LucideIcons.eyeOff,
+                              color: AppColors.textSecondary,
                             ),
-                            onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                            onPressed: () => setState(
+                                () => _isPasswordVisible = !_isPasswordVisible),
                           ),
                           validator: AppValidators.validatePassword,
                         ),
@@ -205,7 +216,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text('Mínimo 6 caracteres', style: AppTypography.caption),
+                            child: Text('Mínimo 6 caracteres',
+                                style: AppTypography.caption),
                           ),
                         ),
                         Align(
@@ -224,7 +236,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     )
                         .animate()
-                        .slideY(begin: 0.15, duration: AppTheme.animDurationSlow, curve: AppTheme.animCurveStandard, delay: 200.ms)
+                        .slideY(
+                            begin: 0.15,
+                            duration: AppTheme.animDurationSlow,
+                            curve: AppTheme.animCurveStandard,
+                            delay: 200.ms)
                         .fadeIn(delay: 200.ms),
 
                     const SizedBox(height: AppSpacing.lg),
@@ -235,7 +251,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _login,
                     )
                         .animate()
-                        .scale(duration: 400.ms, curve: Curves.easeOutBack, delay: 500.ms)
+                        .scale(
+                            duration: 400.ms,
+                            curve: Curves.easeOutBack,
+                            delay: 500.ms)
                         .fadeIn(delay: 500.ms),
 
                     const SizedBox(height: AppSpacing.lg),
@@ -244,12 +263,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const RegisterScreen()),
                         );
                       },
                       child: Text(
                         '¿No tienes cuenta? Regístrate',
-                        style: AppTypography.subtitleBold.copyWith(fontSize: 15),
+                        style:
+                            AppTypography.subtitleBold.copyWith(fontSize: 15),
                       ),
                     ).animate().fadeIn(delay: 600.ms),
 

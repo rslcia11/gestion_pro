@@ -177,7 +177,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     });
 
     if (authState is AuthInitial) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
@@ -207,7 +207,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     }
 
     // Estado por defecto mientras procesa inactividad
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),

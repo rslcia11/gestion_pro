@@ -74,7 +74,7 @@ class ModuleListCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 CounterBadge(count: badgeCount),
                 const SizedBox(width: 4),
-                const Icon(LucideIcons.chevronRight, color: AppColors.textSecondary, size: 20),
+                Icon(LucideIcons.chevronRight, color: AppColors.textSecondary, size: 20),
               ],
             ),
           ),

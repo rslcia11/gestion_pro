@@ -122,7 +122,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
         title: Column(
           children: [
-            const Icon(LucideIcons.store, color: AppColors.accentPurple, size: 48),
+            Icon(LucideIcons.store, color: AppColors.accentPurple, size: 48),
             const SizedBox(height: 16),
             Text(
               '¡Bienvenido a Donde Siempre!',
@@ -172,7 +172,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               leading: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPurple), shape: BoxShape.circle),
-                child: const Icon(LucideIcons.images, color: AppColors.accentPurple),
+                child: Icon(LucideIcons.images, color: AppColors.accentPurple),
               ),
               title: Text('Elegir de galería', style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
@@ -182,7 +182,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               leading: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentAmber), shape: BoxShape.circle),
-                child: const Icon(LucideIcons.camera, color: AppColors.accentAmber),
+                child: Icon(LucideIcons.camera, color: AppColors.accentAmber),
               ),
               title: Text('Tomar foto', style: AppTypography.subtitleBold.copyWith(fontSize: 14)),
               onTap: () => Navigator.pop(context, ImageSource.camera),
@@ -193,7 +193,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                 leading: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPink), shape: BoxShape.circle),
-                  child: const Icon(LucideIcons.trash2, color: AppColors.accentPink),
+                  child: Icon(LucideIcons.trash2, color: AppColors.accentPink),
                 ),
                 title: Text('Eliminar foto', style: AppTypography.subtitleBold.copyWith(fontSize: 14, color: AppColors.accentPink)),
                 onTap: () => Navigator.pop(context, 'delete'),
@@ -249,7 +249,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
+        builder: (context) => Center(
           child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
         ),
       );
@@ -303,7 +303,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentAmber), shape: BoxShape.circle),
-                child: const Icon(LucideIcons.trophy, size: 48, color: AppColors.accentAmber),
+                child: Icon(LucideIcons.trophy, size: 48, color: AppColors.accentAmber),
               ),
               const SizedBox(height: 20),
               Text('¡Premio pendiente!', style: AppTypography.titleBold, textAlign: TextAlign.center),
@@ -342,7 +342,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     });
 
     if (state.isLoading && state.business == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
         ),
@@ -372,7 +372,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                 Container(
                   padding: const EdgeInsets.all(48),
                   decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPurple), shape: BoxShape.circle),
-                  child: const Icon(LucideIcons.store, size: 72, color: AppColors.accentPurple),
+                  child: Icon(LucideIcons.store, size: 72, color: AppColors.accentPurple),
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text('Sin negocio', style: AppTypography.displayBold.copyWith(fontSize: 22), textAlign: TextAlign.center),
@@ -436,7 +436,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                       backgroundColor: AppColors.pastelOf(AppColors.textSecondary),
                       backgroundImage: business['logo_url'] != null ? NetworkImage(business['logo_url']) : null,
                       child: business['logo_url'] == null
-                          ? const Icon(LucideIcons.store, color: AppColors.textSecondary, size: 26)
+                          ? Icon(LucideIcons.store, color: AppColors.textSecondary, size: 26)
                           : null,
                     ),
                   ),
@@ -448,7 +448,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [AppColors.accentPurple, AppColors.accentPink], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          gradient: LinearGradient(colors: [AppColors.accentPurple, AppColors.accentPink], begin: Alignment.topLeft, end: Alignment.bottomRight),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                         ),
@@ -468,7 +468,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               AppBarTitle(business['name'].toString(), style: AppTypography.titleBold.copyWith(fontSize: 18)),
               Row(
                 children: [
-                  Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle)),
+                  Container(width: 8, height: 8, decoration: BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle)),
                   const SizedBox(width: 6),
                   Text('${state.customers.length} clientes activos', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
                 ],

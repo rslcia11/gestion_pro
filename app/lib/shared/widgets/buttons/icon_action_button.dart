@@ -8,15 +8,15 @@ class IconActionButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.onPressed,
-    this.backgroundColor = AppColors.background,
-    this.iconColor = AppColors.textPrimary,
+    this.backgroundColor,
+    this.iconColor,
     this.size = 40,
   });
 
   final IconData icon;
   final VoidCallback? onPressed;
-  final Color backgroundColor;
-  final Color iconColor;
+  final Color? backgroundColor;
+  final Color? iconColor;
   final double size;
 
   @override
@@ -25,12 +25,12 @@ class IconActionButton extends StatelessWidget {
       width: size,
       height: size,
       child: Material(
-        color: backgroundColor,
+        color: backgroundColor ?? AppColors.background,
         shape: const CircleBorder(),
         child: InkWell(
           onTap: onPressed,
           customBorder: const CircleBorder(),
-          child: Icon(icon, size: size * 0.5, color: iconColor),
+          child: Icon(icon, size: size * 0.5, color: iconColor ?? AppColors.textPrimary),
         ),
       ),
     );

@@ -135,8 +135,8 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
       if (_businessFormKey.currentState!.validate()) {
         if (_selectedLatitude == null || _selectedLongitude == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Debes seleccionar la ubicación en el mapa'),
+            SnackBar(
+              content: const Text('Debes seleccionar la ubicación en el mapa'),
               backgroundColor: AppColors.accentPink,
             ),
           );
@@ -164,8 +164,8 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
 
   void _showValidationError() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Revisá los campos marcados en rojo antes de continuar'),
+      SnackBar(
+        content: const Text('Revisá los campos marcados en rojo antes de continuar'),
         backgroundColor: AppColors.accentPink,
       ),
     );
@@ -300,7 +300,7 @@ class _CreateBusinessScreenState extends ConsumerState<CreateBusinessScreen> {
         ),
       ),
       body: createBusinessState.isLoading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
               ),

@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/providers/theme_mode_provider.dart';
 import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/validators/app_validators.dart';
 import '../help/faqs_screen.dart';
@@ -101,7 +102,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle),
                   child: const Icon(LucideIcons.circleCheck, color: Colors.white, size: 44),
                 )
                     .animate()
@@ -249,7 +250,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Contraseña actualizada'), backgroundColor: AppColors.accentGreen),
+          SnackBar(content: const Text('Contraseña actualizada'), backgroundColor: AppColors.accentGreen),
         );
       } else {
         final error = ref.read(userProfileProvider).error;
@@ -322,7 +323,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         ],
       ),
       body: state.isLoading && state.fullName.isEmpty
-          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
+          ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(32),
               child: Form(
@@ -351,8 +352,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                               bottom: 0,
                               child: Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                                child: const Icon(LucideIcons.camera, color: Colors.white, size: 18),
+                                decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                                child: Icon(LucideIcons.camera, color: AppColors.onPrimary, size: 18),
                               ),
                             ),
                           ],
@@ -380,6 +381,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     _buildEmailReadOnly(state.email ?? ''),
+                    const SizedBox(height: AppSpacing.xl),
+                    _buildThemeModeSelector(),
                     const SizedBox(height: AppSpacing.xl),
 
                     // ACCIONES DE CUENTA
@@ -409,13 +412,31 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     const SizedBox(height: AppSpacing.xl),
                     TextButton.icon(
                       onPressed: _deleteAccount,
-                      icon: const Icon(LucideIcons.trash2, color: AppColors.border),
+                      icon: Icon(LucideIcons.trash2, color: AppColors.border),
                       label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.border)),
                     ),
                   ],
                 ),
               ),
             ),
+    );
+  }
+
+  static const _themeModeOptions = [ThemeMode.light, ThemeMode.dark, ThemeMode.system];
+
+  Widget _buildThemeModeSelector() {
+    final mode = ref.watch(themeModeProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Apariencia', style: AppTypography.labelBold.copyWith(color: AppColors.textSecondary)),
+        const SizedBox(height: 8),
+        SegmentedToggle(
+          options: const ['Claro', 'Oscuro', 'Sistema'],
+          selectedIndex: _themeModeOptions.indexOf(mode),
+          onChanged: (index) => ref.read(themeModeProvider.notifier).setThemeMode(_themeModeOptions[index]),
+        ),
+      ],
     );
   }
 
@@ -433,12 +454,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           ),
           child: Row(
             children: [
-              const Icon(LucideIcons.mail, size: 20, color: AppColors.border),
+              Icon(LucideIcons.mail, size: 20, color: AppColors.border),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(email, style: AppTypography.subtitleBold.copyWith(fontSize: 15, color: AppColors.textSecondary)),
               ),
-              const Icon(LucideIcons.lock, size: 16, color: AppColors.border),
+              Icon(LucideIcons.lock, size: 16, color: AppColors.border),
             ],
           ),
         ),
@@ -480,7 +501,7 @@ class _ProfileAction extends StatelessWidget {
               Expanded(
                 child: Text(label, style: AppTypography.subtitleBold.copyWith(color: color, fontSize: 14)),
               ),
-              const Icon(LucideIcons.chevronRight, color: AppColors.border),
+              Icon(LucideIcons.chevronRight, color: AppColors.border),
             ],
           ),
         ),

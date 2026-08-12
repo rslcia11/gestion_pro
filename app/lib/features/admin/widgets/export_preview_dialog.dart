@@ -23,7 +23,7 @@ class ExportPreviewDialog extends StatelessWidget {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple))),
+        builder: (context) => Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple))),
       );
 
       final csvContent = await exportService.generateCsv(data, entity);
@@ -79,7 +79,7 @@ class ExportPreviewDialog extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.circleAlert, color: AppColors.error, size: 20),
+                  Icon(LucideIcons.circleAlert, color: AppColors.error, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

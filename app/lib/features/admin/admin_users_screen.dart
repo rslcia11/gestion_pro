@@ -247,19 +247,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               start: now.subtract(const Duration(days: 7)),
               end: now,
             ),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: AppColors.onPrimary,
-              surface: AppColors.surfaceCard,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
@@ -311,7 +298,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                       prefixIcon: LucideIcons.search,
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
+                              icon: Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
                               onPressed: () {
                                 _searchController.clear();
                                 setState(() {
@@ -400,7 +387,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               ),
             ),
             if (_isLoading)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 child: Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation(AppColors.primary),
@@ -436,8 +423,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       if (index == _filteredUsers.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
                             child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)),
                           ),
@@ -501,7 +488,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                       const SizedBox(height: AppSpacing.sm),
                                       Row(
                                         children: [
-                                          const Icon(LucideIcons.mail, size: 14, color: AppColors.textSecondary),
+                                          Icon(LucideIcons.mail, size: 14, color: AppColors.textSecondary),
                                           const SizedBox(width: 4),
                                           Expanded(
                                             child: Text(
@@ -516,7 +503,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                         const SizedBox(height: 2),
                                         Row(
                                           children: [
-                                            const Icon(LucideIcons.phone, size: 14, color: AppColors.textSecondary),
+                                            Icon(LucideIcons.phone, size: 14, color: AppColors.textSecondary),
                                             const SizedBox(width: 4),
                                             Expanded(
                                               child: Text(
@@ -539,7 +526,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              const Icon(LucideIcons.store, size: 12, color: AppColors.accentPurple),
+                                              Icon(LucideIcons.store, size: 12, color: AppColors.accentPurple),
                                               const SizedBox(width: 4),
                                               Flexible(
                                                 child: Text(

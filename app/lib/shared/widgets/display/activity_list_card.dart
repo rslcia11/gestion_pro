@@ -68,7 +68,7 @@ class ActivityListCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(LucideIcons.clock, size: 13, color: AppColors.textSecondary),
+                        Icon(LucideIcons.clock, size: 13, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Text(timestamp, style: AppTypography.caption),
                       ],

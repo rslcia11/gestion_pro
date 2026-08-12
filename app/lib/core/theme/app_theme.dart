@@ -40,35 +40,76 @@ class AppTheme {
 
   static Duration animDelayStaggered(int index) => Duration(milliseconds: index * 50);
 
-  /// Theme canonical del design system "Gestión Pro" — consume los tokens de
-  /// app_colors/app_typography/app_radii.
-  static ThemeData get theme {
+  /// Theme canonical del design system "Gestión Pro" (light) — consume los
+  /// tokens de app_colors/app_typography/app_radii.
+  static ThemeData get theme => _buildTheme(
+        brightness: Brightness.light,
+        background: AppColors.backgroundLight,
+        surfaceCard: AppColors.surfaceCardLight,
+        primary: AppColors.primaryLight,
+        onPrimary: AppColors.onPrimaryLight,
+        textPrimary: AppColors.textPrimaryLight,
+        textSecondary: AppColors.textSecondaryLight,
+        secondary: AppColors.accentPurpleLight,
+        error: AppColors.errorLight,
+      );
+
+  /// Variante dark del theme canonical — mismo shape que [theme], solo
+  /// cambian los colores.
+  static ThemeData get darkTheme => _buildTheme(
+        brightness: Brightness.dark,
+        background: AppColors.backgroundDark,
+        surfaceCard: AppColors.surfaceCardDark,
+        primary: AppColors.primaryDark,
+        onPrimary: AppColors.onPrimaryDark,
+        textPrimary: AppColors.textPrimaryDark,
+        textSecondary: AppColors.textSecondaryDark,
+        secondary: AppColors.accentPurpleDark,
+        error: AppColors.errorDark,
+      );
+
+  // NOTA: nunca leer los getters dinámicos de AppColors (AppColors.primary,
+  // etc.) acá adentro — theme y darkTheme se construyen los dos en el mismo
+  // build pass sin importar cuál esté activo, así que si ambos leyeran el
+  // mismo AppBrightness.current terminarían con el mismo ColorScheme. Los
+  // colores siempre entran como parámetros explícitos (xxxLight/xxxDark).
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required Color background,
+    required Color surfaceCard,
+    required Color primary,
+    required Color onPrimary,
+    required Color textPrimary,
+    required Color textSecondary,
+    required Color secondary,
+    required Color error,
+  }) {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: const ColorScheme(
-        brightness: Brightness.light,
-        primary: AppColors.primary,
-        onPrimary: AppColors.onPrimary,
-        secondary: AppColors.accentPurple,
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: primary,
+        onPrimary: onPrimary,
+        secondary: secondary,
         onSecondary: Colors.white,
-        error: AppColors.error,
+        error: error,
         onError: Colors.white,
-        surface: AppColors.surfaceCard,
-        onSurface: AppColors.textPrimary,
+        surface: surfaceCard,
+        onSurface: textPrimary,
       ),
 
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: background,
 
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: background,
+        foregroundColor: textPrimary,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: AppTypography.titleBold,
+        titleTextStyle: AppTypography.titleBold.copyWith(color: textPrimary),
       ),
 
       cardTheme: CardThemeData(
-        color: AppColors.surfaceCard,
+        color: surfaceCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.card),
@@ -78,8 +119,8 @@ class AppTheme {
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
+          backgroundColor: primary,
+          foregroundColor: onPrimary,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
           shape: RoundedRectangleBorder(
@@ -95,7 +136,7 @@ class AppTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: primary,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           textStyle: GoogleFonts.poppins(
             fontSize: 15,
@@ -106,146 +147,42 @@ class AppTheme {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.background,
+        fillColor: background,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+          borderSide: BorderSide(color: textPrimary, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+          borderSide: BorderSide(color: textPrimary, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
+          borderSide: BorderSide(color: primary, width: 2.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 24,
           vertical: 20,
         ),
         labelStyle: GoogleFonts.inter(
-          color: AppColors.textSecondary,
+          color: textSecondary,
           fontWeight: FontWeight.w500,
         ),
-        prefixIconColor: AppColors.textSecondary,
+        prefixIconColor: textSecondary,
         errorMaxLines: 3,
       ),
 
       fontFamily: GoogleFonts.inter().fontFamily,
       textTheme: TextTheme(
-        headlineLarge: AppTypography.displayBold,
-        headlineMedium: AppTypography.titleBold,
-        titleLarge: AppTypography.titleBold,
-        titleMedium: AppTypography.subtitleBold,
-        bodyLarge: AppTypography.bodyRegular,
-        bodyMedium: AppTypography.bodyMedium,
-        bodySmall: AppTypography.caption,
-        labelLarge: AppTypography.labelBold,
-      ),
-    );
-  }
-
-  /// Theme para Modo Oscuro (Dark Theme)
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: const ColorScheme(
-        brightness: Brightness.dark,
-        primary: AppColors.primaryDark,
-        onPrimary: AppColors.onPrimaryDark,
-        secondary: AppColors.accentPurple,
-        onSecondary: Colors.white,
-        error: AppColors.error,
-        onError: Colors.white,
-        surface: AppColors.surfaceCardDark,
-        onSurface: AppColors.textPrimaryDark,
-      ),
-
-      scaffoldBackgroundColor: AppColors.backgroundDark,
-
-      appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.backgroundDark,
-        foregroundColor: AppColors.textPrimaryDark,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: AppTypography.titleBold.copyWith(color: AppColors.textPrimaryDark),
-      ),
-
-      cardTheme: CardThemeData(
-        color: AppColors.surfaceCardDark,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadii.card),
-        ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryDark,
-          foregroundColor: AppColors.onPrimaryDark,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadii.pill),
-          ),
-          textStyle: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.2,
-          ),
-        ),
-      ),
-
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryDark,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          textStyle: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.surfaceCardDark,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: const BorderSide(color: AppColors.primaryDark, width: 2.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 20,
-        ),
-        labelStyle: GoogleFonts.inter(
-          color: AppColors.textSecondaryDark,
-          fontWeight: FontWeight.w500,
-        ),
-        prefixIconColor: AppColors.textSecondaryDark,
-      ),
-
-      fontFamily: GoogleFonts.inter().fontFamily,
-      textTheme: TextTheme(
-        headlineLarge: AppTypography.displayBold.copyWith(color: AppColors.textPrimaryDark),
-        headlineMedium: AppTypography.titleBold.copyWith(color: AppColors.textPrimaryDark),
-        titleLarge: AppTypography.titleBold.copyWith(color: AppColors.textPrimaryDark),
-        titleMedium: AppTypography.subtitleBold.copyWith(color: AppColors.textPrimaryDark),
-        bodyLarge: AppTypography.bodyRegular.copyWith(color: AppColors.textPrimaryDark),
-        bodyMedium: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondaryDark),
-        bodySmall: AppTypography.caption.copyWith(color: AppColors.textSecondaryDark),
-        labelLarge: AppTypography.labelBold.copyWith(color: AppColors.textPrimaryDark),
+        headlineLarge: AppTypography.displayBold.copyWith(color: textPrimary),
+        headlineMedium: AppTypography.titleBold.copyWith(color: textPrimary),
+        titleLarge: AppTypography.titleBold.copyWith(color: textPrimary),
+        titleMedium: AppTypography.subtitleBold.copyWith(color: textPrimary),
+        bodyLarge: AppTypography.bodyRegular.copyWith(color: textPrimary),
+        bodyMedium: AppTypography.bodyMedium.copyWith(color: textSecondary),
+        bodySmall: AppTypography.caption.copyWith(color: textSecondary),
+        labelLarge: AppTypography.labelBold.copyWith(color: textPrimary),
       ),
     );
   }
 }
-

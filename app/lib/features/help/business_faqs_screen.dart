@@ -10,7 +10,7 @@ import '../../shared/widgets/shared_widgets.dart';
 class BusinessFaqsScreen extends StatelessWidget {
   const BusinessFaqsScreen({super.key});
 
-  static const List<_FaqItem> _faqs = [
+  static final List<_FaqItem> _faqs = [
     _FaqItem(
       icon: LucideIcons.store,
       color: AppColors.accentPurple,
@@ -130,7 +130,7 @@ class BusinessFaqsScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   LucideIcons.store,
                   size: 32,
                   color: AppColors.accentPurple,
@@ -176,7 +176,7 @@ class BusinessFaqsScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.handHeart, color: AppColors.accentGreen),
+                  Icon(LucideIcons.handHeart, color: AppColors.accentGreen),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

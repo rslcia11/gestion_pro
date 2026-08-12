@@ -66,24 +66,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (authResponse.user == null) throw Exception('Error al crear usuario');
 
       final userId = authResponse.user!.id;
+      final hasActiveSession = authResponse.session != null;
 
-      // Subir Avatar si existe
+      // Subir Avatar si existe Y ya hay sesión activa. Si signUp() no
+      // devolvió sesión (confirmación de email pendiente), el cliente todavía
+      // actúa como 'anon' y auth.uid() no resuelve para la policy RLS de
+      // storage.objects -> el upload se saltea acá y se avisa al usuario en
+      // vez de fallar en silencio.
       String? avatarUrl;
+      bool avatarUploadFailed = false;
       if (_avatarFile != null) {
-        try {
-          final fileBytes = await _avatarFile!.readAsBytes();
-          final fileExt = _avatarFile!.name.split('.').last.toLowerCase();
-          final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
-          final imagePath = '$userId/$fileName';
+        if (hasActiveSession) {
+          try {
+            final fileBytes = await _avatarFile!.readAsBytes();
+            final fileExt = _avatarFile!.name.split('.').last.toLowerCase();
+            final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+            final imagePath = '$userId/$fileName';
 
-          await supabase.storage.from('avatars').uploadBinary(
-            imagePath,
-            fileBytes,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
-          );
-          avatarUrl = supabase.storage.from('avatars').getPublicUrl(imagePath);
-        } catch (e) {
-          debugPrint('Error uploading avatar: $e');
+            await supabase.storage.from('avatars').uploadBinary(
+              imagePath,
+              fileBytes,
+              fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+            );
+            avatarUrl = supabase.storage.from('avatars').getPublicUrl(imagePath);
+          } catch (e) {
+            debugPrint('Error uploading avatar: $e');
+            avatarUploadFailed = true;
+          }
+        } else {
+          avatarUploadFailed = true;
         }
       }
 
@@ -99,9 +110,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (mounted) {
         _showSuccessToast();
-        if (authResponse.session == null) {
-          _showVerificationDialog();
+
+        if (!hasActiveSession) {
+          _showVerificationDialog(avatarPending: avatarUploadFailed);
         } else {
+          if (avatarUploadFailed) _showAvatarUploadWarning();
+
           // Si es cliente, cerramos la sesión para obligarlo a loguearse (como pidió el usuario)
           // y evitar que MyCardsScreen lance el diálogo de bienvenida en el fondo.
           if (_selectedRole == 'client') {
@@ -173,7 +187,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void _showVerificationDialog() {
+  void _showAvatarUploadWarning() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Tu cuenta se creó, pero no pudimos subir tu foto de perfil. '
+          'Podés agregarla luego desde tu perfil.',
+        ),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
+
+  void _showVerificationDialog({bool avatarPending = false}) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -182,7 +208,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
         title: Text('¡Casi listo!', textAlign: TextAlign.center, style: AppTypography.titleBold),
         content: Text(
-          'Te hemos enviado un correo de verificación. Por favor, confirma tu cuenta para continuar.',
+          avatarPending
+              ? 'Te hemos enviado un correo de verificación. Por favor, confirma tu cuenta '
+                  'para continuar. Tu foto de perfil no se subió todavía: podrás agregarla '
+                  'después de confirmar tu cuenta, desde tu perfil.'
+              : 'Te hemos enviado un correo de verificación. Por favor, confirma tu cuenta para continuar.',
           textAlign: TextAlign.center,
           style: AppTypography.bodyRegular,
         ),
@@ -267,7 +297,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   : null,
                             ),
                             child: _avatarFile == null
-                                ? const Icon(LucideIcons.camera, size: 32, color: AppColors.accentPurple)
+                                ? Icon(LucideIcons.camera, size: 32, color: AppColors.accentPurple)
                                 : null,
                           ),
                           if (_avatarFile != null)
@@ -276,7 +306,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               bottom: 0,
                               child: Container(
                                 padding: const EdgeInsets.all(6),
-                                decoration: const BoxDecoration(color: AppColors.accentPurple, shape: BoxShape.circle),
+                                decoration: BoxDecoration(color: AppColors.accentPurple, shape: BoxShape.circle),
                                 child: const Icon(LucideIcons.pencil, size: 14, color: Colors.white),
                               ),
                             ),

@@ -46,7 +46,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentAmber), shape: BoxShape.circle),
-              child: const Icon(LucideIcons.hourglass, size: 44, color: AppColors.accentAmber),
+              child: Icon(LucideIcons.hourglass, size: 44, color: AppColors.accentAmber),
             ),
             const SizedBox(height: 24),
             Text(businessName, style: AppTypography.subtitleBold, textAlign: TextAlign.center),
@@ -84,7 +84,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(color: AppColors.pastelOf(AppColors.accentPurple), shape: BoxShape.circle),
-              child: const Icon(LucideIcons.clock, size: 44, color: AppColors.accentPurple),
+              child: Icon(LucideIcons.clock, size: 44, color: AppColors.accentPurple),
             ),
             const SizedBox(height: 24),
             Text(message, style: AppTypography.subtitleBold, textAlign: TextAlign.center),

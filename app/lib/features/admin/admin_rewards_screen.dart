@@ -233,9 +233,9 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorSize: TabBarIndicatorSize.label,
-            indicator: const UnderlineTabIndicator(
+            indicator: UnderlineTabIndicator(
               borderSide: BorderSide(width: 3, color: AppColors.primary),
-              insets: EdgeInsets.symmetric(horizontal: 16),
+              insets: const EdgeInsets.symmetric(horizontal: 16),
             ),
             tabs: const [
               Tab(text: 'Usuarios Ganadores'),
@@ -261,7 +261,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                           DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: _selectedFilter,
-                              icon: const Icon(
+                              icon: Icon(
                                 LucideIcons.listFilter,
                                 color: AppColors.textPrimary,
                                 size: 18,
@@ -309,7 +309,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                             DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: _selectedBusinessId,
-                                icon: const Icon(
+                                icon: Icon(
                                   LucideIcons.store,
                                   color: AppColors.textPrimary,
                                   size: 18,
@@ -356,7 +356,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                         prefixIcon: LucideIcons.search,
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
+                                icon: Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
                                 onPressed: () {
                                   _searchController.clear();
                                   setState(() {
@@ -378,7 +378,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
             ];
           },
           body: _isLoading
-              ? const Center(
+              ? Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
                   ),
@@ -399,7 +399,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                                       color: AppColors.pastelOf(AppColors.accentPurple),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(LucideIcons.users, size: 56, color: AppColors.accentPurple),
+                                    child: Icon(LucideIcons.users, size: 56, color: AppColors.accentPurple),
                                   ),
                                   const SizedBox(height: AppSpacing.lg),
                                   Text(
@@ -485,7 +485,7 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                   color: AppColors.pastelOf(AppColors.accentOrange),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(LucideIcons.arrowLeftRight, size: 56, color: AppColors.accentOrange),
+                child: Icon(LucideIcons.arrowLeftRight, size: 56, color: AppColors.accentOrange),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
@@ -564,8 +564,8 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 12),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
                       child: Icon(LucideIcons.cornerDownRight, size: 14, color: AppColors.accentOrange),
                     ),
                     const SizedBox(width: 6),
@@ -595,14 +595,14 @@ class _AdminRewardsScreenState extends State<AdminRewardsScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                  child: const Divider(height: 1, color: AppColors.border),
+                  child: Divider(height: 1, color: AppColors.border),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        const Icon(LucideIcons.store, size: 14, color: AppColors.textSecondary),
+                        Icon(LucideIcons.store, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 6),
                         Text(
                           businessName,

@@ -104,14 +104,6 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
       initialDateRange: initialDateRange,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Colors.black, onPrimary: Colors.white, onSurface: Colors.black),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (pickedRange != null) {
@@ -157,7 +149,7 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
           ],
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
+            ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
             : TabBarView(children: [_buildScansList(), _buildRewardsList(), _buildTransfersList()]),
       ),
     );
@@ -178,7 +170,7 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
             title: profileName,
             description: '+1 Punto',
             timestamp: EcuadorDateUtils.formatEcuadorTime(scan['scanned_at']),
-            trailing: const Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 20),
+            trailing: Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 20),
           ),
         );
       },
@@ -201,7 +193,7 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
             title: profileName,
             description: (reward['description'] ?? 'Premio').toString(),
             timestamp: EcuadorDateUtils.formatEcuadorTime(reward['earned_at']),
-            trailing: const Icon(LucideIcons.gift, color: AppColors.accentPurple, size: 20),
+            trailing: Icon(LucideIcons.gift, color: AppColors.accentPurple, size: 20),
           ),
         );
       },
@@ -226,7 +218,7 @@ class _BusinessHistoryScreenState extends State<BusinessHistoryScreen> {
             title: '$fromName → $toName',
             description: 'Premio transferido ($pts pts)',
             timestamp: EcuadorDateUtils.formatEcuadorTime(transfer['created_at']),
-            trailing: const Icon(LucideIcons.arrowLeftRight, color: AppColors.accentBlue, size: 20),
+            trailing: Icon(LucideIcons.arrowLeftRight, color: AppColors.accentBlue, size: 20),
           ),
         );
       },

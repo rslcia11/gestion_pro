@@ -120,14 +120,14 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
                     subtitle: Text('${items.length} registros', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w700)),
                     trailing: IconActionButton(icon: LucideIcons.x, onPressed: () => Navigator.pop(context)),
                   ),
-                  const Divider(color: AppColors.border),
+                  Divider(color: AppColors.border),
                   Expanded(
                     child: items.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(LucideIcons.inbox, size: 44, color: AppColors.border),
+                                Icon(LucideIcons.inbox, size: 44, color: AppColors.border),
                                 const SizedBox(height: 16),
                                 Text('No hay registros', style: AppTypography.subtitleBold.copyWith(color: AppColors.textSecondary, fontSize: 14)),
                               ],
@@ -263,20 +263,20 @@ class _TabStatisticsState extends ConsumerState<TabStatistics> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Información de campaña', style: AppTypography.labelBold.copyWith(color: Colors.white)),
+                Text('Información de campaña', style: AppTypography.labelBold.copyWith(color: AppColors.onPrimary)),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Inicio', style: AppTypography.caption.copyWith(color: Colors.white54, fontWeight: FontWeight.w700)),
-                    Text(formattedDate, style: AppTypography.subtitleBold.copyWith(color: Colors.white, fontSize: 14)),
+                    Text('Inicio', style: AppTypography.caption.copyWith(color: AppColors.onPrimary.withValues(alpha: 0.54), fontWeight: FontWeight.w700)),
+                    Text(formattedDate, style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 14)),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Días activo', style: AppTypography.caption.copyWith(color: Colors.white54, fontWeight: FontWeight.w700)),
+                    Text('Días activo', style: AppTypography.caption.copyWith(color: AppColors.onPrimary.withValues(alpha: 0.54), fontWeight: FontWeight.w700)),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(color: AppColors.accentGreen, borderRadius: BorderRadius.circular(AppRadii.badge)),

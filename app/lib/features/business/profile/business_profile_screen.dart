@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/providers/theme_mode_provider.dart';
 import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/models/business_category.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -218,8 +219,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Perfil actualizado exitosamente'),
+          SnackBar(
+            content: const Text('Perfil actualizado exitosamente'),
             backgroundColor: AppColors.accentGreen,
           ),
         );
@@ -352,7 +353,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
+          ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
               child: Form(
@@ -389,7 +390,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 ),
                                 child:
                                     (_logoUrl == null && _newLogoFile == null)
-                                    ? const Icon(LucideIcons.store, size: 44, color: AppColors.border)
+                                    ? Icon(LucideIcons.store, size: 44, color: AppColors.border)
                                     : null,
                               ),
                             ),
@@ -398,11 +399,11 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               bottom: 0,
                               child: Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   color: AppColors.primary,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(LucideIcons.camera, color: Colors.white, size: 20),
+                                child: Icon(LucideIcons.camera, color: AppColors.onPrimary, size: 20),
                               ),
                             ),
                           ],
@@ -456,7 +457,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
+                            Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -488,21 +489,21 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           focusNode: focusNode,
                           style: AppTypography.bodyRegular,
                           decoration: InputDecoration(
-                            prefixIcon: const Icon(LucideIcons.layers, size: 20, color: AppColors.textSecondary),
-                            suffixIcon: const Icon(LucideIcons.chevronDown, color: AppColors.textSecondary),
+                            prefixIcon: Icon(LucideIcons.layers, size: 20, color: AppColors.textSecondary),
+                            suffixIcon: Icon(LucideIcons.chevronDown, color: AppColors.textSecondary),
                             filled: true,
                             fillColor: AppColors.background,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(AppRadii.pill),
-                              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                              borderSide: BorderSide(color: AppColors.textPrimary, width: 1.5),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(AppRadii.pill),
-                              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                              borderSide: BorderSide(color: AppColors.textPrimary, width: 1.5),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(AppRadii.pill),
-                              borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
+                              borderSide: BorderSide(color: AppColors.primary, width: 2.5),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
@@ -547,7 +548,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                           padding: const EdgeInsets.symmetric(vertical: 4),
                                           shrinkWrap: true,
                                           itemCount: options.length,
-                                          separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                                          separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.border),
                                           itemBuilder: (BuildContext context, int index) {
                                             final BusinessCategory option = options.elementAt(index);
                                             final isSelected = _selectedCategory?.id == option.id;
@@ -637,20 +638,20 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(LucideIcons.mapPin, color: AppColors.accentPink),
+                            Icon(LucideIcons.mapPin, color: AppColors.accentPink),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Text(
                                 _address ?? 'Seleccionar en el mapa',
                                 style: AppTypography.bodyMedium.copyWith(
-                                  color: _address == null ? AppColors.border : AppColors.textPrimary,
+                                  color: _address == null ? AppColors.textSecondary : AppColors.textPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const Icon(LucideIcons.chevronRight, color: AppColors.border),
+                            Icon(LucideIcons.chevronRight, color: AppColors.border),
                           ],
                         ),
                       ),
@@ -703,7 +704,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 color: AppColors.accentPurple.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(AppRadii.badge),
                               ),
-                              child: const Icon(LucideIcons.circleHelp, color: AppColors.accentPurple, size: 22),
+                              child: Icon(LucideIcons.circleHelp, color: AppColors.accentPurple, size: 22),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -716,10 +717,32 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 ],
                               ),
                             ),
-                            const Icon(LucideIcons.chevronRight, color: AppColors.accentPurple),
+                            Icon(LucideIcons.chevronRight, color: AppColors.accentPurple),
                           ],
                         ),
                       ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // APARIENCIA
+                    Consumer(
+                      builder: (context, ref, _) {
+                        const modes = [ThemeMode.light, ThemeMode.dark, ThemeMode.system];
+                        final mode = ref.watch(themeModeProvider);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Apariencia', style: AppTypography.labelBold.copyWith(color: AppColors.textSecondary)),
+                            const SizedBox(height: 8),
+                            SegmentedToggle(
+                              options: const ['Claro', 'Oscuro', 'Sistema'],
+                              selectedIndex: modes.indexOf(mode),
+                              onChanged: (index) => ref.read(themeModeProvider.notifier).setThemeMode(modes[index]),
+                            ),
+                          ],
+                        );
+                      },
                     ),
 
                     const SizedBox(height: AppSpacing.xl),
@@ -728,7 +751,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     Center(
                       child: TextButton.icon(
                         onPressed: _deleteAccount,
-                        icon: const Icon(LucideIcons.trash2, color: AppColors.border),
+                        icon: Icon(LucideIcons.trash2, color: AppColors.border),
                         label: Text('Eliminar mi cuenta', style: AppTypography.labelBold.copyWith(color: AppColors.border)),
                       ),
                     ),

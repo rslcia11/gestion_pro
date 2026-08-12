@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/theme/providers/theme_mode_provider.dart';
 import '../../shared/widgets/shared_widgets.dart';
 import 'admin_businesses_screen.dart';
 import 'admin_users_screen.dart';
@@ -209,6 +210,41 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     await ref.read(authStateProvider.notifier).logout();
   }
 
+  static const _themeModeOptions = [ThemeMode.light, ThemeMode.dark, ThemeMode.system];
+
+  void _showThemeModeSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.card)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Apariencia', style: AppTypography.titleBold),
+            const SizedBox(height: AppSpacing.lg),
+            Consumer(
+              builder: (context, ref, _) {
+                final mode = ref.watch(themeModeProvider);
+                return SegmentedToggle(
+                  options: const ['Claro', 'Oscuro', 'Sistema'],
+                  selectedIndex: _themeModeOptions.indexOf(mode),
+                  onChanged: (index) => ref.read(themeModeProvider.notifier).setThemeMode(_themeModeOptions[index]),
+                );
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -222,6 +258,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               )
             : null,
         actions: [
+          IconActionButton(icon: LucideIcons.sunMoon, onPressed: _showThemeModeSheet),
+          const SizedBox(width: 4),
           IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadMetrics),
           const SizedBox(width: 4),
           IconActionButton(icon: LucideIcons.logOut, onPressed: _logout),
@@ -230,7 +268,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       ),
       body: SafeArea(
         child: _isLoading
-            ? const Center(
+            ? Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
                 ),

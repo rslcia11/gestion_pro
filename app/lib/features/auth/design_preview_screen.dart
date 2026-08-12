@@ -36,7 +36,7 @@ class DesignPreviewScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadii.badge),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(LucideIcons.zap, color: AppColors.onPrimary, size: 32),
+                  child: Icon(LucideIcons.zap, color: AppColors.onPrimary, size: 32),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text('Donde Siempre', style: AppTypography.displayBold),

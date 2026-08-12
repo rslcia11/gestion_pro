@@ -87,19 +87,19 @@ class StepBusinessData extends StatelessWidget {
                   labelStyle: AppTypography.bodyMedium,
                   filled: true,
                   fillColor: AppColors.background,
-                  prefixIcon: const Icon(LucideIcons.layers, size: 20, color: AppColors.textSecondary),
-                  suffixIcon: const Icon(LucideIcons.chevronDown, color: AppColors.textSecondary),
+                  prefixIcon: Icon(LucideIcons.layers, size: 20, color: AppColors.textSecondary),
+                  suffixIcon: Icon(LucideIcons.chevronDown, color: AppColors.textSecondary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.pill),
-                    borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                    borderSide: BorderSide(color: AppColors.textPrimary, width: 1.5),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.pill),
-                    borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                    borderSide: BorderSide(color: AppColors.textPrimary, width: 1.5),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.pill),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2.5),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
@@ -141,7 +141,7 @@ class StepBusinessData extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(vertical: 4),
                                 shrinkWrap: true,
                                 itemCount: options.length,
-                                separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                                separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.border),
                                 itemBuilder: (BuildContext context, int index) {
                                   final BusinessCategory option = options.elementAt(index);
                                   final isSelected = selectedCategory?.id == option.id;
@@ -176,7 +176,7 @@ class StepBusinessData extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
+                  Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -220,7 +220,7 @@ class StepBusinessData extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 20),
+                    Icon(LucideIcons.circleCheck, color: AppColors.accentGreen, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(address, style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary)),

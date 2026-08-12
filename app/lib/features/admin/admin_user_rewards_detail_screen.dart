@@ -54,7 +54,7 @@ class AdminUserRewardsDetailScreen extends StatelessWidget {
                       color: AppColors.pastelOf(AppColors.accentPurple),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(LucideIcons.gift, size: 56, color: AppColors.accentPurple),
+                    child: Icon(LucideIcons.gift, size: 56, color: AppColors.accentPurple),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text('No hay premios registrados', style: AppTypography.subtitleBold),
@@ -101,7 +101,7 @@ class AdminUserRewardsDetailScreen extends StatelessWidget {
                     actions: isTransferred
                         ? Row(
                             children: [
-                              const Icon(LucideIcons.arrowLeftRight, size: 14, color: AppColors.accentOrange),
+                              Icon(LucideIcons.arrowLeftRight, size: 14, color: AppColors.accentOrange),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(

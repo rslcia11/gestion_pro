@@ -138,7 +138,7 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(LucideIcons.users, size: 56, color: AppColors.border),
+                      Icon(LucideIcons.users, size: 56, color: AppColors.border),
                       const SizedBox(height: 16),
                       Text(
                         _searchQuery.isEmpty ? 'No hay clientes aún' : 'Sin resultados',
@@ -195,9 +195,9 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                                       '${card['current_points'] ?? 0}/${business['points_required'] ?? '?'} actuales',
                                       style: AppTypography.caption.copyWith(color: AppColors.accentPurple, fontWeight: FontWeight.w700),
                                     ),
-                                    Container(width: 3, height: 3, decoration: const BoxDecoration(color: AppColors.border, shape: BoxShape.circle)),
+                                    Container(width: 3, height: 3, decoration: BoxDecoration(color: AppColors.border, shape: BoxShape.circle)),
                                     Text('${card['total_points_lifetime'] ?? 0} totales', style: AppTypography.caption),
-                                    Container(width: 3, height: 3, decoration: const BoxDecoration(color: AppColors.border, shape: BoxShape.circle)),
+                                    Container(width: 3, height: 3, decoration: BoxDecoration(color: AppColors.border, shape: BoxShape.circle)),
                                     Text('${card['rewards_claimed'] ?? 0} premios', style: AppTypography.caption),
                                   ],
                                 ),
@@ -205,7 +205,7 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                             ),
                           ),
                           PopupMenuButton<String>(
-                            icon: const Icon(LucideIcons.moreHorizontal, color: AppColors.textSecondary),
+                            icon: Icon(LucideIcons.moreHorizontal, color: AppColors.textSecondary),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
                             onSelected: (value) {
                               if (value == 'add_points') {
@@ -230,13 +230,13 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                                       Icon(
                                         hasPendingReward ? LucideIcons.lock : LucideIcons.circlePlus,
                                         size: 20,
-                                        color: hasPendingReward ? AppColors.border : accentColor,
+                                        color: hasPendingReward ? AppColors.textSecondary : accentColor,
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
                                         hasPendingReward ? 'Premio pendiente' : 'Puntos',
                                         style: AppTypography.labelBold.copyWith(
-                                          color: hasPendingReward ? AppColors.border : AppColors.textPrimary,
+                                          color: hasPendingReward ? AppColors.textSecondary : AppColors.textPrimary,
                                         ),
                                       ),
                                     ],
@@ -247,7 +247,7 @@ class _TabCustomersState extends ConsumerState<TabCustomers> {
                                     value: 'redeem',
                                     child: Row(
                                       children: [
-                                        const Icon(LucideIcons.gift, size: 20, color: AppColors.accentGreen),
+                                        Icon(LucideIcons.gift, size: 20, color: AppColors.accentGreen),
                                         const SizedBox(width: 12),
                                         Text('Canjear', style: AppTypography.labelBold),
                                       ],

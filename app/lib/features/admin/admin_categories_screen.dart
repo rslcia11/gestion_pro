@@ -174,7 +174,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
         label: Text('Nueva categoría', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 15)),
       ),
       body: _isLoading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(AppColors.accentPurple),
               ),
@@ -202,7 +202,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                           borderRadius: BorderRadius.circular(AppRadii.badge),
                         ),
                         alignment: Alignment.center,
-                        child: const Icon(LucideIcons.layers, color: AppColors.accentPurple, size: 24),
+                        child: Icon(LucideIcons.layers, color: AppColors.accentPurple, size: 24),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(

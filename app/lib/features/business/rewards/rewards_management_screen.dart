@@ -49,8 +49,8 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Entrega de premio aprobada'),
+          SnackBar(
+            content: const Text('Entrega de premio aprobada'),
             backgroundColor: AppColors.accentGreen,
           ),
         );
@@ -71,8 +71,8 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Premio rechazado'),
+          SnackBar(
+            content: const Text('Premio rechazado'),
             backgroundColor: AppColors.accentPink,
           ),
         );
@@ -95,7 +95,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: state.isLoading && state.rewards.isEmpty
-          ? const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
+          ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)))
           : state.error != null
           ? Center(child: Text(state.error!, style: AppTypography.bodyMedium.copyWith(color: AppColors.error)))
           : state.rewards.isEmpty
@@ -109,7 +109,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
                       color: AppColors.pastelOf(AppColors.accentPurple),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(LucideIcons.gift, size: 56, color: AppColors.accentPurple),
+                    child: Icon(LucideIcons.gift, size: 56, color: AppColors.accentPurple),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text('Sin premios aún', style: AppTypography.subtitleBold),

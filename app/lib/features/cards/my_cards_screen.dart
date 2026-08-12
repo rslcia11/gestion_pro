@@ -14,7 +14,6 @@ import '../../core/theme/app_shadows.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../shared/widgets/shared_widgets.dart';
-import '../../shared/widgets/navigation/app_bar_title.dart';
 import 'providers/my_cards_provider.dart';
 import 'dart:async';
 import '../../core/services/realtime_sync_service.dart';
@@ -88,10 +87,10 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     if (!mounted) return;
     _confettiController.play();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('¡Punto aprobado! Sumaste 1 punto ✨', style: TextStyle(fontWeight: FontWeight.bold)),
+      SnackBar(
+        content: const Text('¡Punto aprobado! Sumaste 1 punto ✨', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.accentGreen,
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -126,7 +125,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
         title: Column(
           children: [
-            const Icon(LucideIcons.partyPopper, color: AppColors.accentPurple, size: 48),
+            Icon(LucideIcons.partyPopper, color: AppColors.accentPurple, size: 48),
             const SizedBox(height: 16),
             Text(
               '¡Bienvenido a Donde Siempre!',
@@ -205,7 +204,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                 color: AppColors.pastelOf(AppColors.accentAmber),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(LucideIcons.gift, color: AppColors.accentAmber, size: 44),
+              child: Icon(LucideIcons.gift, color: AppColors.accentAmber, size: 44),
             ).animate().scale(duration: 450.ms, curve: Curves.easeOutBack),
             const SizedBox(height: 16),
             Text(
@@ -270,6 +269,11 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     final state = ref.watch(myCardsProvider);
     
     // Listen to error state.
+    // Si ya hay tarjetas cargadas, un fallo de refresco en segundo plano no
+    // amerita el estado de error persistente (el usuario sigue viendo datos
+    // válidos) — alcanza con un aviso transitorio, sin el texto crudo de la
+    // excepción. Si NO hay tarjetas cargadas, el body ya muestra su propio
+    // CardsErrorState persistente, así que evitamos duplicar el mensaje acá.
     ref.listen<MyCardsState>(myCardsProvider, (previous, next) {
       if (next.error != null && next.error != previous?.error && next.cards.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -280,6 +284,8 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
         );
       }
 
+      // Apenas terminan de cargar las tarjetas, revisamos si hay un premio
+      // pendiente para avisarle al usuario con un modal (una vez por sesión).
       final justLoaded = !next.isLoading &&
           next.cards.isNotEmpty &&
           (previous == null || previous.isLoading || previous.cards.isEmpty);
@@ -293,147 +299,143 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: AppColors.background,
           appBar: AppBar(
-            toolbarHeight: 100,
-            backgroundColor: theme.scaffoldBackgroundColor,
-            centerTitle: false,
-            leading: Navigator.canPop(context)
-                ? IconActionButton(
-                    icon: LucideIcons.arrowLeft,
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                : null,
-            title: displayName.isNotEmpty
-                ? AppBarTitle('Hola, $displayName', style: AppTypography.titleBold.copyWith(color: theme.colorScheme.onSurface))
-                : null,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Center(
-                  child: Semantics(
-                    label: 'Editar perfil',
-                    button: true,
-                    child: GestureDetector(
-                      onTap: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const UserProfileScreen()),
-                        );
-                        if (result == true) {
-                          ref.read(myCardsProvider.notifier).refreshCards(silent: true);
-                        }
-                      },
-                      child: Stack(
-                        children: [
-                          UserAvatar(
-                            imageUrl: state.avatarUrl,
-                            initials: state.userName.isNotEmpty ? state.userName[0] : '?',
-                            size: 48,
-                          ),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [AppColors.accentPurple, AppColors.accentPink],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: theme.colorScheme.surface, width: 1.5),
-                              ),
-                              child: const Icon(
-                                LucideIcons.pencil,
-                                size: 10,
-                                color: Colors.white,
-                              ),
-                            )
-                                .animate(
-                                  onPlay: (controller) => controller.repeat(reverse: true),
-                                )
-                                .scale(
-                                  duration: const Duration(seconds: 1),
-                                  begin: const Offset(1, 1),
-                                  end: const Offset(1.15, 1.15),
-                                  curve: Curves.easeInOut,
-                                )
-                                .shimmer(
-                                  duration: const Duration(seconds: 3),
-                                  color: Colors.white.withValues(alpha: 0.5),
-                                ),
-                          ),
-                        ],
+        toolbarHeight: 100,
+        backgroundColor: AppColors.background,
+        centerTitle: false,
+        leading: Navigator.canPop(context)
+            ? IconActionButton(
+                icon: LucideIcons.arrowLeft,
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
+        title: displayName.isNotEmpty
+            ? AppBarTitle('Hola, $displayName', style: AppTypography.titleBold)
+            : null,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Center(
+              child: Semantics(
+                label: 'Editar perfil',
+                button: true,
+                child: GestureDetector(
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const UserProfileScreen()),
+                    );
+                    if (result == true) {
+                      // Refresco silencioso (sin spinner): actualiza foto y nombre en
+                      // su lugar, sin recargar toda la pantalla ni parpadear.
+                      ref.read(myCardsProvider.notifier).refreshCards(silent: true);
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      UserAvatar(
+                        imageUrl: state.avatarUrl,
+                        initials: state.userName.isNotEmpty ? state.userName[0] : '?',
+                        size: 48,
                       ),
-                    ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.accentPurple, AppColors.accentPink],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                          child: const Icon(
+                            LucideIcons.pencil,
+                            size: 10,
+                            color: Colors.white,
+                          ),
+                        )
+                            .animate(
+                              onPlay: (controller) => controller.repeat(reverse: true),
+                            )
+                            .scale(
+                              duration: const Duration(seconds: 1),
+                              begin: const Offset(1, 1),
+                              end: const Offset(1.15, 1.15),
+                              curve: Curves.easeInOut,
+                            )
+                            .shimmer(
+                              duration: const Duration(seconds: 3),
+                              color: Colors.white.withValues(alpha: 0.5),
+                            ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
-          body: SafeArea(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: state.isLoading && state.cards.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : state.error != null && state.cards.isEmpty
-                    ? CardsErrorState(
-                        onRetry: () => ref.read(myCardsProvider.notifier).refreshCards(),
-                      )
-                    : state.cards.isEmpty
-                    ? _buildEmptyState(theme)
-                    : RefreshIndicator(
-                        onRefresh: () => ref.read(myCardsProvider.notifier).refreshCards(),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 24,
-                          ),
-                          itemCount: state.cards.length,
-                          itemBuilder: (context, index) {
-                            return _LoyaltyCardItem(
-                              card: state.cards[index],
-                              index: index,
-                              sessionLastViewedAt: state.sessionLastViewedAt,
-                              onTap: () {
-                                final card = state.cards[index];
-                                final business = card['businesses'];
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CardHistoryScreen(
-                                      loyaltyCardId: card['id'],
-                                      businessId: business['id'],
-                                      businessName: business['name'],
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-              ),
             ),
           ),
-          floatingActionButton: state.cards.isEmpty
-              ? null
-              : FloatingActionButton.extended(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ScannerScreen()),
+        ],
+      ),
+      body: SafeArea(
+        child: state.isLoading && state.cards.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : state.error != null && state.cards.isEmpty
+            ? CardsErrorState(
+                onRetry: () => ref.read(myCardsProvider.notifier).refreshCards(),
+              )
+            : state.cards.isEmpty
+            ? _buildEmptyState(theme)
+            : RefreshIndicator(
+                onRefresh: () => ref.read(myCardsProvider.notifier).refreshCards(),
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 24,
+                  ),
+                  itemCount: state.cards.length,
+                  itemBuilder: (context, index) {
+                    return _LoyaltyCardItem(
+                      card: state.cards[index],
+                      index: index,
+                      sessionLastViewedAt: state.sessionLastViewedAt,
+                      onTap: () {
+                        final card = state.cards[index];
+                        final business = card['businesses'];
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CardHistoryScreen(
+                              loyaltyCardId: card['id'],
+                              businessId: business['id'],
+                              businessName: business['name'],
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
-                  icon: const Icon(LucideIcons.scanLine),
-                  label: Text('Escanear QR', style: AppTypography.subtitleBold.copyWith(color: theme.colorScheme.onPrimary, fontSize: 15)),
-                ).animate().scale(delay: 1.seconds, curve: Curves.elasticOut),
+                ),
+              ),
+      ),
+      floatingActionButton: state.cards.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ScannerScreen()),
+                );
+              },
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.pill)),
+              icon: const Icon(LucideIcons.scanLine),
+              label: Text('Escanear QR', style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary, fontSize: 14)),
+            ).animate().scale(delay: 1.seconds, curve: Curves.elasticOut),
         ),
         Align(
           alignment: Alignment.topCenter,
@@ -464,7 +466,7 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
                 color: AppColors.pastelOf(AppColors.accentPurple),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(LucideIcons.creditCard, size: 72, color: AppColors.accentPurple),
+              child: Icon(LucideIcons.creditCard, size: 72, color: AppColors.accentPurple),
             ).animate().scale(curve: Curves.elasticOut, duration: 800.ms),
             const SizedBox(height: AppSpacing.xl),
             Text('¡Empieza tu colección!', style: AppTypography.displayBold.copyWith(fontSize: 20)),
@@ -495,6 +497,10 @@ class _MyCardsScreenState extends ConsumerState<MyCardsScreen> {
 /// inicial y no hay tarjetas para mostrar en su lugar (ver spec
 /// `cards-error-state`: nunca debe confundirse con la ilustración de
 /// "¡Empieza tu colección!" que ve un usuario genuinamente nuevo).
+///
+/// Widget público (no privado) a propósito: se testea en aislamiento en
+/// `app/test/cards_error_state_test.dart`, ya que `MyCardsScreen` completo
+/// no se puede montar en un widget test sin un backend/repositorio falso.
 class CardsErrorState extends StatelessWidget {
   const CardsErrorState({
     super.key,
@@ -519,7 +525,7 @@ class CardsErrorState extends StatelessWidget {
                 color: AppColors.pastelOf(AppColors.error),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(LucideIcons.wifiOff, size: 56, color: AppColors.error),
+              child: Icon(LucideIcons.wifiOff, size: 56, color: AppColors.error),
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
@@ -600,17 +606,13 @@ class _LoyaltyCardItem extends StatelessWidget {
       }
     }
 
-    final theme = Theme.of(context);
-    final cardColor = theme.cardColor;
-    final onSurfaceColor = theme.colorScheme.onSurface;
-
     return GestureDetector(
           onTap: onTap,
           child: Container(
             margin: const EdgeInsets.only(bottom: AppSpacing.lg),
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: cardColor,
+              color: AppColors.surfaceCard,
               borderRadius: BorderRadius.circular(AppRadii.card),
               boxShadow: AppShadows.card,
             ),
@@ -654,10 +656,7 @@ class _LoyaltyCardItem extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   business['name'].toString(),
-                                  style: AppTypography.subtitleBold.copyWith(
-                                    fontSize: 18,
-                                    color: onSurfaceColor,
-                                  ),
+                                  style: AppTypography.subtitleBold,
                                 ),
                               ),
                               if (isRecentlyUpdated)
@@ -671,7 +670,7 @@ class _LoyaltyCardItem extends StatelessWidget {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(LucideIcons.zap, color: AppColors.accentGreen, size: 12),
+                                      Icon(LucideIcons.zap, color: AppColors.accentGreen, size: 12),
                                       const SizedBox(width: 4),
                                       Text(
                                         '¡Nuevo!',
@@ -743,7 +742,7 @@ class _LoyaltyCardItem extends StatelessWidget {
                       icon: LucideIcons.gift,
                       value: (card['rewards_claimed'] ?? 0).toString(),
                       label: 'CANJES',
-                      color: AppColors.accentPinkOnLight,
+                      color: AppColors.onLightOf(accentColor),
                     ),
                   ],
                 ),
@@ -764,7 +763,7 @@ class _RewardBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color color = AppColors.accentAmber;
+    final Color color = AppColors.accentAmber;
     final String title = count > 1 ? '¡Tienes $count premios!' : '¡Tienes un premio!';
     const String subtitle = 'Andá a Premios para solicitarlo o transferirlo.';
 
@@ -783,7 +782,7 @@ class _RewardBanner extends StatelessWidget {
               color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(LucideIcons.gift, color: color, size: 22),
+            child: Icon(LucideIcons.gift, color: color, size: 22),
           )
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scaleXY(begin: 1.0, end: 1.12, duration: 800.ms, curve: Curves.easeInOut),
@@ -792,7 +791,7 @@ class _RewardBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.subtitleBold.copyWith(color: AppColors.accentAmberOnLight, fontSize: 14)),
+                Text(title, style: AppTypography.subtitleBold.copyWith(color: AppColors.onLightOf(color), fontSize: 14)),
                 const SizedBox(height: 2),
                 Text(subtitle, style: AppTypography.caption),
               ],
@@ -834,3 +833,5 @@ class _MiniStat extends StatelessWidget {
     );
   }
 }
+
+

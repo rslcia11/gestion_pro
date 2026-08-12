@@ -234,19 +234,6 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
               start: now.subtract(const Duration(days: 7)),
               end: now,
             ),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: AppColors.onPrimary,
-              surface: AppColors.surfaceCard,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
@@ -278,7 +265,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(AppColors.primary),
               ),
@@ -296,7 +283,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(LucideIcons.triangleAlert, size: 64, color: AppColors.error),
+            Icon(LucideIcons.triangleAlert, size: 64, color: AppColors.error),
             const SizedBox(height: AppSpacing.md),
             Text(
               _errorMessage!,
@@ -542,7 +529,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
             barRods: [
               BarChartRodData(
                 toY: business.scanCount.toDouble(),
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   colors: [AppColors.accentPurple, AppColors.accentPink],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
@@ -576,7 +563,7 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _rankingList.length,
-            separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border),
+            separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.border),
             itemBuilder: (context, index) {
               final business = _rankingList[index];
               final position = index + 1;

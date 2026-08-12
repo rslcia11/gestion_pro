@@ -208,7 +208,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
                         DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedFilter,
-                            icon: const Icon(LucideIcons.listFilter, color: AppColors.textPrimary, size: 18),
+                            icon: Icon(LucideIcons.listFilter, color: AppColors.textPrimary, size: 18),
                             style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 14),
                             dropdownColor: AppColors.surfaceCard,
                             borderRadius: BorderRadius.circular(AppRadii.badge),
@@ -240,7 +240,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
                           DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: _selectedBusinessId,
-                              icon: const Icon(LucideIcons.store, color: AppColors.textPrimary, size: 18),
+                              icon: Icon(LucideIcons.store, color: AppColors.textPrimary, size: 18),
                               style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 14),
                               dropdownColor: AppColors.surfaceCard,
                               borderRadius: BorderRadius.circular(AppRadii.badge),
@@ -269,7 +269,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
               ),
             ),
             if (_isLoading)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 child: Center(
                   child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
                 ),
@@ -287,8 +287,8 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       if (index == _activities.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
                             child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
                           ),
