@@ -8,6 +8,8 @@ class StepCampaignData extends StatelessWidget {
   final TextEditingController rewardController;
   final TextEditingController rewardLongController;
   final TextEditingController pointsController;
+  final GlobalKey<FormFieldState<String>> rewardFieldKey;
+  final GlobalKey<FormFieldState<String>> pointsFieldKey;
 
   const StepCampaignData({
     super.key,
@@ -15,6 +17,8 @@ class StepCampaignData extends StatelessWidget {
     required this.rewardController,
     required this.rewardLongController,
     required this.pointsController,
+    required this.rewardFieldKey,
+    required this.pointsFieldKey,
   });
 
   @override
@@ -30,6 +34,7 @@ class StepCampaignData extends StatelessWidget {
           const SizedBox(height: 24),
 
           AppTextField(
+            fieldKey: rewardFieldKey,
             controller: rewardController,
             label: 'Premio (ej: Café Gratis, 10% de Descuento)',
             prefixIcon: LucideIcons.gift,
@@ -46,6 +51,7 @@ class StepCampaignData extends StatelessWidget {
           const SizedBox(height: 16),
 
           AppTextField(
+            fieldKey: pointsFieldKey,
             controller: pointsController,
             keyboardType: TextInputType.number,
             label: 'Escaneos / Puntos necesarios',

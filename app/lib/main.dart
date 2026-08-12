@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
+import 'core/config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/auth_wrapper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +21,11 @@ void main() async {
   } catch (e) {
     debugPrint('Firebase ya inicializado o error: $e');
   }
+
+  await Supabase.initialize(
+    url: SupabaseConfig.supabaseUrl,
+    anonKey: SupabaseConfig.supabaseAnonKey,
+  );
 
   runApp(const ProviderScope(child: AppRoot()));
 }

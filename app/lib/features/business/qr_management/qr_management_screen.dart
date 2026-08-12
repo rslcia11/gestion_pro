@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
@@ -18,6 +19,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/shared_widgets.dart';
 import '../../../core/utils/date_utils.dart';
+import '../../../core/utils/qr_code_link.dart';
 import '../../../core/services/realtime_sync_service.dart';
 import 'dart:async';
 
@@ -29,8 +31,8 @@ class QRManagementScreen extends StatefulWidget {
   State<QRManagementScreen> createState() => _QRManagementScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _QRManagementScreenState extends State<QRManagementScreen> {
+  final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _qrCodes = [];
   bool _isLoading = true;
 
@@ -53,33 +55,59 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
 
   Future<void> _loadQRCodes() async {
     if (!mounted) return;
-    setState(() {
-      _qrCodes = [];
-      _isLoading = false;
-    });
+    setState(() => _isLoading = true);
+    try {
+      final response = await supabase
+          .from('qr_codes')
+          .select()
+          .eq('business_id', widget.businessId)
+          .order('created_at', ascending: false);
+
+      if (mounted) {
+        setState(() {
+          _qrCodes = List<Map<String, dynamic>>.from(response);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading QR codes: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _generateFirstQRCode() async {
     setState(() => _isLoading = true);
-    final newCode = const Uuid().v4();
-    setState(() {
-      _qrCodes = [
-        {
-          'id': newCode,
-          'qr_code': newCode,
-          'label': 'Código QR Único',
-          'created_at': DateTime.now().toUtc().toIso8601String(),
-        },
-      ];
-      _isLoading = false;
-    });
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Código QR generado exitosamente'),
-          backgroundColor: AppColors.accentGreen,
-        ),
-      );
+    try {
+      final newCode = const Uuid().v4();
+      await supabase.from('qr_codes').insert({
+        'business_id': widget.businessId,
+        'qr_code': newCode,
+        'label': 'Código QR Único',
+      });
+      await _loadQRCodes();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Código QR generado exitosamente'),
+            backgroundColor: AppColors.accentGreen,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al generar QR: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -95,7 +123,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
     try {
 
       final painter = QrPainter(
-        data: code,
+        data: QrCodeLink.build(code),
         version: QrVersions.auto,
         gapless: true,
         errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -221,7 +249,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                     children: [
                       pw.BarcodeWidget(
                         barcode: pw.Barcode.qrCode(errorCorrectLevel: pw.BarcodeQRCorrectionLevel.high),
-                        data: code,
+                        data: QrCodeLink.build(code),
                         width: 300,
                         height: 300,
                       ),
@@ -305,7 +333,7 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
                   boxShadow: AppShadows.card,
                 ),
                 child: QrImageView(
-                  data: code,
+                  data: QrCodeLink.build(code),
                   version: QrVersions.auto,
                   size: 200.0,
                   eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Colors.black),
@@ -383,16 +411,38 @@ class _QRManagementScreenState extends State<QRManagementScreen> {
 
     if (confirmed != true) return;
 
-    final newCode = const Uuid().v4();
-    setState(() {
-      _qrCodes[index]['qr_code'] = newCode;
-    });
+    try {
+      final newCode = const Uuid().v4();
+      final qrId = _qrCodes[index]['id'];
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ QR regenerado correctamente')),
-      );
-      _showQRDialog(newCode, label);
+      if (qrId == null) throw Exception('ID de QR no encontrado');
+
+      // Update DB
+      await supabase
+          .from('qr_codes')
+          .update({'qr_code': newCode})
+          .eq('id', qrId);
+
+      // Update Local State transparently
+      setState(() {
+        _qrCodes[index]['qr_code'] = newCode;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ QR regenerado correctamente')),
+        );
+        _showQRDialog(newCode, label);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al regenerar: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+      }
     }
   }
 

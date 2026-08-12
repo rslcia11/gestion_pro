@@ -39,10 +39,13 @@ class SegmentedToggle extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadii.pill),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  options[index],
-                  style: AppTypography.labelBold.copyWith(
-                    color: isSelected ? AppColors.onPrimary : AppColors.textSecondary,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    options[index],
+                    style: AppTypography.labelBold.copyWith(
+                      color: isSelected ? AppColors.onPrimary : AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ),

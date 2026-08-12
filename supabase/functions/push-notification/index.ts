@@ -172,17 +172,22 @@ async function handleRewards(payload) {
   const { businessName, ownerToken } = await getBusinessOwnerTokens(reward.business_id);
   const { userName: clientName, userToken: clientToken } = await getUserTokenAndName(reward.user_id);
   if (payload.type === 'INSERT') {
-    if (ownerToken) {
-      await sendPushNotification(ownerToken, '¡Premio solicitado! 🎁', `${clientName} ganó un premio, pendiente de aprobar.`, {
-        route: '/business_dashboard/rewards'
-      });
-    }
+    // El dueño ya NO se entera acá: recién se le notifica cuando el cliente
+    // aprieta "Solicitar" (ver la rama de status === 'requested' más abajo).
     if (clientToken) {
-      await sendPushNotification(clientToken, '¡Premio alcanzado! 🎁', `Haz ganado premio en ${businessName}, acercate a retirar, la aprobación esta pendiente.`, {
+      await sendPushNotification(clientToken, '¡Premio alcanzado! 🎁', `Ganaste un premio en ${businessName}. Abrí la app para solicitarlo o transferirlo.`, {
         route: '/my_cards'
       });
     }
     await broadcastToAdmins('Premio Alcanzado 🎁', `${clientName} alcanzó un premio en ${businessName}.`, '/admin_rewards');
+  }
+  if (payload.type === 'UPDATE' && reward.status === 'requested' && payload.old_record?.status !== 'requested') {
+    if (ownerToken) {
+      await sendPushNotification(ownerToken, '¡Premio solicitado! 🎁', `${clientName} está listo para retirar su premio en ${businessName}.`, {
+        route: '/business_dashboard/rewards'
+      });
+    }
+    await broadcastToAdmins('Premio Solicitado 🎁', `${clientName} solicitó retirar su premio en ${businessName}.`, '/admin_rewards');
   }
   if (payload.type === 'UPDATE' && (reward.status === 'approved' || reward.status === 'claimed') && payload.old_record?.status !== reward.status) {
     if (clientToken) {

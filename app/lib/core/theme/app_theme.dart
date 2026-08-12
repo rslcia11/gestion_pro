@@ -109,11 +109,11 @@ class AppTheme {
         fillColor: AppColors.background,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -128,6 +128,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
         prefixIconColor: AppColors.textSecondary,
+        errorMaxLines: 3,
       ),
 
       fontFamily: GoogleFonts.inter().fontFamily,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/theme/app_colors.dart';
@@ -14,20 +15,23 @@ class AdminActivityScreen extends StatefulWidget {
   State<AdminActivityScreen> createState() => _AdminActivityScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _AdminActivityScreenState extends State<AdminActivityScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = true;
   List<Map<String, dynamic>> _activities = [];
-  final List<Map<String, dynamic>> _businessesList = [];
+  List<Map<String, dynamic>> _businessesList = [];
   String _selectedFilter = 'all';
   String _selectedBusinessId = 'all';
   final ScrollController _scrollController = ScrollController();
   bool _isFetchingMore = false;
   bool _hasMore = true;
+  int _currentPage = 0;
+  static const int _pageSize = 20;
 
   @override
   void initState() {
     super.initState();
+    _loadBusinesses();
     _loadActivity();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
@@ -44,22 +48,132 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
     super.dispose();
   }
 
+  Future<void> _loadBusinesses() async {
+    try {
+      final response = await supabase.from('businesses').select('id, name').order('name');
+      if (mounted) {
+        setState(() {
+          _businessesList = List<Map<String, dynamic>>.from(response);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading businesses: $e');
+    }
+  }
+
   Future<void> _loadActivity() async {
     setState(() {
       _isLoading = true;
+      _currentPage = 0;
       _hasMore = true;
       _activities = [];
     });
-    EcuadorDateUtils.getStartOfDayEcuadorUtc();
-    setState(() {
-      _activities = [];
-      _hasMore = false;
-      _isLoading = false;
-    });
+    try {
+      var scansQuery = supabase.from('scans').select('''
+            id, scanned_at, status, is_demo, qr_code_id,
+            profiles:user_id (full_name, email),
+            businesses:business_id (name)
+          ''');
+
+      final startOfDayUtc = EcuadorDateUtils.getStartOfDayEcuadorUtc();
+
+      if (_selectedFilter == 'today') {
+        scansQuery = scansQuery.gte('scanned_at', startOfDayUtc.toIso8601String());
+      } else if (_selectedFilter == 'week') {
+        final startOfWeek = startOfDayUtc.subtract(const Duration(days: 7));
+        scansQuery = scansQuery.gte('scanned_at', startOfWeek.toIso8601String());
+      } else if (_selectedFilter == 'month') {
+        final startOfMonth = startOfDayUtc.subtract(const Duration(days: 30));
+        scansQuery = scansQuery.gte('scanned_at', startOfMonth.toIso8601String());
+      }
+
+      if (_selectedBusinessId != 'all') {
+        scansQuery = scansQuery.eq('business_id', _selectedBusinessId);
+      }
+
+      final scansResponse = await scansQuery
+          .order('scanned_at', ascending: false)
+          .range(0, _pageSize - 1);
+
+      List<Map<String, dynamic>> combined = [];
+      for (var s in scansResponse) {
+         combined.add({
+            'type': 'scan',
+            'date': s['scanned_at'],
+            ...s
+         });
+      }
+
+      if (mounted) {
+        setState(() {
+          _activities = combined;
+          _hasMore = combined.length == _pageSize;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading activities: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _fetchMoreActivity() async {
-    setState(() => _isFetchingMore = false);
+    setState(() => _isFetchingMore = true);
+    try {
+      _currentPage++;
+      final startIndex = _currentPage * _pageSize;
+      final endIndex = startIndex + _pageSize - 1;
+
+      var scansQuery = supabase.from('scans').select('''
+            id, scanned_at, status, is_demo, qr_code_id,
+            profiles:user_id (full_name, email),
+            businesses:business_id (name)
+          ''');
+
+      final startOfDayUtc = EcuadorDateUtils.getStartOfDayEcuadorUtc();
+
+      if (_selectedFilter == 'today') {
+        scansQuery = scansQuery.gte('scanned_at', startOfDayUtc.toIso8601String());
+      } else if (_selectedFilter == 'week') {
+        final startOfWeek = startOfDayUtc.subtract(const Duration(days: 7));
+        scansQuery = scansQuery.gte('scanned_at', startOfWeek.toIso8601String());
+      } else if (_selectedFilter == 'month') {
+        final startOfMonth = startOfDayUtc.subtract(const Duration(days: 30));
+        scansQuery = scansQuery.gte('scanned_at', startOfMonth.toIso8601String());
+      }
+
+      if (_selectedBusinessId != 'all') {
+        scansQuery = scansQuery.eq('business_id', _selectedBusinessId);
+      }
+
+      final scansResponse = await scansQuery
+          .order('scanned_at', ascending: false)
+          .range(startIndex, endIndex);
+
+      List<Map<String, dynamic>> newItems = [];
+      for (var s in scansResponse) {
+         newItems.add({
+            'type': 'scan',
+            'date': s['scanned_at'],
+            ...s
+         });
+      }
+
+      if (mounted) {
+        setState(() {
+          _activities.addAll(newItems);
+          _hasMore = newItems.length == _pageSize;
+          _isFetchingMore = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading more activities: $e');
+      if (mounted) {
+        setState(() => _isFetchingMore = false);
+      }
+    }
   }
 
   @override
@@ -67,7 +181,11 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Actividad Global'),
+        title: const AppBarTitle('Actividad Global'),
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: _loadActivity,

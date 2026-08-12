@@ -21,6 +21,9 @@ class StepBusinessData extends StatelessWidget {
   final String address;
   final Function(double, double, String) onLocationSelected;
 
+  final GlobalKey<FormFieldState<String>> nameFieldKey;
+  final GlobalKey<FormFieldState<String>> categoryFieldKey;
+
   const StepBusinessData({
     super.key,
     required this.formKey,
@@ -33,6 +36,8 @@ class StepBusinessData extends StatelessWidget {
     required this.longitude,
     required this.address,
     required this.onLocationSelected,
+    required this.nameFieldKey,
+    required this.categoryFieldKey,
   });
 
   @override
@@ -48,6 +53,7 @@ class StepBusinessData extends StatelessWidget {
           const SizedBox(height: 24),
 
           AppTextField(
+            fieldKey: nameFieldKey,
             controller: nameController,
             label: 'Nombre del negocio',
             prefixIcon: LucideIcons.store,
@@ -59,11 +65,12 @@ class StepBusinessData extends StatelessWidget {
             initialValue: TextEditingValue(text: selectedCategory?.name.toUpperCase() ?? ''),
             displayStringForOption: (BusinessCategory option) => option.name.toUpperCase(),
             optionsBuilder: (TextEditingValue textEditingValue) {
-              if (textEditingValue.text.isEmpty) {
+              final query = textEditingValue.text.trim();
+              if (query.isEmpty || query.toUpperCase() == selectedCategory?.name.trim().toUpperCase()) {
                 return categories;
               }
               return categories.where((BusinessCategory option) {
-                return option.name.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                return option.name.toLowerCase().contains(query.toLowerCase());
               });
             },
             onSelected: (BusinessCategory selection) {
@@ -71,6 +78,7 @@ class StepBusinessData extends StatelessWidget {
             },
             fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
               return TextFormField(
+                key: categoryFieldKey,
                 controller: textEditingController,
                 focusNode: focusNode,
                 style: AppTypography.bodyRegular,
@@ -83,11 +91,22 @@ class StepBusinessData extends StatelessWidget {
                   suffixIcon: const Icon(LucideIcons.chevronDown, color: AppColors.textSecondary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.pill),
-                    borderSide: BorderSide.none,
+                    borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                    borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
                 validator: (String? value) {
+                  if (categories.isEmpty) {
+                    return 'No hay categorías disponibles en este momento. Intentá de nuevo más tarde.';
+                  }
                   if (selectedCategory == null || value == null || value.isEmpty) {
                     return 'Selecciona una categoría válida de la lista';
                   }
@@ -98,31 +117,76 @@ class StepBusinessData extends StatelessWidget {
             optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<BusinessCategory> onSelected, Iterable<BusinessCategory> options) {
               return Align(
                 alignment: Alignment.topLeft,
-                child: Material(
-                  elevation: 8.0,
-                  borderRadius: BorderRadius.circular(AppRadii.card),
-                  clipBehavior: Clip.antiAlias,
-                  child: Container(
-                    constraints: const BoxConstraints(maxHeight: 250),
-                    // We let it size based on the parent's constraints mostly, but give it a max width
-                    width: MediaQuery.of(context).size.width - 48,
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: options.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final BusinessCategory option = options.elementAt(index);
-                        return ListTile(
-                          title: Text(option.name.toUpperCase(), style: AppTypography.labelBold),
-                          onTap: () => onSelected(option),
-                        );
-                      },
-                    ),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Material(
+                      elevation: 8.0,
+                      shadowColor: Colors.black26,
+                      color: AppColors.surfaceCard,
+                      borderRadius: BorderRadius.circular(AppRadii.card),
+                      clipBehavior: Clip.antiAlias,
+                      child: Container(
+                        width: constraints.maxWidth,
+                        constraints: const BoxConstraints(maxHeight: 280),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(AppRadii.card),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: options.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text('No se encontraron categorías', style: AppTypography.bodyMedium),
+                              )
+                            : ListView.separated(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                                itemBuilder: (BuildContext context, int index) {
+                                  final BusinessCategory option = options.elementAt(index);
+                                  final isSelected = selectedCategory?.id == option.id;
+                                  return ListTile(
+                                    dense: true,
+                                    tileColor: isSelected ? AppColors.primary.withValues(alpha: 0.08) : null,
+                                    leading: Icon(
+                                      LucideIcons.layers,
+                                      size: 18,
+                                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                                    ),
+                                    title: Text(
+                                      option.name.toUpperCase(),
+                                      style: AppTypography.labelBold.copyWith(
+                                        color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    onTap: () => onSelected(option),
+                                  );
+                                },
+                              ),
+                      ),
+                    );
+                  },
                 ),
               );
             },
           ),
+          if (categories.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'No hay categorías disponibles en este momento.',
+                      style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 16),
 
           AppTextField(

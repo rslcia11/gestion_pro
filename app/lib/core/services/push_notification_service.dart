@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
@@ -14,6 +15,7 @@ import '../widgets/global_celebration_dialog.dart';
 
 class PushNotificationService {
   static final _firebaseMessaging = FirebaseMessaging.instance;
+  static final _supabase = Supabase.instance.client;
   static final _localNotifications = FlutterLocalNotificationsPlugin();
 
   // Los listeners de FCM / notificaciones se registran UNA sola vez por proceso.
@@ -239,15 +241,34 @@ class PushNotificationService {
     // Nota: Para /business_dashboard y /my_cards el AuthWrapper ya hace el trabajo por nosotros.
   }
 
-  // Stub: sin backend conectado — pendiente de asociar el token FCM a un
-  // usuario en la nueva DB.
-  static Future<void> _saveTokenToDatabase(String token) async {}
+  static Future<void> _saveTokenToDatabase(String token) async {
+    final user = _supabase.auth.currentUser;
+    if (user != null) {
+      try {
+        await _supabase
+            .from('profiles')
+            .update({'fcm_token': token})
+            .eq('id', user.id);
+        debugPrint('Token guardado en Supabase exitosamente.');
+      } catch (e) {
+        debugPrint('Error guardando token en BD: ');
+      }
+    }
+  }
 
   static Future<void> removeTokenFromDatabase() async {
-    try {
-      await _firebaseMessaging.deleteToken();
-    } catch (e) {
-      debugPrint('Error eliminando token FCM: $e');
+    final user = _supabase.auth.currentUser;
+    if (user != null) {
+      try {
+        await _supabase
+            .from('profiles')
+            .update({'fcm_token': null})
+            .eq('id', user.id);
+        await _firebaseMessaging.deleteToken();
+        debugPrint('Token eliminado de Supabase exitosamente al cerrar sesion.');
+      } catch (e) {
+        debugPrint('Error eliminando token: $e');
+      }
     }
   }
 }

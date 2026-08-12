@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
@@ -28,8 +29,8 @@ class BusinessProfileScreen extends StatefulWidget {
   State<BusinessProfileScreen> createState() => _BusinessProfileScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
 
@@ -48,7 +49,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   XFile? _newLogoFile;
 
   BusinessCategory? _selectedCategory;
-  final List<BusinessCategory> _categories = [];
+  List<BusinessCategory> _categories = [];
 
   double? _latitude;
   double? _longitude;
@@ -85,9 +86,52 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     _loadCategories();
   }
 
-  Future<void> _loadProfileData() async {}
+  Future<void> _loadProfileData() async {
+    try {
+      final userId = supabase.auth.currentUser!.id;
+      final profile = await supabase
+          .from('profiles')
+          .select('phone')
+          .eq('id', userId)
+          .single();
 
-  Future<void> _loadCategories() async {}
+      if (mounted) {
+        setState(() {
+          _phoneController.text = profile['phone'] ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading profile phone: $e');
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final response = await supabase
+          .from('business_categories')
+          .select()
+          .order('name');
+
+      if (mounted) {
+        setState(() {
+          _categories = (response as List)
+              .map((c) => BusinessCategory.fromJson(c))
+              .toList();
+
+          final categoryId = widget.business['category_id'];
+          if (categoryId != null) {
+            try {
+              _selectedCategory = _categories.firstWhere(
+                (c) => c.id == categoryId,
+              );
+            } catch (_) {}
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading categories: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -116,16 +160,83 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Perfil actualizado exitosamente'),
-        backgroundColor: AppColors.accentGreen,
-      ),
-    );
-    Navigator.pop(context, true); // Indicate success to refresh parent
+    try {
+      final userId = supabase.auth.currentUser!.id;
+      final businessId = widget.business['id'];
+
+      // 1. Upload Logo if changed
+      String? finalLogoUrl = _logoUrl;
+      if (_newLogoFile != null) {
+        final fileBytes = await _newLogoFile!.readAsBytes();
+        final fileExt = _newLogoFile!.name.split('.').last.toLowerCase();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+        final imagePath = '$userId/$fileName';
+
+        await supabase.storage
+            .from('business-logos')
+            .uploadBinary(
+              imagePath,
+              fileBytes,
+              fileOptions: const FileOptions(
+                cacheControl: '3600',
+                upsert: true,
+              ),
+            );
+        final rawUrl = supabase.storage
+            .from('business-logos')
+            .getPublicUrl(imagePath);
+        finalLogoUrl = '$rawUrl?v=${DateTime.now().millisecondsSinceEpoch}';
+      }
+
+      // 2. Update Profile
+      await supabase
+          .from('profiles')
+          .update({
+            'full_name': _fullNameController.text.trim(),
+            'phone': _phoneController.text.trim(),
+          })
+          .eq('id', userId);
+
+      // 3. Update Business
+      await supabase
+          .from('businesses')
+          .update({
+            'name': _businessNameController.text.trim(),
+            'description': _businessDescriptionController.text.trim(),
+            'logo_url': finalLogoUrl,
+            'category_id': _selectedCategory?.id,
+            'address': _address,
+            'latitude': _latitude,
+            'longitude': _longitude,
+            'reward_description': _rewardDescriptionController.text.trim(),
+            'reward_long_description': _rewardLongDescriptionController.text
+                .trim(),
+            'points_required': int.parse(_pointsRequiredController.text),
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', businessId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado exitosamente'),
+            backgroundColor: AppColors.accentGreen,
+          ),
+        );
+        Navigator.pop(context, true); // Indicate success to refresh parent
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _deleteAccount() async {
@@ -153,18 +264,27 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             ],
           ),
           actions: [
-            SecondaryButton(
-              label: 'Cancelar',
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            PrimaryButton(
-              label: 'Eliminar definitivamente',
-              isDestructive: true,
-              onPressed: () {
-                if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') {
-                  Navigator.pop(context, true);
-                }
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: SecondaryButton(
+                    label: 'Cancelar',
+                    onPressed: () => Navigator.pop(context, false),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Eliminar definitivamente',
+                    isDestructive: true,
+                    onPressed: () {
+                      if (confirmController.text.trim().toUpperCase() == 'ELIMINAR') {
+                        Navigator.pop(context, true);
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -172,10 +292,41 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     );
 
     if (confirm != true) return;
-    if (!mounted) return;
 
     setState(() => _isLoading = true);
-    await ProviderScope.containerOf(context).read(authStateProvider.notifier).logout();
+    try {
+      final userId = supabase.auth.currentUser!.id;
+
+      // Intentamos llamar a la Edge Function (recomendado para GDPR completo)
+      try {
+        await supabase.functions.invoke(
+          'hyper-action',
+          headers: {
+            'Authorization':
+                'Bearer ${supabase.auth.currentSession?.accessToken}',
+          },
+        );
+      } catch (e) {
+        debugPrint('Edge Function failed, using RPC fallback: $e');
+        // Fallback: Si no has desplegado la Edge Function, al menos limpiamos los datos públicos
+        await supabase.rpc(
+          'delete_user_data',
+          params: {'user_id_param': userId},
+        );
+      }
+
+      await ProviderScope.containerOf(context).read(authStateProvider.notifier).logout();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -184,8 +335,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         toolbarHeight: 80,
-        title: Text('Editar Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
+        title: AppBarTitle('Editar Perfil', style: AppTypography.titleBold.copyWith(fontSize: 16)),
         centerTitle: true,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconActionButton(
             icon: LucideIcons.circleCheck,
@@ -295,15 +450,33 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     // Category Dropdown
                     Text('Categoría', style: AppTypography.labelBold.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 8),
+                    if (_categories.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(LucideIcons.circleAlert, size: 16, color: AppColors.accentAmber),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'No hay categorías disponibles en este momento.',
+                                style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     Autocomplete<BusinessCategory>(
                       initialValue: TextEditingValue(text: _selectedCategory?.name.toUpperCase() ?? ''),
                       displayStringForOption: (BusinessCategory option) => option.name.toUpperCase(),
                       optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
+                        final query = textEditingValue.text.trim();
+                        if (query.isEmpty || query.toUpperCase() == _selectedCategory?.name.trim().toUpperCase()) {
                           return _categories;
                         }
                         return _categories.where((BusinessCategory option) {
-                          return option.name.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                          return option.name.toLowerCase().contains(query.toLowerCase());
                         });
                       },
                       onSelected: (BusinessCategory selection) {
@@ -321,7 +494,15 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             fillColor: AppColors.background,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(AppRadii.pill),
-                              borderSide: BorderSide.none,
+                              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(AppRadii.pill),
+                              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(AppRadii.pill),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
@@ -329,6 +510,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             ),
                           ),
                           validator: (String? value) {
+                            if (_categories.isEmpty) {
+                              return 'No hay categorías disponibles en este momento. Intentá de nuevo más tarde.';
+                            }
                             if (_selectedCategory == null || value == null || value.isEmpty) {
                               return 'Selecciona una categoría válida';
                             }
@@ -339,26 +523,55 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<BusinessCategory> onSelected, Iterable<BusinessCategory> options) {
                         return Align(
                           alignment: Alignment.topLeft,
-                          child: Material(
-                            elevation: 8.0,
-                            borderRadius: BorderRadius.circular(AppRadii.card),
-                            clipBehavior: Clip.antiAlias,
-                            child: Container(
-                              constraints: const BoxConstraints(maxHeight: 250),
-                              width: MediaQuery.of(context).size.width - 48,
-                              child: ListView.builder(
-                                padding: EdgeInsets.zero,
-                                shrinkWrap: true,
-                                itemCount: options.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final BusinessCategory option = options.elementAt(index);
-                                  return ListTile(
-                                    title: Text(option.name.toUpperCase(), style: AppTypography.labelBold),
-                                    onTap: () => onSelected(option),
-                                  );
-                                },
-                              ),
-                            ),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Material(
+                                elevation: 8.0,
+                                shadowColor: Colors.black26,
+                                color: AppColors.surfaceCard,
+                                borderRadius: BorderRadius.circular(AppRadii.card),
+                                clipBehavior: Clip.antiAlias,
+                                child: Container(
+                                  width: constraints.maxWidth,
+                                  constraints: const BoxConstraints(maxHeight: 280),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(AppRadii.card),
+                                    border: Border.all(color: AppColors.border),
+                                  ),
+                                  child: options.isEmpty
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Text('No se encontraron categorías', style: AppTypography.bodyMedium),
+                                        )
+                                      : ListView.separated(
+                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                          shrinkWrap: true,
+                                          itemCount: options.length,
+                                          separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                                          itemBuilder: (BuildContext context, int index) {
+                                            final BusinessCategory option = options.elementAt(index);
+                                            final isSelected = _selectedCategory?.id == option.id;
+                                            return ListTile(
+                                              dense: true,
+                                              tileColor: isSelected ? AppColors.primary.withValues(alpha: 0.08) : null,
+                                              leading: Icon(
+                                                LucideIcons.layers,
+                                                size: 18,
+                                                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                                              ),
+                                              title: Text(
+                                                option.name.toUpperCase(),
+                                                style: AppTypography.labelBold.copyWith(
+                                                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                                ),
+                                              ),
+                                              onTap: () => onSelected(option),
+                                            );
+                                          },
+                                        ),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
@@ -379,7 +592,11 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           MaterialPageRoute(
                             builder: (context) => Scaffold(
                               appBar: AppBar(
-                                title: const Text('Seleccionar Ubicación'),
+                                title: const AppBarTitle('Seleccionar Ubicación'),
+                                leading: IconActionButton(
+                                  icon: LucideIcons.arrowLeft,
+                                  onPressed: () => Navigator.pop(context),
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(context),

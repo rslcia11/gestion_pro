@@ -14,6 +14,7 @@ class PrimaryButton extends StatelessWidget {
     this.isLoading = false,
     this.isFullWidth = true,
     this.isDestructive = false,
+    this.padding,
   });
 
   final String label;
@@ -22,10 +23,12 @@ class PrimaryButton extends StatelessWidget {
   final bool isLoading;
   final bool isFullWidth;
   final bool isDestructive;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
     final backgroundColor = isDestructive ? AppColors.error : AppColors.primary;
+    final effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14);
 
     final button = ElevatedButton(
       onPressed: isLoading ? null : onPressed,
@@ -34,7 +37,9 @@ class PrimaryButton extends StatelessWidget {
         foregroundColor: AppColors.onPrimary,
         disabledBackgroundColor: backgroundColor.withValues(alpha: 0.6),
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+        padding: effectivePadding,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadii.pill),
         ),
@@ -49,15 +54,23 @@ class PrimaryButton extends StatelessWidget {
               ),
             )
           : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
                   Icon(icon, size: 18, color: AppColors.onPrimary),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                 ],
-                Text(
-                  label,
-                  style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: Text(
+                      label,
+                      style: AppTypography.subtitleBold.copyWith(color: AppColors.onPrimary),
+                      maxLines: 1,
+                    ),
+                  ),
                 ),
               ],
             ),

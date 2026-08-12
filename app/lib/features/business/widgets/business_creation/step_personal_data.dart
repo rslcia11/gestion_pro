@@ -9,12 +9,16 @@ class StepPersonalData extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController fullNameController;
   final TextEditingController phoneController;
+  final GlobalKey<FormFieldState<String>> fullNameFieldKey;
+  final GlobalKey<FormFieldState<String>> phoneFieldKey;
 
   const StepPersonalData({
     super.key,
     required this.formKey,
     required this.fullNameController,
     required this.phoneController,
+    required this.fullNameFieldKey,
+    required this.phoneFieldKey,
   });
 
   @override
@@ -30,6 +34,7 @@ class StepPersonalData extends StatelessWidget {
           const SizedBox(height: 24),
 
           AppTextField(
+            fieldKey: fullNameFieldKey,
             controller: fullNameController,
             label: 'Nombre completo',
             prefixIcon: LucideIcons.user,
@@ -43,6 +48,7 @@ class StepPersonalData extends StatelessWidget {
           const SizedBox(height: 16),
 
           AppTextField(
+            fieldKey: phoneFieldKey,
             controller: phoneController,
             keyboardType: TextInputType.phone,
             label: 'Teléfono',

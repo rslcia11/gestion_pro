@@ -23,8 +23,12 @@ class AppTextField extends StatelessWidget {
     this.textInputAction,
     this.inputFormatters,
     this.maxLines = 1,
+    this.fieldKey,
   });
 
+  /// Permite ubicar este campo (ej. para scrollear hasta él si falla su
+  /// validación) sin depender del [key] de identidad del widget.
+  final GlobalKey<FormFieldState<String>>? fieldKey;
   final TextEditingController? controller;
   final String? label;
   final String? hint;
@@ -50,6 +54,7 @@ class AppTextField extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         TextFormField(
+          key: fieldKey,
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
@@ -71,15 +76,15 @@ class AppTextField extends StatelessWidget {
             suffixIcon: suffixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadii.pill),
-              borderSide: BorderSide.none,
+              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadii.pill),
-              borderSide: BorderSide.none,
+              borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadii.pill),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           ),

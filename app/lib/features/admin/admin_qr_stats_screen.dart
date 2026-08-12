@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -58,8 +59,8 @@ class AdminQrStatsScreen extends StatefulWidget {
   State<AdminQrStatsScreen> createState() => _AdminQrStatsScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -110,25 +111,113 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
     }
   }
 
-  /// Stub: sin backend conectado — pendiente de integrar nueva DB.
+  /// Load scan data from Supabase
   Future<void> _loadScanData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
-    _getDateRange();
+    try {
+      final (startDate, endDate) = _getDateRange();
 
-    setState(() {
-      _scanData = const ScanAggregation(
-        totalScans: 0,
-        topBusinesses: [],
-        dailyScans: {},
+      // Query approved scans within date range
+      final response = await supabase
+          .from('scans')
+          .select('id, scanned_at, business_id, businesses(name)')
+          .eq('status', 'approved')
+          .eq('is_demo', false)
+          .gte('scanned_at', startDate.toUtc().toIso8601String())
+          .lte('scanned_at', endDate.toUtc().toIso8601String())
+          .order('scanned_at', ascending: true);
+
+      if (response.isEmpty) {
+        setState(() {
+          _scanData = const ScanAggregation(
+            totalScans: 0,
+            topBusinesses: [],
+            dailyScans: {},
+          );
+          _totalScans = 0;
+          _rankingList = [];
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Aggregate data in Dart using Map
+      final businessScanMap = <String, Map<String, dynamic>>{};
+      final dailyScanMap = <String, int>{};
+      int totalCount = 0;
+
+      for (final row in response) {
+        totalCount++;
+
+        // Business aggregation
+        final businessId = row['business_id'] as String?;
+        final businessName =
+            (row['businesses'] as Map<String, dynamic>?)?['name'] as String? ??
+            'Sin nombre';
+        final scannedAt = row['scanned_at'] as String?;
+
+        if (businessId != null) {
+          if (businessScanMap.containsKey(businessId)) {
+            businessScanMap[businessId]!['count'] =
+                (businessScanMap[businessId]!['count'] as int) + 1;
+          } else {
+            businessScanMap[businessId] = {
+              'id': businessId,
+              'name': businessName,
+              'count': 1,
+            };
+          }
+        }
+
+        // Daily aggregation
+        if (scannedAt != null) {
+          final date = EcuadorDateUtils.toEcuadorTime(scannedAt);
+          final dayKey =
+              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+          dailyScanMap[dayKey] = (dailyScanMap[dayKey] ?? 0) + 1;
+        }
+      }
+
+      // Convert business map to sorted list
+      final businessList = businessScanMap.entries.map((entry) {
+        final data = entry.value;
+        return BusinessScanStats(
+          businessId: data['id'] as String,
+          businessName: data['name'] as String,
+          scanCount: data['count'] as int,
+        );
+      }).toList();
+
+      // Sort by scan count descending
+      businessList.sort((a, b) => b.scanCount.compareTo(a.scanCount));
+
+      // Get top 10 for chart
+      final top10 = businessList.take(10).toList();
+
+      // Full ranking list
+      _rankingList = List.from(businessList);
+
+      _scanData = ScanAggregation(
+        totalScans: totalCount,
+        topBusinesses: top10,
+        dailyScans: dailyScanMap,
       );
-      _totalScans = 0;
-      _rankingList = [];
-      _isLoading = false;
-    });
+
+      setState(() {
+        _totalScans = totalCount;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading scan stats: $e');
+      setState(() {
+        _errorMessage = 'Error al cargar las estadísticas: $e';
+        _isLoading = false;
+      });
+    }
   }
 
   /// Show custom date range picker
@@ -175,10 +264,14 @@ class _AdminQrStatsScreenState extends State<AdminQrStatsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Estadísticas QR', style: AppTypography.titleBold),
+        title: AppBarTitle('Estadísticas QR', style: AppTypography.titleBold),
         backgroundColor: AppColors.background,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadScanData),
           const SizedBox(width: AppSpacing.sm),

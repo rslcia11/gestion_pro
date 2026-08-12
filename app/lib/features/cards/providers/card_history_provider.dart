@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/reward_transfer_service.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../data/card_history_repository.dart';
 
 class CardHistoryState {
@@ -16,6 +17,9 @@ class CardHistoryState {
   final String? transferSuccessMessage;
   final bool showInviteButton;
 
+  // Solicitar premio
+  final String? requestingRewardId;
+
   CardHistoryState({
     this.isLoading = true,
     this.error,
@@ -26,6 +30,7 @@ class CardHistoryState {
     this.transferErrorMessage,
     this.transferSuccessMessage,
     this.showInviteButton = false,
+    this.requestingRewardId,
   });
 
   CardHistoryState copyWith({
@@ -38,6 +43,7 @@ class CardHistoryState {
     String? transferErrorMessage,
     String? transferSuccessMessage,
     bool? showInviteButton,
+    String? requestingRewardId,
   }) {
     return CardHistoryState(
       isLoading: isLoading ?? this.isLoading,
@@ -49,6 +55,7 @@ class CardHistoryState {
       transferErrorMessage: transferErrorMessage,
       transferSuccessMessage: transferSuccessMessage,
       showInviteButton: showInviteButton ?? this.showInviteButton,
+      requestingRewardId: requestingRewardId,
     );
   }
 
@@ -110,7 +117,7 @@ class CardHistoryNotifier extends Notifier<CardHistoryState> {
     );
 
     try {
-      final transferService = RewardTransferService();
+      final transferService = RewardTransferService(ref.read(supabaseClientProvider));
 
       final user = await transferService.findUserByEmail(email);
 
@@ -150,6 +157,21 @@ class CardHistoryNotifier extends Notifier<CardHistoryState> {
         isTransferLoading: false,
         transferErrorMessage: 'Error al transferir. Intenta de nuevo.',
       );
+    }
+  }
+
+  /// Solicita la entrega de un premio 'pending' — pasa a 'requested' y
+  /// notifica al dueño del negocio que el cliente está listo para retirarlo.
+  Future<bool> requestReward(String rewardId) async {
+    state = state.copyWith(requestingRewardId: rewardId);
+    try {
+      await ref.read(cardHistoryRepositoryProvider).requestReward(rewardId);
+      state = state.copyWith(requestingRewardId: null);
+      await loadHistory();
+      return true;
+    } catch (e) {
+      state = state.copyWith(requestingRewardId: null, error: e.toString());
+      return false;
     }
   }
 }

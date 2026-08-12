@@ -130,7 +130,10 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
 
                 StatusChipVariant variant = StatusChipVariant.pending;
                 String statusLabel = 'Pendiente';
-                if (status == 'approved') {
+                if (status == 'requested') {
+                  variant = StatusChipVariant.info;
+                  statusLabel = 'Solicitado';
+                } else if (status == 'approved') {
                   variant = StatusChipVariant.success;
                   statusLabel = 'Entregado';
                 } else if (status == 'rejected') {
@@ -149,7 +152,7 @@ class _RewardsManagementScreenState extends ConsumerState<RewardsManagementScree
                         : '$fullName ganó premio',
                     timestamp: 'El $date',
                     trailing: StatusChip(label: statusLabel, variant: variant),
-                    actions: status == 'pending'
+                    actions: (status == 'pending' || status == 'requested')
                         ? Row(
                             children: [
                               Expanded(

@@ -6,3 +6,11 @@ supabase/.temp/
 
 # Artefactos de trabajo que no van al repo
 check_policies.sql
+
+# Credenciales — NUNCA al repo
+ec2-fullaccess-friend-credentials.txt
+migracion_aws/
+CREDENCIALES.txt
+
+# SDD tooling cache (Agent Teams Lite)
+.atl/

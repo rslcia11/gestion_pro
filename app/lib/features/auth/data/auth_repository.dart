@@ -1,19 +1,43 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/services/push_notification_service.dart';
+import '../../../core/providers/supabase_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository();
+  return AuthRepository(ref.watch(supabaseClientProvider));
 });
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class AuthRepository {
-  Object? get currentSession => null;
-  Object? get currentUser => null;
+  final SupabaseClient _supabase;
 
-  Stream<void> get authStateChanges => const Stream.empty();
+  AuthRepository(this._supabase);
 
-  Future<void> signOut() async {}
+  Session? get currentSession => _supabase.auth.currentSession;
+  User? get currentUser => _supabase.auth.currentUser;
 
-  Future<void> refreshSession() async {}
+  Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
 
-  Future<bool> isBusinessActive(String businessId) async => false;
+  Future<void> signOut() async {
+    await PushNotificationService.removeTokenFromDatabase();
+    await _supabase.auth.signOut();
+  }
+
+  Future<void> refreshSession() async {
+    await _supabase.auth.refreshSession();
+  }
+
+  Future<bool> isBusinessActive(String businessId) async {
+    try {
+      final response = await _supabase
+          .from('businesses')
+          .select('is_active')
+          .eq('id', businessId)
+          .single();
+
+      return response['is_active'] ?? false;
+    } catch (e) {
+      // Si falla la consulta, asumimos que no está activo por seguridad
+      return false;
+    }
+  }
 }

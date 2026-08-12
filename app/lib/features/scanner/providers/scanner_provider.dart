@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../data/scanner_repository.dart';
 
 class ScannerState {
@@ -59,17 +61,45 @@ class ScannerNotifier extends Notifier<ScannerState> {
     state = state.copyWith(isProcessing: true).clearMessages();
 
     try {
-      final businessName = await ref.read(scannerRepositoryProvider).validateScan(qrCode, '');
+      final userId = ref.read(supabaseClientProvider).auth.currentUser?.id;
+      if (userId == null) throw Exception('Usuario no autenticado');
+
+      final businessName = await ref.read(scannerRepositoryProvider).validateScan(qrCode, userId);
 
       state = state.copyWith(
         isProcessing: false,
         successBusinessName: businessName,
       );
+    } on PostgrestException catch (e) {
+      if (e.message.contains('COOLDOWN_ACTIVE')) {
+        final parts = e.message.split(':');
+        final hours = parts.length > 1 ? parts[1] : '4';
+        state = state.copyWith(
+          isProcessing: false,
+          cooldownHours: hours,
+        );
+      } else {
+        state = state.copyWith(
+          isProcessing: false,
+          error: 'Error de base de datos: ${e.message}',
+        );
+      }
     } catch (e) {
-      state = state.copyWith(
-        isProcessing: false,
-        error: 'Backend no conectado.',
-      );
+      if (e.toString().contains('PENDING_REWARD')) {
+        state = state.copyWith(
+          isProcessing: false,
+          hasPendingReward: true,
+        );
+      } else {
+        String msg = 'Error inesperado: $e';
+        if (e.toString().contains('single row') || e.toString().contains('no encontrado')) {
+          msg = 'QR no válido';
+        }
+        state = state.copyWith(
+          isProcessing: false,
+          error: msg,
+        );
+      }
     }
   }
 }

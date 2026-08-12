@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
@@ -31,8 +32,8 @@ enum DateRangeFilter {
   const DateRangeFilter(this.label, this.days);
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = true;
   List<Map<String, dynamic>> _businesses = [];
   final TextEditingController _searchController = TextEditingController();
@@ -44,6 +45,8 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isFetchingMore = false;
   bool _hasMore = true;
+  int _currentPage = 0;
+  static const int _pageSize = 20;
 
   @override
   void initState() {
@@ -95,19 +98,114 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
   Future<void> _loadBusinesses() async {
     setState(() {
       _isLoading = true;
+      _currentPage = 0;
       _hasMore = true;
       _businesses = [];
     });
-    _getDateRange();
-    setState(() {
-      _businesses = [];
-      _hasMore = false;
-      _isLoading = false;
-    });
+    try {
+      var query = supabase
+          .from('businesses')
+          .select('''
+            id,
+            name,
+            category_id,
+            business_categories(name),
+            logo_url,
+            is_active,
+            is_demo,
+            created_at,
+            owner_id,
+            reward_description,
+            points_required,
+            profiles:owner_id (full_name, email, phone, is_demo),
+            loyalty_cards (
+              profiles:user_id (full_name, email, phone, is_demo)
+            )
+          ''');
+
+      final dateRange = _getDateRange();
+      if (dateRange != null) {
+        query = query.gte('created_at', dateRange.$1.toIso8601String())
+                     .lte('created_at', dateRange.$2.toIso8601String());
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(0, _pageSize - 1);
+
+      if (mounted) {
+        setState(() {
+          _businesses = List<Map<String, dynamic>>.from(response);
+          _hasMore = _businesses.length == _pageSize;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading businesses: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar negocios: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _fetchMoreBusinesses() async {
-    setState(() => _isFetchingMore = false);
+    setState(() => _isFetchingMore = true);
+    try {
+      _currentPage++;
+      final startIndex = _currentPage * _pageSize;
+      final endIndex = startIndex + _pageSize - 1;
+
+      var query = supabase
+          .from('businesses')
+          .select('''
+            id,
+            name,
+            category_id,
+            business_categories(name),
+            logo_url,
+            is_active,
+            is_demo,
+            created_at,
+            owner_id,
+            reward_description,
+            points_required,
+            profiles:owner_id (full_name, email, phone, is_demo),
+            loyalty_cards (
+              profiles:user_id (full_name, email, phone, is_demo)
+            )
+          ''');
+
+      final dateRange = _getDateRange();
+      if (dateRange != null) {
+        query = query.gte('created_at', dateRange.$1.toIso8601String())
+                     .lte('created_at', dateRange.$2.toIso8601String());
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(startIndex, endIndex);
+
+      final newItems = List<Map<String, dynamic>>.from(response);
+
+      if (mounted) {
+        setState(() {
+          _businesses.addAll(newItems);
+          _hasMore = newItems.length == _pageSize;
+          _isFetchingMore = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading more businesses: $e');
+      if (mounted) {
+        setState(() => _isFetchingMore = false);
+      }
+    }
   }
 
   List<Map<String, dynamic>> get _filteredBusinesses {
@@ -122,12 +220,42 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
   }
 
   Future<void> _toggleBusinessStatus(String id, bool currentStatus) async {
+    // 1. Optimistic UI Update: Cambiar visualmente de inmediato
     setState(() {
       final index = _businesses.indexWhere((b) => b['id'] == id);
       if (index != -1) {
         _businesses[index]['is_active'] = !currentStatus;
       }
     });
+
+    try {
+      // 2. Ejecutar en Supabase (RPC para saltar RLS)
+      await supabase.rpc(
+        'admin_toggle_business_status',
+        params: {
+          'target_business_id': id,
+          'new_status': !currentStatus,
+        },
+      );
+    } catch (e) {
+      debugPrint('Error toggling status: $e');
+      if (mounted) {
+        // 3. Revertir si hubo error
+        setState(() {
+          final index = _businesses.indexWhere((b) => b['id'] == id);
+          if (index != -1) {
+            _businesses[index]['is_active'] = currentStatus;
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cambiar estado: $e'),
+            backgroundColor: AppColors.accentPink,
+          ),
+        );
+      }
+    }
   }
 
   void _showExportDialog() {
@@ -183,7 +311,11 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Negocios Registrados'),
+        title: const AppBarTitle('Negocios Registrados'),
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showExportDialog,
@@ -601,6 +733,7 @@ class _AdminBusinessesScreenState extends State<AdminBusinessesScreen> {
                         ),
                       );
                     },
+                    childCount: _filteredBusinesses.length + (_hasMore ? 1 : 0),
                   ),
                 ),
               ),

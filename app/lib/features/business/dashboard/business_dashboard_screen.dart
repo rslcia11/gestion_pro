@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../qr_management/qr_management_screen.dart';
@@ -12,6 +13,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/providers/supabase_provider.dart';
 import '../../../shared/widgets/shared_widgets.dart';
 
 import 'providers/dashboard_provider.dart';
@@ -37,6 +39,8 @@ class BusinessDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScreen> with WidgetsBindingObserver, TickerProviderStateMixin {
+  static bool _welcomeShown = false;
+
   late final TabController _tabController;
 
   @override
@@ -85,9 +89,65 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     }
   }
 
-  // Stub: sin backend conectado — no hay señal real de "negocio recién
-  // activado", así que el mensaje de bienvenida no se dispara automáticamente.
-  void _checkWelcomeMessage() {}
+  void _checkWelcomeMessage() async {
+    if (_welcomeShown) return;
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      final hasSeen = user.userMetadata?['has_seen_welcome'] == true;
+      if (!hasSeen) {
+        _welcomeShown = true;
+        if (mounted) {
+          _showWelcomeDialog();
+        }
+        try {
+          await Supabase.instance.client.auth.updateUser(
+            UserAttributes(data: {'has_seen_welcome': true}),
+          );
+        } catch (_) {}
+      }
+    }
+  }
+
+  void _showWelcomeDialog() {
+    final state = ref.read(dashboardProvider);
+    String ownerDisplayName = '';
+    if (state.ownerName.isNotEmpty) {
+      final parts = state.ownerName.trim().split(RegExp(r'\s+'));
+      ownerDisplayName = parts.length >= 2 ? '${parts[0]} ${parts[1]}' : parts[0];
+    }
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadii.card)),
+        title: Column(
+          children: [
+            const Icon(LucideIcons.store, color: AppColors.accentPurple, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              '¡Bienvenido a Donde Siempre!',
+              style: AppTypography.titleBold.copyWith(color: AppColors.accentPurple, fontSize: 22),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        content: Text(
+          '¡Hola $ownerDisplayName, tu negocio ha sido registrado y activado exitosamente!\n\nDesde aquí podrás administrar tus clientes, aprobar escaneos y gestionar los premios.',
+          textAlign: TextAlign.center,
+          style: AppTypography.bodyRegular,
+        ),
+        actions: [
+          Center(
+            child: PrimaryButton(
+              label: '¡Comenzar!',
+              isFullWidth: false,
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
+    );
+  }
 
   Future<void> _pickAndUploadLogo(Map<String, dynamic> business) async {
     final ImagePicker picker = ImagePicker();
@@ -147,23 +207,84 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
 
     if (source == null) return;
 
+    final supabase = ref.read(supabaseClientProvider);
+
     if (source == 'delete') {
-      if (mounted) {
-        DashboardAnimatedToast.show(context, 'Foto eliminada exitosamente', AppColors.accentGreen, LucideIcons.circleCheck);
+      try {
+        final userId = supabase.auth.currentUser!.id;
+        final logoUrl = business['logo_url'] as String;
+
+        final uri = Uri.parse(logoUrl);
+        final pathSegments = uri.pathSegments;
+        final folderIndex = pathSegments.indexOf('business-logos');
+        if (folderIndex != -1 && folderIndex + 1 < pathSegments.length) {
+          final objectPath = pathSegments.sublist(folderIndex + 1).join('/');
+          await supabase.storage.from('business-logos').remove([objectPath]);
+        }
+
+        await supabase.from('businesses').update({'logo_url': null}).eq('owner_id', userId);
+
+        if (mounted) {
+          ref.read(dashboardProvider.notifier).loadData(silent: true);
+          DashboardAnimatedToast.show(context, 'Foto eliminada exitosamente', AppColors.accentGreen, LucideIcons.circleCheck);
+        }
+      } catch (e) {
+        if (mounted) {
+          DashboardAnimatedToast.show(context, 'Error al eliminar foto', AppColors.accentPink, LucideIcons.circleAlert);
+        }
       }
       return;
     }
 
-    final XFile? pickedFile = await picker.pickImage(
-      source: source as ImageSource,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 80,
-    );
+    try {
+      final XFile? pickedFile = await picker.pickImage(
+        source: source as ImageSource,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
 
-    if (pickedFile == null || !mounted) return;
+      if (pickedFile == null || !mounted) return;
 
-    DashboardAnimatedToast.show(context, 'Logo actualizado exitosamente', AppColors.accentGreen, LucideIcons.circleCheck);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.accentPurple)),
+        ),
+      );
+
+      final fileBytes = await pickedFile.readAsBytes();
+      final fileExt = pickedFile.name.split('.').last.toLowerCase();
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      final userId = supabase.auth.currentUser!.id;
+      final imagePath = '$userId/$fileName';
+
+      String mimeType = 'image/jpeg';
+      if (fileExt == 'png') { mimeType = 'image/png'; }
+      else if (fileExt == 'webp') { mimeType = 'image/webp'; }
+      else if (fileExt == 'gif') { mimeType = 'image/gif'; }
+
+      await supabase.storage.from('business-logos').uploadBinary(
+            imagePath,
+            fileBytes,
+            fileOptions: FileOptions(cacheControl: '3600', upsert: true, contentType: mimeType),
+          );
+
+      final newLogoUrl = supabase.storage.from('business-logos').getPublicUrl(imagePath);
+      await supabase.from('businesses').update({'logo_url': newLogoUrl}).eq('owner_id', userId);
+
+      if (mounted) {
+        Navigator.pop(context); // close dialog
+        ref.read(dashboardProvider.notifier).loadData(silent: true);
+        DashboardAnimatedToast.show(context, 'Logo actualizado exitosamente', AppColors.accentGreen, LucideIcons.circleCheck);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // close dialog
+        DashboardAnimatedToast.show(context, 'Error al cambiar logo', AppColors.accentPink, LucideIcons.circleAlert);
+      }
+    }
   }
 
   void _showPendingRewardOverlay() {
@@ -233,7 +354,15 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     if (business == null) {
       return Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(title: const Text('Mi Negocio')),
+        appBar: AppBar(
+          title: const AppBarTitle('Mi Negocio'),
+          leading: Navigator.canPop(context)
+              ? IconActionButton(
+                  icon: LucideIcons.arrowLeft,
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : null,
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -279,8 +408,13 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
         appBar: AppBar(
           toolbarHeight: 90,
           leadingWidth: 90,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+          leading: Navigator.canPop(context)
+              ? IconActionButton(
+                  icon: LucideIcons.arrowLeft,
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
             child: GestureDetector(
               onTap: () async {
                 final result = await Navigator.push(
@@ -331,7 +465,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
             children: [
               if (ownerDisplayName.isNotEmpty)
                 Text('Hola, $ownerDisplayName', style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600)),
-              Text(business['name'].toString(), style: AppTypography.titleBold.copyWith(fontSize: 18)),
+              AppBarTitle(business['name'].toString(), style: AppTypography.titleBold.copyWith(fontSize: 18)),
               Row(
                 children: [
                   Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.accentGreen, shape: BoxShape.circle)),

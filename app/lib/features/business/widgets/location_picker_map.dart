@@ -85,8 +85,17 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
               title: Text('GPS Desactivado', style: AppTypography.titleBold),
               content: Text('Para poder ubicarte automáticamente, necesitas encender el GPS. ¿Deseas abrir la configuración?', style: AppTypography.bodyRegular),
               actions: [
-                SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
-                PrimaryButton(label: 'Configuración', onPressed: () => Navigator.pop(ctx, true)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SecondaryButton(label: 'Cancelar', onPressed: () => Navigator.pop(ctx, false)),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: PrimaryButton(label: 'Configuración', onPressed: () => Navigator.pop(ctx, true)),
+                    ),
+                  ],
+                ),
               ],
             ),
           );
@@ -366,114 +375,121 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
           Container(
             padding: const EdgeInsets.all(8),
             color: AppColors.surfaceCard,
-            child: Row(
-              children: [
-                Expanded(
-                  child: RawAutocomplete<Map<String, dynamic>>(
-                    textEditingController: _searchController,
-                    focusNode: _searchFocusNode,
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return const Iterable<Map<String, dynamic>>.empty();
-                      }
-                      return _getSuggestions(textEditingValue.text);
-                    },
-                    displayStringForOption: (option) => option['display_name'] ?? '',
-                    onSelected: (selection) {
-                      final lat = double.tryParse(selection['lat'].toString()) ?? 0.0;
-                      final lon = double.tryParse(selection['lon'].toString()) ?? 0.0;
-                      final newLocation = LatLng(lat, lon);
+            child: RawAutocomplete<Map<String, dynamic>>(
+              textEditingController: _searchController,
+              focusNode: _searchFocusNode,
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text.isEmpty) {
+                  return const Iterable<Map<String, dynamic>>.empty();
+                }
+                return _getSuggestions(textEditingValue.text);
+              },
+              displayStringForOption: (option) => option['display_name'] ?? '',
+              onSelected: (selection) {
+                final lat = double.tryParse(selection['lat'].toString()) ?? 0.0;
+                final lon = double.tryParse(selection['lon'].toString()) ?? 0.0;
+                final newLocation = LatLng(lat, lon);
 
-                      setState(() {
-                        _selectedLocation = newLocation;
-                        _address = selection['display_name'] ?? '';
-                        _mapController.move(newLocation, 16.0);
-                      });
+                setState(() {
+                  _selectedLocation = newLocation;
+                  _address = selection['display_name'] ?? '';
+                  _mapController.move(newLocation, 16.0);
+                });
 
-                      _searchFocusNode.unfocus();
-                      widget.onLocationSelected(lat, lon, _address);
-                    },
-                    fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-                      return TextField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
-                        style: AppTypography.bodyRegular,
-                        decoration: InputDecoration(
-                          hintText: 'Buscar ciudad, calle, local...',
-                          prefixIcon: const Icon(LucideIcons.search, size: 20, color: AppColors.textSecondary),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppRadii.pill),
-                            borderSide: BorderSide.none,
+                _searchFocusNode.unfocus();
+                widget.onLocationSelected(lat, lon, _address);
+              },
+              fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+                return TextField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  style: AppTypography.bodyRegular,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar ciudad, calle, local...',
+                    prefixIcon: const Icon(LucideIcons.search, size: 20, color: AppColors.textSecondary),
+                    suffixIcon: textEditingController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(LucideIcons.x, size: 18, color: AppColors.textSecondary),
+                            onPressed: () {
+                              textEditingController.clear();
+                              setState(() {});
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.background,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  onSubmitted: (value) {
+                    onFieldSubmitted();
+                    _searchAddress(value);
+                  },
+                );
+              },
+              optionsViewBuilder: (context, onSelected, options) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Material(
+                        elevation: 8,
+                        shadowColor: Colors.black26,
+                        borderRadius: BorderRadius.circular(AppRadii.card),
+                        clipBehavior: Clip.antiAlias,
+                        color: AppColors.surfaceCard,
+                        child: Container(
+                          width: constraints.maxWidth,
+                          constraints: const BoxConstraints(maxHeight: 280),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(AppRadii.card),
+                            border: Border.all(color: AppColors.border),
                           ),
-                          filled: true,
-                          fillColor: AppColors.background,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                        onSubmitted: (value) {
-                          onFieldSubmitted();
-                          _searchAddress(value);
-                        },
-                      );
-                    },
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 8,
-                          borderRadius: BorderRadius.circular(AppRadii.card),
-                          clipBehavior: Clip.antiAlias,
-                          color: AppColors.surfaceCard,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 250, maxWidth: 300),
-                            child: ListView.separated(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
-                              itemBuilder: (context, index) {
-                                final option = options.elementAt(index);
-                                final address = option['address'] ?? {};
-                                final road = address['road'] ?? address['pedestrian'] ?? '';
-                                final city = address['city'] ?? address['town'] ?? address['village'] ?? '';
-                                final name = option['name'] ?? '';
+                          child: ListView.separated(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                            itemBuilder: (context, index) {
+                              final option = options.elementAt(index);
+                              final address = option['address'] ?? {};
+                              final road = address['road'] ?? address['pedestrian'] ?? '';
+                              final city = address['city'] ?? address['town'] ?? address['village'] ?? '';
+                              final name = option['name'] ?? '';
 
-                                final title = name.isNotEmpty ? name : (road.isNotEmpty ? road : city);
+                              final title = name.isNotEmpty ? name : (road.isNotEmpty ? road : city);
 
-                                return ListTile(
-                                  leading: const Icon(LucideIcons.mapPin, color: AppColors.textSecondary),
-                                  title: Text(
-                                    title.isNotEmpty ? title : 'Ubicación',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.subtitleBold.copyWith(fontSize: 13),
-                                  ),
-                                  subtitle: Text(
-                                    option['display_name'] ?? '',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.caption,
-                                  ),
-                                  onTap: () => onSelected(option),
-                                );
-                              },
-                            ),
+                              return ListTile(
+                                dense: true,
+                                leading: const Icon(LucideIcons.mapPin, color: AppColors.primary, size: 20),
+                                title: Text(
+                                  title.isNotEmpty ? title : 'Ubicación',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.subtitleBold.copyWith(fontSize: 14),
+                                ),
+                                subtitle: Text(
+                                  option['display_name'] ?? '',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.caption,
+                                ),
+                                onTap: () => onSelected(option),
+                              );
+                            },
                           ),
                         ),
                       );
                     },
                   ),
-                ),
-                const SizedBox(width: 8),
-                PrimaryButton(
-                  label: 'Ubicarme',
-                  icon: LucideIcons.locate,
-                  isFullWidth: false,
-                  onPressed: _getCurrentLocation,
-                ),
-              ],
+                );
+              },
             ),
           ),
 
@@ -511,6 +527,38 @@ class _LocationPickerMapState extends State<LocationPickerMap> {
                         ],
                       ),
                   ],
+                ),
+
+                // Botón flotante "Ubicarme" sobre el mapa
+                Positioned(
+                  bottom: 12,
+                  right: 12,
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(AppRadii.pill),
+                    color: AppColors.surfaceCard,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(AppRadii.pill),
+                      onTap: _getCurrentLocation,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(LucideIcons.locate, size: 18, color: AppColors.primary),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Ubicarme',
+                              style: AppTypography.labelBold.copyWith(
+                                color: AppColors.primary,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
 
                 if (_isLoading)

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../shared/widgets/shared_widgets.dart';
@@ -22,8 +24,8 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = true;
 
   // Metrics
@@ -33,22 +35,174 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   int _totalRewards = 0;
   int _pendingBusinessesCount = 0;
 
+  RealtimeChannel? _adminChannel;
+
   @override
   void initState() {
     super.initState();
     _loadMetrics();
+    _setupRealtimeNotifications();
+  }
+
+  void _setupRealtimeNotifications() {
+    _adminChannel = supabase.channel('public:admin_notifications')
+      ..onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'businesses',
+          callback: (payload) {
+            if (mounted) {
+              final newBusiness = payload.newRecord;
+              if (newBusiness['is_demo'] == false && newBusiness['is_active'] == false) {
+                _showNotification(
+                  'NUEVO NEGOCIO POR APROBAR',
+                  'El negocio "${newBusiness['name']}" se acaba de registrar y requiere activación.',
+                  logoUrl: newBusiness['logo_url'],
+                );
+                _loadMetrics();
+              }
+            }
+          })
+      ..onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'profiles',
+          callback: (payload) {
+            if (mounted) {
+              final newProfile = payload.newRecord;
+              if (newProfile['is_demo'] == false) {
+                _showNotification('NUEVO USUARIO REGISTRADO', 'El usuario "${newProfile['full_name'] ?? 'Sin nombre'}" se ha unido.');
+                _loadMetrics();
+              }
+            }
+          })
+      ..subscribe();
+  }
+
+  void _showNotification(String title, String message, {String? logoUrl}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        duration: const Duration(seconds: 5),
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppColors.accentPurple,
+            borderRadius: BorderRadius.circular(AppRadii.card),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.accentPurple.withValues(alpha: 0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  if (logoUrl != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: CircleAvatar(
+                        radius: 12,
+                        backgroundColor: Colors.white,
+                        backgroundImage: NetworkImage(logoUrl),
+                      ),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: Icon(LucideIcons.bell, color: Colors.white),
+                    ),
+                  Expanded(
+                    child: Text(title, style: AppTypography.labelBold.copyWith(color: Colors.white)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(message, style: AppTypography.bodyMedium.copyWith(color: Colors.white)),
+            ],
+          ),
+        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.5, end: 0, curve: Curves.easeOutBack),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _adminChannel?.unsubscribe();
+    super.dispose();
   }
 
   Future<void> _loadMetrics() async {
     setState(() => _isLoading = true);
-    setState(() {
-      _totalBusinesses = 0;
-      _pendingBusinessesCount = 0;
-      _totalUsers = 0;
-      _totalScans = 0;
-      _totalRewards = 0;
-      _isLoading = false;
-    });
+    try {
+      // Load businesses count
+      final businessesResponse = await supabase
+          .from('businesses')
+          .select('id')
+          .eq('is_demo', false)
+          .count();
+
+      final pendingBusinessesResponse = await supabase
+          .from('businesses')
+          .select('id')
+          .eq('is_demo', false)
+          .eq('is_active', false)
+          .count();
+
+      // Load users count (Only clients)
+      final usersResponse = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'client')
+          .eq('is_demo', false)
+          .count();
+
+      // Load scans count
+      final scansResponse = await supabase
+          .from('scans')
+          .select('id')
+          .eq('is_demo', false)
+          .count();
+
+      // Load rewards counts
+      final rewardsResponse = await supabase
+          .from('rewards')
+          .select('id')
+          .eq('is_demo', false)
+          .count();
+
+      if (mounted) {
+        setState(() {
+          _totalBusinesses = businessesResponse.count;
+          _pendingBusinessesCount = pendingBusinessesResponse.count;
+          _totalUsers = usersResponse.count;
+          _totalScans = scansResponse.count;
+          _totalRewards = rewardsResponse.count;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // If status column doesn't exist, we fall back to just total
+      debugPrint('Error loading metrics (status might not exist): $e');
+      try {
+         final rewardsResponse = await supabase.from('rewards').select('id').count();
+         if (mounted) {
+           setState(() {
+             _totalRewards = rewardsResponse.count;
+             _isLoading = false;
+           });
+         }
+      } catch (innerE) {
+         if (mounted) setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _logout() async {
@@ -60,7 +214,13 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Panel de Administración'),
+        title: const AppBarTitle('Panel de Administración'),
+        leading: Navigator.canPop(context)
+            ? IconActionButton(
+                icon: LucideIcons.arrowLeft,
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         actions: [
           IconActionButton(icon: LucideIcons.refreshCcw, onPressed: _loadMetrics),
           const SizedBox(width: 4),

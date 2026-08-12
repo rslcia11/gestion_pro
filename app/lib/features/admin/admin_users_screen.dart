@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_theme.dart';
@@ -33,8 +34,8 @@ enum DateRangeFilter {
   const DateRangeFilter(this.label, this.days);
 }
 
-// Stub: sin backend conectado — pendiente de integrar nueva DB.
 class _AdminUsersScreenState extends State<AdminUsersScreen> {
+  final supabase = Supabase.instance.client;
   bool _isLoading = true;
   List<Map<String, dynamic>> _users = [];
   String _selectedRoleFilter = 'all';
@@ -47,6 +48,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isFetchingMore = false;
   bool _hasMore = true;
+  int _currentPage = 0;
+  static const int _pageSize = 20;
 
   static const List<String> _roleFilterValues = ['all', 'business', 'client'];
   static const List<String> _roleFilterLabels = ['Todos', 'Negocios', 'Clientes'];
@@ -101,19 +104,102 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   Future<void> _loadUsers() async {
     setState(() {
       _isLoading = true;
+      _currentPage = 0;
       _hasMore = true;
       _users = [];
     });
-    _getDateRange();
-    setState(() {
-      _users = [];
-      _hasMore = false;
-      _isLoading = false;
-    });
+    try {
+      var query = supabase.from('profiles').select('''
+            id,
+            full_name,
+            email,
+            phone,
+            role,
+            is_demo,
+            created_at,
+            businesses!owner_id(name)
+          ''');
+
+      final dateRange = _getDateRange();
+      if (dateRange != null) {
+        query = query.gte('created_at', dateRange.$1.toIso8601String())
+                     .lte('created_at', dateRange.$2.toIso8601String());
+      }
+
+      if (_selectedRoleFilter != 'all') {
+        query = query.eq('role', _selectedRoleFilter);
+      } else {
+        query = query.neq('role', 'admin');
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(0, _pageSize - 1);
+
+      if (mounted) {
+        setState(() {
+          _users = List<Map<String, dynamic>>.from(response);
+          _hasMore = _users.length == _pageSize;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading users: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _fetchMoreUsers() async {
-    setState(() => _isFetchingMore = false);
+    setState(() => _isFetchingMore = true);
+    try {
+      _currentPage++;
+      final startIndex = _currentPage * _pageSize;
+      final endIndex = startIndex + _pageSize - 1;
+
+      var query = supabase.from('profiles').select('''
+            id,
+            full_name,
+            email,
+            phone,
+            role,
+            is_demo,
+            created_at,
+            businesses!owner_id(name)
+          ''');
+
+      final dateRange = _getDateRange();
+      if (dateRange != null) {
+        query = query.gte('created_at', dateRange.$1.toIso8601String())
+                     .lte('created_at', dateRange.$2.toIso8601String());
+      }
+
+      if (_selectedRoleFilter != 'all') {
+        query = query.eq('role', _selectedRoleFilter);
+      } else {
+        query = query.neq('role', 'admin');
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(startIndex, endIndex);
+
+      final newItems = List<Map<String, dynamic>>.from(response);
+
+      if (mounted) {
+        setState(() {
+          _users.addAll(newItems);
+          _hasMore = newItems.length == _pageSize;
+          _isFetchingMore = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading more users: $e');
+      if (mounted) {
+        setState(() => _isFetchingMore = false);
+      }
+    }
   }
 
   List<Map<String, dynamic>> get _filteredUsers {
@@ -191,9 +277,13 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Usuarios Registrados', style: AppTypography.titleBold.copyWith(fontSize: 18)),
+        title: AppBarTitle('Usuarios Registrados', style: AppTypography.titleBold.copyWith(fontSize: 18)),
         backgroundColor: AppColors.background,
         elevation: 0,
+        leading: IconActionButton(
+          icon: LucideIcons.arrowLeft,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showExportDialog,
@@ -480,6 +570,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                             curve: AppTheme.animCurveStandard,
                           );
                     },
+                    childCount: _filteredUsers.length + (_hasMore ? 1 : 0),
                   ),
                 ),
               ),
